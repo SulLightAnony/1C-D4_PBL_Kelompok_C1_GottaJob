@@ -1,4 +1,5 @@
 import sys
+import os
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, 
                              QVBoxLayout, QPushButton, QFrame, QLabel, 
                              QStackedWidget)
@@ -31,12 +32,12 @@ class Dashboard(QMainWindow):
             QPushButton {
                 color: #B2D2D9;
                 background-color: transparent;
-                padding: 12px 20px;
+                padding: 18px 25px;
                 text-align: left;
-                font-size: 15px;
+                font-size: 22px;
                 border: none;
-                border-radius: 10px;
-                margin: 5px 15px;
+                border-radius: 12px;
+                margin: 8px 15px;
             }
             QPushButton:hover { background-color: #408699; color: white; }
             QPushButton#ActiveMenu {
@@ -60,11 +61,11 @@ class Dashboard(QMainWindow):
         # TOMBOL MENU
         self.menu_buttons = []
         
-        self.btn_dashboard = self.create_menu_btn("  Dashboard", 0)
-        self.btn_discovery = self.create_menu_btn("  Live Discovery", 1)
-        self.btn_archive   = self.create_menu_btn("  Job Archive", 2)
-        self.btn_directory = self.create_menu_btn("  Company Directory", 3)
-        self.btn_toolkit   = self.create_menu_btn("  Career Toolkit", 4)
+        self.btn_dashboard = self.create_menu_btn("  Dashboard", 0, "dashboard.png")
+        self.btn_discovery = self.create_menu_btn("  Live Discovery", 1, "search.png")
+        self.btn_archive   = self.create_menu_btn("  Job Archive", 2, "folder.png")
+        self.btn_directory = self.create_menu_btn("  Job Posting", 3, "post.png")
+        self.btn_toolkit   = self.create_menu_btn("  Career Toolkit", 4, "toolbox.png")
 
         self.btn_dashboard.setObjectName("ActiveMenu")
 
@@ -101,8 +102,20 @@ class Dashboard(QMainWindow):
         layout.addStretch()
         self.layout_sidebar.addWidget(container)
 
-    def create_menu_btn(self, text, index):
+    def create_menu_btn(self, text, index, icon_name=None):
         btn = QPushButton(text)
+        font = QFont("Segoe UI", 18) 
+        btn.setFont(font)
+
+        if icon_name:
+            base_path = os.path.dirname(os.path.abspath(__file__))
+            icon_path = os.path.join(base_path, 'assets', icon_name)
+            
+            icon = QIcon(icon_path)
+            if not icon.isNull():
+                btn.setIcon(icon)
+                btn.setIconSize(QSize(32, 32)) 
+        
         btn.clicked.connect(lambda: self.pindah_halaman(btn, index))
         self.layout_sidebar.addWidget(btn)
         self.menu_buttons.append(btn)
