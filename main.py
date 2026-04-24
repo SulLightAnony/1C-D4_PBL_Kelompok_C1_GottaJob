@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout,
                              QStackedWidget)
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QFont, QPixmap, QIcon
+from pages.career_toolkit.toolkit_main import CareerToolkitPage
 
 # IMPORT file menu
 from pages.dashboard import DashboardPage
@@ -75,12 +76,13 @@ class Dashboard(QMainWindow):
 
         # MENU
         self.halaman_dashboard = DashboardPage() # <--- PENTING: Membuat objek halaman
+        self.toolkit_page = CareerToolkitPage()
         
         self.content_stack.addWidget(self.halaman_dashboard)         # Index 0
         self.content_stack.addWidget(self.create_page("Discovery"))  # Index 1 (Sementara)
         self.content_stack.addWidget(self.create_page("Archive"))    # Index 2 (Sementara)
         self.content_stack.addWidget(self.create_page("Directory"))  # Index 3 (Sementara)
-        self.content_stack.addWidget(self.create_page("Toolkit"))    # Index 4 (Sementara)
+        self.content_stack.addWidget(self.toolkit_page)             # Index 4
 
         self.layout_utama.addWidget(self.sidebar)
         self.layout_utama.addWidget(self.content_stack)
