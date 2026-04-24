@@ -4,6 +4,10 @@ import random
 import os
 from scraper_glints import GlintsScraper
 
+# Path absolut ke folder database/ di root project (2 level di atas pages/Scraper/)
+ROOT_DIR  = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
+DB_DIR    = os.path.join(ROOT_DIR, "database")
+
 if __name__ == "__main__":
     print("==================================================")
     print("        BOT SCRAPER GLINTS (HEADLESS MODE)        ")
@@ -19,7 +23,8 @@ if __name__ == "__main__":
         print("Error: Keyword tidak boleh kosong. Program dihentikan.")
         exit()
 
-    nama_file = "hasil_scraping_glints.json"
+    nama_file = os.path.join(DB_DIR, "hasil_scraping_glints.json")
+    os.makedirs(DB_DIR, exist_ok=True)
 
     # Untuk mencegah duplikasi data jika menggunakan banyak keyword
     global_seen_links = set()

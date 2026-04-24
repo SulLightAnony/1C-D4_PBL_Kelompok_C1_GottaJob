@@ -1,11 +1,14 @@
 import json
 import os
 import uuid
+import datetime
 
 # ─────────────────────────────────────────────
 # KONFIGURASI
 # ─────────────────────────────────────────────
-FILE_NAME = "Data_Job.JSON"
+# Root project = 2 level di atas file ini (pages/CRUD/Shared.py → root)
+_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+FILE_NAME = os.path.join(_ROOT, "database", "Data_Upload_Job.JSON")
 
 FIELDS = [
     ("Judul_Pekerjaan",         "Judul Pekerjaan         "),
@@ -84,3 +87,38 @@ def tampilkan_daftar_singkat(data: list) -> None:
 
 def clear_menu():
     os.system('cls' if os.name == 'nt' else 'clear')
+
+# ─────────────────────────────────────────────
+# AUTO-DELETE: Hapus data yang sudah kadaluarsa
+# ─────────────────────────────────────────────
+def bersihkan_data_kadaluarsa() -> int:
+    """Membaca semua data, menghapus yang Tanggal_Kadaluarsa-nya sudah lewat,
+    menyimpan kembali, dan mengembalikan jumlah data yang dihapus."""
+    data = muat_data()
+    if not data:
+        return 0
+
+    hari_ini = datetime.date.today()
+    data_valid = []
+    jumlah_hapus = 0
+
+    for job in data:
+        tgl_str = job.get("Tanggal_Kadaluarsa", "").strip()
+        try:
+            # Format yang dipakai Create.py: DD/MM/YYYY
+            tgl = datetime.datetime.strptime(tgl_str, "%d/%m/%Y").date()
+            if tgl < hari_ini:
+                jumlah_hapus += 1
+                print(f"  [AUTO-DELETE] '{job.get('Judul_Pekerjaan', '-')}' "
+                      f"@ {job.get('Nama_Perusahaan', '-')} "
+                      f"(kadaluarsa: {tgl_str})")
+            else:
+                data_valid.append(job)
+        except (ValueError, TypeError):
+            # Jika format tanggal tidak bisa diparse, simpan datanya
+            data_valid.append(job)
+
+    if jumlah_hapus > 0:
+        simpan_data(data_valid)
+
+    return jumlah_hapus

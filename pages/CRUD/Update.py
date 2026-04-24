@@ -1,4 +1,4 @@
-from Shared import muat_data, simpan_data, cetak_header, cetak_kartu_job, tampilkan_daftar_singkat, FIELDS
+from CRUD.Shared import muat_data, simpan_data, cetak_header, cetak_kartu_job, tampilkan_daftar_singkat, FIELDS
 
 def perbarui_data() -> None:
     cetak_header("PERBARUI DATA PEKERJAAN")

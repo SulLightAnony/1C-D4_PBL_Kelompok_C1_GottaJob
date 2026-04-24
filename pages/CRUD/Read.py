@@ -1,4 +1,4 @@
-from Shared import muat_data, cetak_header, cetak_kartu_job
+from CRUD.Shared import muat_data, cetak_header, cetak_kartu_job
 
 def lihat_semua_data() -> None:
     cetak_header("DAFTAR SEMUA DATA PEKERJAAN")
