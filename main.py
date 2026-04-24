@@ -6,8 +6,6 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout,
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QFont, QPixmap, QIcon
 from pages.career_toolkit.toolkit_main import CareerToolkitPage
-
-# IMPORT file menu
 from pages.dashboard import DashboardPage
 
 class Dashboard(QMainWindow):
@@ -35,7 +33,7 @@ class Dashboard(QMainWindow):
                 background-color: transparent;
                 padding: 18px 25px;
                 text-align: left;
-                font-size: 22px;
+                font-size: 21px;
                 border: none;
                 border-radius: 12px;
                 margin: 8px 15px;
