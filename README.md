@@ -1,3 +1,1 @@
-# 1C-D4_PBL_Kelompok_C1_GottaJob
-
-Ikutin struktur foldernya ya, yang rapih
+# Jangan lupa untuk mendownload library ekstrak pdf. Lakukan dengan ketik "pip install fpdf2" di terminal.
