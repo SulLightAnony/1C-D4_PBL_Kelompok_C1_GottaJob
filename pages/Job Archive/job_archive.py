@@ -428,6 +428,11 @@ class JobArchivePage(QWidget):
         file_path = self.combo_file.itemData(index)
         if not file_path or not os.path.exists(file_path):
             self.chart.set_data({})
+            if hasattr(self, 'skill_list'):
+                self.skill_list.clear()
+            if hasattr(self, 'dashboard_view'):
+                self.dashboard_view.update_stats(0, 0, "-")
+            self.current_file = None
             return
             
         try:

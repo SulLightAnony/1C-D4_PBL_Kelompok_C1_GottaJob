@@ -1,132 +1,101 @@
-import math
-from PyQt5.QtWidgets import QWidget, QToolTip
-from PyQt5.QtGui import QPainter, QColor, QBrush, QPen
-from PyQt5.QtCore import Qt, QRectF
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QToolTip
+from PyQt5.QtGui import QCursor
+from PyQt5.QtCore import Qt
 
 class PieChartWidget(QWidget):
-    def __init__(self, parent=None, size_ratio=0.5):
+    def __init__(self, parent=None, size_ratio=0.8):
         super().__init__(parent)
-        self.data = []
         self.size_ratio = size_ratio
-        self.colors = [
-            QColor("#2C687B"), QColor("#D9534F"), QColor("#5CB85C"),
-            QColor("#F0AD4E"), QColor("#5BC0DE"), QColor("#6610F2"),
-            QColor("#E83E8C"), QColor("#FD7E14"), QColor("#20C997"), QColor("#6F42C1")
-        ]
-        self.setMinimumHeight(250)
-        self.setMouseTracking(True)
+        
+        # Inisialisasi Matplotlib Figure & Canvas
+        self.figure, self.ax = plt.subplots(figsize=(4, 4), dpi=100)
+        self.canvas = FigureCanvas(self.figure)
+        
+        # Buat background transparan
+        self.figure.patch.set_alpha(0.0)
+        self.ax.patch.set_alpha(0.0)
+        self.canvas.setStyleSheet("background-color:transparent;")
+        self.ax.axis('equal')
+        self.ax.axis('off')
+        
+        # Tambahkan canvas ke dalam layout
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self.canvas)
+        
+        self.colors = ["#2C687B", "#D9534F", "#5CB85C", "#F0AD4E", "#5BC0DE", "#6610F2", "#E83E8C", "#FD7E14", "#20C997", "#6F42C1"]
+        self.wedges = []
+        self.tooltips = []
         self.hovered_index = -1
+        
+        # Hubungkan event hover dari Matplotlib
+        self.canvas.mpl_connect('motion_notify_event', self.on_hover)
+        self.canvas.mpl_connect('axes_leave_event', self.on_leave)
 
     def set_data(self, processed_data):
-        self.data = []
-        if not processed_data:
-            self.update()
-            return
-            
-        total = sum(processed_data.keys())
+        self.ax.clear()
+        self.ax.axis('equal')
+        self.ax.axis('off')
         
-        i = 0
-        for perc, skills in processed_data.items():
-            color = self.colors[i % len(self.colors)]
-            
-            # Format label tooltip (Gunakan <br> agar rapi di dalam HTML Tooltip)
-            label_skills = "<br>".join([f"• {s}" for s in skills])
-            
-            # Tambahkan kotak warna menggunakan karakter HTML span
-            color_hex = color.name()
-            tooltip_text = f"<span style='color:{color_hex}; font-size:16px;'>■</span> <b>{perc}%</b><br>{label_skills}"
-            
-            span_deg = (perc / total) * 360
-            
-            self.data.append({
-                "perc": perc,
-                "span_deg": span_deg,
-                "tooltip": tooltip_text,
-                "color": color
-            })
-            i += 1
-            
-        self.update()
-
-    def mouseMoveEvent(self, event):
-        if not self.data:
-            return
-            
-        size = min(self.width(), self.height()) * self.size_ratio
-        center_x = self.width() / 2
-        center_y = self.height() / 2
-        outer_radius = size / 2
-        inner_radius = outer_radius * 0.55 # Ukuran lubang donut
-        
-        dx = event.x() - center_x
-        dy = event.y() - center_y
-        distance = math.sqrt(dx**2 + dy**2)
-        
-        new_hover = -1
-        
-        if inner_radius <= distance <= outer_radius:
-            # Hitung sudut mouse (0 di arah jam 3, berlawanan jarum jam)
-            angle = math.degrees(math.atan2(-dy, dx))
-            if angle < 0: angle += 360
-            
-            # Map ke sistem sudut kita (0 di jam 12, searah jarum jam)
-            mapped_angle = 90 - angle
-            if mapped_angle < 0: mapped_angle += 360
-            
-            # Cari slice mana yang di-hover
-            current_angle = 0
-            for i, item in enumerate(self.data):
-                if current_angle <= mapped_angle <= current_angle + item["span_deg"]:
-                    new_hover = i
-                    break
-                current_angle += item["span_deg"]
-                
-        if new_hover != self.hovered_index:
-            self.hovered_index = new_hover
-            self.update()
-            
-            if self.hovered_index != -1:
-                QToolTip.showText(event.globalPos(), self.data[self.hovered_index]["tooltip"], self)
-            else:
-                QToolTip.hideText()
-
-    def leaveEvent(self, event):
+        self.wedges = []
+        self.tooltips = []
         self.hovered_index = -1
-        QToolTip.hideText()
-        self.update()
-
-    def paintEvent(self, event):
-        if not self.data:
+        
+        if not processed_data:
+            self.canvas.draw()
             return
-        
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
-        
-        # Diagram lebih kecil & terpusat (Samakan dengan mouseMoveEvent)
-        size = min(self.width(), self.height()) * self.size_ratio
-        pos_x = (self.width() - size) / 2
-        pos_y = (self.height() - size) / 2
-        rect = QRectF(pos_x, pos_y, size, size)
-        
-        start_angle = 90 * 16 # Mulai jam 12
-        
-        for i, item in enumerate(self.data):
-            span_angle = -int(item["span_deg"] * 16) # Negatif = searah jarum jam
             
-            color = item["color"]
-            if self.hovered_index != -1 and self.hovered_index != i:
-                # Meredupkan warna lain saat ada yang di-hover
-                color = color.lighter(150)
+        sizes = list(processed_data.keys())
+        
+        # Buat Donut Chart
+        self.wedges, _ = self.ax.pie(
+            sizes,
+            colors=self.colors[:len(sizes)],
+            wedgeprops=dict(width=0.45, edgecolor='white', linewidth=2)
+        )
+        
+        # Siapkan tooltip teks untuk tiap potongan
+        for i, (perc, skills) in enumerate(processed_data.items()):
+            color_hex = self.colors[i % len(self.colors)]
+            label_skills = "<br>".join([f"• {s}" for s in skills])
+            tooltip_text = f"<span style='color:{color_hex}; font-size:16px;'>■</span> <b>{perc}%</b><br>{label_skills}"
+            self.tooltips.append(tooltip_text)
+            
+        self.canvas.draw()
+
+    def on_hover(self, event):
+        if not self.wedges:
+            return
+            
+        # Periksa potongan mana yang di-hover
+        found = False
+        for i, wedge in enumerate(self.wedges):
+            if wedge.contains(event)[0]:
+                found = True
+                if self.hovered_index != i:
+                    self.hovered_index = i
+                    self.highlight_wedge(i)
+                    
+                    # Tampilkan tooltip PyQt5
+                    global_pos = QCursor.pos()
+                    QToolTip.showText(global_pos, self.tooltips[i], self)
+                break
                 
-            painter.setBrush(QBrush(color))
-            painter.setPen(QPen(Qt.white, 2)) # Garis batas putih
-            painter.drawPie(rect, start_angle, span_angle)
-            
-            start_angle += span_angle
-            
-        # Potong bagian tengah untuk efek Donut
-        inner_size = size * 0.55
-        inner_rect = QRectF((self.width() - inner_size) / 2, (self.height() - inner_size) / 2, inner_size, inner_size)
-        painter.setBrush(QBrush(QColor("#FFFFFF"))) # Warna background card
-        painter.setPen(Qt.NoPen)
-        painter.drawEllipse(inner_rect)
+        if not found and self.hovered_index != -1:
+            self.on_leave(event)
+
+    def on_leave(self, event):
+        if self.hovered_index != -1:
+            self.hovered_index = -1
+            self.highlight_wedge(-1)
+            QToolTip.hideText()
+
+    def highlight_wedge(self, index):
+        for i, wedge in enumerate(self.wedges):
+            if index == -1 or index == i:
+                wedge.set_alpha(1.0)
+            else:
+                wedge.set_alpha(0.3)
+        self.canvas.draw_idle()
