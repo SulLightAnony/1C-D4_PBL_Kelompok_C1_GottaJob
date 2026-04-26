@@ -1,0 +1,713 @@
+import os
+from PyQt5.QtWidgets import (
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
+    QFrame, QTableWidget, QTableWidgetItem, QHeaderView, QScrollArea,
+    QPushButton, QListWidget, QStackedWidget
+)
+from PyQt5.QtCore import Qt, pyqtSignal, QSize
+from PyQt5.QtGui import QColor, QPixmap, QIcon
+
+class StatCard(QFrame):
+    """Card statistik kecil (Scorecard style) yang terstandarisasi."""
+    def __init__(self, title, val="0", parent=None):
+        super().__init__(parent)
+        self.setObjectName("PanelCard")
+        lay = QVBoxLayout(self)
+        lay.setContentsMargins(15, 15, 15, 15)
+        lay.setSpacing(5)
+        
+        self.lbl_title = QLabel(title)
+        self.lbl_title.setStyleSheet("font-size: 13px; font-weight: normal; color: #4A5568; background-color: transparent;")
+        
+        self.lbl_val = QLabel(val)
+        self.lbl_val.setStyleSheet("font-size: 24px; font-weight: bold; color: #1E3A4A; background-color: transparent;")
+        
+        lay.addWidget(self.lbl_title, alignment=Qt.AlignLeft)
+        lay.addWidget(self.lbl_val, alignment=Qt.AlignLeft)
+
+    def update_value(self, val, color=None):
+        self.lbl_val.setText(str(val))
+        if color:
+            self.lbl_val.setStyleSheet(f"font-size: 24px; font-weight: bold; color: {color}; background-color: transparent;")
+
+class JobDashboardWidget(QWidget):
+    """Kontainer utama dashboard yang berisi statistik, chart, dan daftar skill."""
+    find_match_clicked = pyqtSignal()
+    
+    def __init__(self, chart_widget, parent=None):
+        super().__init__(parent)
+        self.chart = chart_widget
+        self._init_ui()
+
+    def _init_ui(self):
+        # Layout utama horizontal: Kiri (Stats + Chart) | Kanan (Skill List)
+        main_layout = QHBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(20)
+
+        # ── KIRI: Stats di atas, Chart di bawah ──
+        left_container = QVBoxLayout()
+        left_container.setSpacing(20)
+
+        # Baris Atas Kiri: 3 Card Statistik (Horizontal)
+        stat_row = QHBoxLayout()
+        stat_row.setSpacing(10)
+        
+        self.card_total = StatCard("Total pekerjaan")
+        self.card_skills = StatCard("Skill teridentifikasi")
+        self.card_dominant = StatCard("Skill dominan", "-")
+        
+        stat_row.addWidget(self.card_total)
+        stat_row.addWidget(self.card_skills)
+        stat_row.addWidget(self.card_dominant)
+        left_container.addLayout(stat_row)
+
+        # Bagian Bawah Kiri: Chart Card
+        chart_card = QFrame()
+        chart_card.setObjectName("PanelCard")
+        chart_card_lay = QVBoxLayout(chart_card)
+        chart_card_lay.setContentsMargins(0, 20, 0, 50)
+        
+        lbl_chart = QLabel("Diagram Persentase Skill", alignment=Qt.AlignHCenter)
+        lbl_chart.setStyleSheet("font-size: 16px; font-weight: bold; color: #2C687B; background-color: transparent;")
+        chart_card_lay.addWidget(lbl_chart)
+        chart_card_lay.addSpacing(20)
+        chart_card_lay.addWidget(self.chart, stretch=1)
+        
+        left_container.addWidget(chart_card, stretch=1)
+        main_layout.addLayout(left_container, stretch=2)
+
+        # ── KANAN: Daftar Skill (Full Height) ──
+        right_panel = QFrame()
+        right_panel.setObjectName("PanelCard")
+        right_lay = QVBoxLayout(right_panel)
+        right_lay.setContentsMargins(20, 20, 20, 20)
+        
+        right_title = QLabel("Daftar Skill Pekerjaan", alignment=Qt.AlignCenter)
+        right_title.setStyleSheet("font-size: 16px; font-weight: bold; color: #2C687B; background-color: transparent;")
+        right_lay.addWidget(right_title)
+        right_lay.addSpacing(15)
+        
+        self.skill_list = QListWidget()
+        self.skill_list.setStyleSheet("""
+            QListWidget { 
+                border: none; 
+                background-color: #F7FBFC; 
+                border-radius: 8px; 
+                font-size: 14px;
+                color: #1E3A4A;
+            }
+            QListWidget::item { 
+                padding: 10px; 
+                border-bottom: 1px solid #E0E7EF; 
+                color: #1E3A4A;
+            }
+            QListWidget::item:hover {
+                background-color: #EBF4F6;
+            }
+            QListWidget::item:selected {
+                background-color: #E2EFF1;
+                color: #2C687B;
+                border-left: 4px solid #2C687B;
+            }
+            QScrollBar:vertical { border: none; background: #F3F4F6; width: 8px; border-radius: 4px; }
+            QScrollBar::handle:vertical { background: #B2D2D9; border-radius: 4px; }
+            QScrollBar:horizontal { border: none; background: #F3F4F6; height: 8px; border-radius: 4px; }
+            QScrollBar::handle:horizontal { background: #B2D2D9; border-radius: 4px; }
+            QListWidget::indicator { width: 18px; height: 18px; border: 2px solid #B2D2D9; border-radius: 4px; background-color: white; }
+            QListWidget::indicator:checked { background-color: #2C687B; border: 2px solid #2C687B; }
+        """)
+        self.skill_list.itemDoubleClicked.connect(self._toggle_item_check)
+        right_lay.addWidget(self.skill_list, stretch=1)
+        right_lay.addSpacing(15)
+        
+        self.btn_find_match = QPushButton(" Cari pekerjaan yang cocok")
+        base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        search_icon_path = os.path.join(base_path, 'assets', 'Job Archive', 'search.png')
+        self.btn_find_match.setIcon(QIcon(search_icon_path))
+        self.btn_find_match.setIconSize(QSize(18, 18))
+        self.btn_find_match.setCursor(Qt.PointingHandCursor)
+        self.btn_find_match.setStyleSheet("""
+            QPushButton {
+                background-color: #2C687B; color: white;
+                font-size: 14px; font-weight: bold;
+                border-radius: 8px; padding: 10px;
+            }
+            QPushButton:hover { background-color: #3B7C91; }
+        """)
+        self.btn_find_match.clicked.connect(self.find_match_clicked.emit)
+        right_lay.addWidget(self.btn_find_match)
+        
+        main_layout.addWidget(right_panel, stretch=1)
+
+    def update_stats(self, total_jobs, total_skills, dominant_skill):
+        self.card_total.update_value(total_jobs)
+        self.card_skills.update_value(total_skills)
+        self.card_dominant.update_value(dominant_skill, color="#2C687B")
+
+    def _toggle_item_check(self, item):
+        if item.checkState() == Qt.Checked:
+            item.setCheckState(Qt.Unchecked)
+        else:
+            item.setCheckState(Qt.Checked)
+
+
+class BestMatchCard(QFrame):
+    """Card untuk menampilkan pekerjaan dengan persentase kecocokan tertinggi."""
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setObjectName("PanelCard")
+        self.setStyleSheet("""
+            QFrame#PanelCard {
+                background-color: white;
+                border: 2px solid #27AE60;
+                border-radius: 16px;
+            }
+        """)
+        self.setFixedWidth(350)
+        self._init_ui()
+
+    def _init_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(25, 25, 25, 25)
+        # Scroll Area for the entire card content
+        self.scroll = QScrollArea()
+        self.scroll.setWidgetResizable(True)
+        self.scroll.setStyleSheet("""
+            QScrollArea { border: none; background: transparent; }
+            QScrollBar:vertical { border: none; background: #F3F4F6; width: 8px; border-radius: 4px; }
+            QScrollBar::handle:vertical { background: #B2D2D9; border-radius: 4px; }
+            QScrollBar:horizontal { border: none; background: #F3F4F6; height: 8px; border-radius: 4px; }
+            QScrollBar::handle:horizontal { background: #B2D2D9; border-radius: 4px; }
+        """)
+        
+        self.scroll_content = QWidget()
+        self.scroll_content.setStyleSheet("background-color: transparent;")
+        self.content_lay = QVBoxLayout(self.scroll_content)
+        self.content_lay.setContentsMargins(5, 5, 5, 5)
+        self.content_lay.setSpacing(15)
+
+        # 0. Label Judul Persentase
+        self.lbl_perc_title = QLabel("Persentase Kecocokan")
+        self.lbl_perc_title.setAlignment(Qt.AlignCenter)
+        self.lbl_perc_title.setStyleSheet("font-size: 16px; font-weight: bold; color: #2C687B; background-color: transparent;")
+        self.content_lay.addWidget(self.lbl_perc_title)
+
+        # 1. Badge Persentase
+        self.lbl_perc = QLabel("0%")
+        self.lbl_perc.setAlignment(Qt.AlignCenter)
+        self.lbl_perc.setStyleSheet("""
+            font-size: 36px;
+            font-weight: bold;
+            color: white;
+            background-color: #27AE60;
+            border-radius: 12px;
+            padding: 10px;
+        """)
+        self.content_lay.addWidget(self.lbl_perc)
+
+        self.content_lay.addSpacing(5)
+
+        # 2. Judul Pekerjaan
+        self.lbl_title = QLabel("Nama Pekerjaan")
+        self.lbl_title.setWordWrap(True)
+        self.lbl_title.setStyleSheet("font-size: 24px; font-weight: bold; color: #1E3A4A; background-color: transparent;")
+        self.content_lay.addWidget(self.lbl_title)
+
+        # 3. Nama Perusahaan & Lokasi
+        self.lbl_company = QLabel("Nama Perusahaan")
+        self.lbl_company.setStyleSheet("font-size: 18px; color: #2C687B; font-weight: bold; background-color: transparent;")
+        self.content_lay.addWidget(self.lbl_company)
+
+        self.lbl_location = QLabel("📍 Lokasi")
+        self.lbl_location.setWordWrap(True)
+        self.lbl_location.setStyleSheet("font-size: 17px; color: #1E3A4A; background-color: transparent;")
+        self.content_lay.addWidget(self.lbl_location)
+
+        self.content_lay.addSpacing(10)
+        
+        # 4. Skill Tags
+        # Skill yang Kamu Punya
+        lbl_owned = QLabel("Skill yang kamu punya:")
+        lbl_owned.setStyleSheet("font-size: 13px; font-weight: bold; color: #27AE60; background-color: transparent;")
+        self.content_lay.addWidget(lbl_owned)
+        
+        self.owned_flow = QWidget()
+        self.owned_flow.setStyleSheet("background-color: transparent;")
+        self.owned_lay = QVBoxLayout(self.owned_flow)
+        self.owned_lay.setContentsMargins(0, 0, 0, 0)
+        self.owned_lay.setSpacing(6)
+        self.owned_lay.setAlignment(Qt.AlignTop)
+        self.content_lay.addWidget(self.owned_flow)
+
+        # Skill yang Dibutuhkan
+        lbl_req = QLabel("Skill yang dibutuhkan:")
+        lbl_req.setStyleSheet("font-size: 13px; font-weight: bold; color: #C0392B; background-color: transparent;")
+        self.content_lay.addWidget(lbl_req)
+        
+        self.req_flow = QWidget()
+        self.req_flow.setStyleSheet("background-color: transparent;")
+        self.req_lay = QVBoxLayout(self.req_flow)
+        self.req_lay.setContentsMargins(0, 0, 0, 0)
+        self.req_lay.setSpacing(6)
+        self.req_lay.setAlignment(Qt.AlignTop)
+        self.content_lay.addWidget(self.req_flow)
+
+        self.content_lay.addStretch()
+        
+        self.scroll.setWidget(self.scroll_content)
+        layout.addWidget(self.scroll)
+
+    def update_data(self, data, user_skills):
+        self.lbl_perc.setText(f"{data.get('match_percentage', 0)}%")
+        self.lbl_title.setText(data.get("Judul_Pekerjaan", "-"))
+        self.lbl_company.setText(data.get("Nama_Perusahaan", "-"))
+        self.lbl_location.setText(f"📍 {data.get('Lokasi', '-')}")
+
+        # Clear tags
+        self._clear_layout(self.owned_lay)
+        self._clear_layout(self.req_lay)
+
+        raw_skills = data.get("Skills", "-")
+        if raw_skills != "-":
+            job_skills = [s.strip() for s in raw_skills.split("|")]
+            user_set = {s.lower() for s in user_skills}
+            matched = [s for s in job_skills if s.lower() in user_set]
+            missing = [s for s in job_skills if s.lower() not in user_set]
+
+            for s in matched:
+                self.owned_lay.addWidget(self._create_tag(s, "#27AE60"))
+            for s in missing:
+                self.req_lay.addWidget(self._create_tag(s, "#C0392B"))
+
+    def _create_tag(self, text, color):
+        lbl = QLabel(text)
+        lbl.setStyleSheet(f"color: {color}; border: 1px solid {color}; border-radius: 8px; padding: 6px 16px; font-size: 18px; font-weight: bold; background-color: transparent;")
+        return lbl
+
+    def _clear_layout(self, layout):
+        while layout.count():
+            item = layout.takeAt(0)
+            if item.widget(): item.widget().deleteLater()
+
+class JobMatchResultContainer(QWidget):
+    """Kontainer yang membagi tampilan menjadi Best Match (Kiri) dan Hasil Lainnya (Kanan)."""
+    itemDoubleClicked = pyqtSignal(object)
+    save_clicked = pyqtSignal(dict)
+    favorite_clicked = pyqtSignal(dict)
+    delete_clicked = pyqtSignal(dict)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(20)
+
+        # Kiri: Best Match Card
+        self.best_match_card = BestMatchCard()
+        layout.addWidget(self.best_match_card)
+
+        # Kanan: Tabel Hasil (Semua)
+        self.table = JobMatchTable()
+        self.table.itemDoubleClicked.connect(self._on_item_double_clicked)
+        self.table.save_clicked.connect(self.save_clicked.emit)
+        self.table.favorite_clicked.connect(self.favorite_clicked.emit)
+        self.table.delete_clicked.connect(self.delete_clicked.emit)
+        layout.addWidget(self.table, stretch=1)
+
+    def set_data(self, hasil, selected_skills, show_save=True, show_favorite=True, show_delete=False, fav_link=None):
+        if not hasil:
+            return
+        
+        # Urutkan berdasarkan persentase tertinggi (biasanya sudah di modul pengolahan)
+        best = hasil[0]
+        self.best_match_card.update_data(best, selected_skills)
+        
+        # Isi tabel dengan semua data (atau sisanya)
+        self.table.set_data(hasil, selected_skills, show_save=show_save, show_favorite=show_favorite, show_delete=show_delete, fav_link=fav_link)
+        self.current_data = hasil
+
+    def _on_item_double_clicked(self, item):
+        self.itemDoubleClicked.emit(item)
+
+class JobMatchTable(QTableWidget):
+    """Komponen tabel hasil pencarian lowongan yang terstandarisasi."""
+    save_clicked = pyqtSignal(dict)
+    favorite_clicked = pyqtSignal(dict)
+    delete_clicked = pyqtSignal(dict)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setColumnCount(4)
+        self.setHorizontalHeaderLabels(["Judul Pekerjaan", "Perusahaan", "Kecocokan", "Aksi"])
+        self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        self.horizontalHeader().setSectionResizeMode(3, QHeaderView.Fixed)
+        self.setColumnWidth(3, 300)
+        self.verticalHeader().setDefaultSectionSize(70)
+        self.verticalHeader().setVisible(False)
+        self.setShowGrid(False)
+        self.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.setSelectionBehavior(QTableWidget.SelectRows)
+        self.setStyleSheet("""
+            QTableWidget {
+                border: none;
+                background-color: white;
+                font-size: 14px;
+                color: #1E3A4A;
+            }
+            QTableWidget::item {
+                padding: 12px;
+                border-bottom: 1px solid #F0F5F7;
+            }
+            QTableWidget::item:selected {
+                background-color: #F7FBFC;
+                color: #2C687B;
+            }
+            QHeaderView::section {
+                background-color: white;
+                padding: 12px;
+                border: none;
+                border-bottom: 2px solid #E0E7EF;
+                font-weight: bold;
+                color: #2C687B;
+                text-align: left;
+            }
+            QScrollBar:vertical {
+                border: none;
+                background: #F3F4F6;
+                width: 8px;
+                border-radius: 4px;
+            }
+            QScrollBar::handle:vertical {
+                background: #B2D2D9;
+                border-radius: 4px;
+            }
+            QScrollBar::handle:vertical:hover {
+                background: #7A9EB0;
+            }
+            QScrollBar:horizontal {
+                border: none;
+                background: #F3F4F6;
+                height: 8px;
+                border-radius: 4px;
+            }
+            QScrollBar::handle:horizontal {
+                background: #B2D2D9;
+                border-radius: 4px;
+            }
+            QScrollBar::handle:horizontal:hover {
+                background: #7A9EB0;
+            }
+        """)
+
+    def set_data(self, hasil, selected_skills, show_save=True, show_favorite=True, show_delete=False, fav_link=None):
+        """Isi tabel dengan data lowongan hasil pencocokan."""
+        self.setRowCount(len(hasil))
+        
+        # Sembunyikan kolom aksi jika tidak ada tombol yang ditampilkan
+        if not show_save and not show_favorite and not show_delete:
+            self.setColumnHidden(3, True)
+        else:
+            self.setColumnHidden(3, False)
+
+        for row, data in enumerate(hasil):
+            # 1. Judul Pekerjaan
+            self.setItem(row, 0, QTableWidgetItem(data.get("Judul_Pekerjaan", "-")))
+            
+            # 2. Nama Perusahaan
+            self.setItem(row, 1, QTableWidgetItem(data.get("Nama_Perusahaan", "-")))
+            
+            # 3. Persentase Kecocokan
+            perc = data.get("match_percentage", 0)
+            match_item = QTableWidgetItem(f"{perc}%")
+            match_item.setTextAlignment(Qt.AlignCenter)
+            
+            # Warna teks berdasarkan tingkat kecocokan
+            if perc >= 70:
+                match_item.setForeground(QColor("#27AE60")) # Hijau
+            elif perc >= 40:
+                match_item.setForeground(QColor("#F39C12")) # Oranye
+            else:
+                match_item.setForeground(QColor("#C0392B")) # Merah
+                
+            font = match_item.font()
+            font.setBold(True)
+            match_item.setFont(font)
+            
+            self.setItem(row, 2, match_item)
+            
+            if not show_save and not show_favorite and not show_delete:
+                continue
+                
+            # Container untuk tombol aksi
+            btn_widget = QWidget()
+            btn_widget.setStyleSheet("background-color: transparent;")
+            btn_lay = QHBoxLayout(btn_widget)
+            btn_lay.setContentsMargins(70, 0, 0, 0)
+            btn_lay.setSpacing(10)
+            btn_lay.setAlignment(Qt.AlignCenter)
+            
+            # 4. Tombol Simpan
+            if show_save:
+                btn_save = QPushButton("💾 Simpan")
+                btn_save.setCursor(Qt.PointingHandCursor)
+                btn_save.setStyleSheet("""
+                    QPushButton {
+                        background-color: #2C687B; color: white;
+                        border: none; border-radius: 8px; padding: 8px 12px; font-weight: bold; font-size: 13px;
+                        min-height: 32px;
+                    }
+                    QPushButton:hover { background-color: #3B7C91; }
+                """)
+                btn_save.clicked.connect(lambda checked, d=data: self.save_clicked.emit(d))
+                btn_lay.addWidget(btn_save)
+
+            # 5. Tombol Favorit
+            if show_favorite:
+                is_fav = (fav_link == data.get("Link_Lowongan"))
+                btn_fav = QPushButton("⭐ Terfavorit" if is_fav else "⭐ Favorit")
+                btn_fav.setCursor(Qt.PointingHandCursor)
+                
+                if is_fav:
+                    btn_fav.setEnabled(False)
+                    btn_fav.setStyleSheet("""
+                        QPushButton {
+                            background-color: #BDC3C7; color: white;
+                            border: none; border-radius: 8px; padding: 8px 12px; font-weight: bold; font-size: 13px;
+                            min-height: 32px;
+                        }
+                    """)
+                else:
+                    btn_fav.setStyleSheet("""
+                        QPushButton {
+                            background-color: #F1C40F; color: #1E3A4A;
+                            border: none; border-radius: 8px; padding: 8px 12px; font-weight: bold; font-size: 13px;
+                            min-height: 32px;
+                        }
+                        QPushButton:hover { background-color: #F39C12; }
+                    """)
+                
+                btn_fav.clicked.connect(lambda checked, d=data: self.favorite_clicked.emit(d))
+                btn_lay.addWidget(btn_fav)
+
+            # 6. Tombol Hapus
+            if show_delete:
+                btn_del = QPushButton("🗑️ Hapus")
+                btn_del.setCursor(Qt.PointingHandCursor)
+                btn_del.setStyleSheet("""
+                    QPushButton {
+                        background-color: #E74C3C; color: white;
+                        border: none; border-radius: 8px; padding: 8px 12px; font-weight: bold; font-size: 13px;
+                        min-height: 32px;
+                    }
+                    QPushButton:hover { background-color: #C0392B; }
+                """)
+                btn_del.clicked.connect(lambda checked, d=data: self.delete_clicked.emit(d))
+                btn_lay.addWidget(btn_del)
+            
+            self.setCellWidget(row, 3, btn_widget)
+
+class JobDetailPanel(QFrame):
+    """Komponen detail lowongan pekerjaan yang terstandarisasi."""
+    def __init__(self, on_back_callback, parent=None):
+        super().__init__(parent)
+        self.setObjectName("PanelCard")
+        self.on_back_callback = on_back_callback
+        self._init_ui()
+
+    def _init_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(30, 25, 30, 25)
+
+        # Header
+        header = QHBoxLayout()
+        btn_back = self._create_back_button()
+        btn_back.clicked.connect(self.on_back_callback)
+        header.addWidget(btn_back)
+        header.addStretch()
+        layout.addLayout(header)
+        layout.addSpacing(15)
+
+        # Scroll Area
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setStyleSheet("""
+            QScrollArea { border: none; background-color: transparent; }
+            QScrollBar:vertical {
+                border: none; background: #F3F4F6; width: 8px; border-radius: 4px;
+            }
+            QScrollBar::handle:vertical { background: #B2D2D9; min-height: 20px; border-radius: 4px; }
+            QScrollBar::handle:vertical:hover { background: #7A9EB0; }
+            QScrollBar:horizontal {
+                border: none; background: #F3F4F6; height: 8px; border-radius: 4px;
+            }
+            QScrollBar::handle:horizontal { background: #B2D2D9; min-width: 20px; border-radius: 4px; }
+            QScrollBar::handle:horizontal:hover { background: #7A9EB0; }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical,
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal { height: 0px; width: 0px; }
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical,
+            QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal { background: none; }
+        """)
+        
+        scroll_content = QWidget()
+        scroll_content.setStyleSheet("background-color: transparent;")
+        self.content_lay = QVBoxLayout(scroll_content)
+        self.content_lay.setContentsMargins(0, 0, 20, 0)
+        self.content_lay.setSpacing(15)
+
+        # Labels
+        self.det_title = QLabel("Judul Pekerjaan")
+        self.det_title.setWordWrap(True)
+        self.det_title.setStyleSheet("font-size: 28px; font-weight: bold; color: #1E3A4A; background-color: transparent;")
+        self.content_lay.addWidget(self.det_title)
+        
+        self.det_company = QLabel("Nama Perusahaan")
+        self.det_company.setStyleSheet("font-size: 18px; color: #2C687B; font-weight: bold; background-color: transparent;")
+        self.content_lay.addWidget(self.det_company)
+
+        # Sections
+        self.det_loc = self._create_section("📍 Lokasi Pekerjaan")
+        self.det_type = self._create_section("💼 Jenis Pekerjaan")
+        
+        # Salary Tags
+        self.salary_lay = self._create_tag_container("💰 Rentang Gaji")
+        
+        # Skill Tags
+        self.lbl_match_title = QLabel("✅ Skill yang kamu punya")
+        self.lbl_match_title.setStyleSheet("font-size: 18px; font-weight: bold; color: #27AE60; background-color: transparent;")
+        self.content_lay.addWidget(self.lbl_match_title)
+        self.match_tags_lay = self._create_tag_layout()
+        
+        self.lbl_missing_title = QLabel("🛠 Skill yang dibutuhkan lainnya")
+        self.lbl_missing_title.setStyleSheet("font-size: 18px; font-weight: bold; color: #C0392B; background-color: transparent;")
+        self.content_lay.addWidget(self.lbl_missing_title)
+        self.missing_tags_lay = self._create_tag_layout()
+
+        # Benefit Tags
+        self.benefit_tags_lay = self._create_tag_container("🎁 Benefit Pekerjaan")
+
+        self.det_req = self._create_section("📋 Kualifikasi & Persyaratan")
+        self.det_desc = self._create_section("📝 Deskripsi Pekerjaan")
+        
+        self.det_link = self._create_section("🔗 Link Lowongan")
+        self.det_link.setOpenExternalLinks(True)
+
+        scroll.setWidget(scroll_content)
+        layout.addWidget(scroll)
+
+    def _create_back_button(self):
+        btn = QPushButton("← Kembali")
+        btn.setCursor(Qt.PointingHandCursor)
+        btn.setStyleSheet("""
+            QPushButton {
+                background-color: transparent; color: #2C687B;
+                font-size: 14px; font-weight: bold;
+                border: 1px solid #2C687B; border-radius: 6px; padding: 5px 15px;
+            }
+            QPushButton:hover { background-color: #E2EFF1; }
+        """)
+        return btn
+
+    def _create_section(self, title):
+        container = QWidget()
+        lay = QVBoxLayout(container)
+        lay.setContentsMargins(0, 5, 0, 15)
+        lbl_t = QLabel(title)
+        lbl_t.setStyleSheet("font-size: 18px; font-weight: bold; color: #2C687B; background-color: transparent;")
+        lay.addWidget(lbl_t)
+        lbl_c = QLabel("-")
+        lbl_c.setWordWrap(True)
+        lbl_c.setStyleSheet("font-size: 16px; color: #4A5568; line-height: 1.5; background-color: transparent;")
+        lay.addWidget(lbl_c)
+        self.content_lay.addWidget(container)
+        return lbl_c
+
+    def _create_tag_container(self, title):
+        """Membuat section yang berisi judul dan kumpulan tag (layout horizontal)."""
+        section_widget = QWidget()
+        section_lay = QVBoxLayout(section_widget)
+        section_lay.setContentsMargins(0, 5, 0, 15)
+        
+        lbl_t = QLabel(title)
+        lbl_t.setStyleSheet("font-size: 18px; font-weight: bold; color: #2C687B; background-color: transparent;")
+        section_lay.addWidget(lbl_t)
+        
+        # Widget khusus untuk menampung tag secara horizontal
+        tag_container = QWidget()
+        tag_lay = QHBoxLayout(tag_container)
+        tag_lay.setContentsMargins(0, 5, 0, 0)
+        tag_lay.setSpacing(8)
+        tag_lay.setAlignment(Qt.AlignLeft)
+        
+        section_lay.addWidget(tag_container)
+        self.content_lay.addWidget(section_widget)
+        
+        return tag_lay
+
+    def _create_tag_layout(self):
+        """Membuat layout horizontal untuk tag yang langsung ditempel ke content_lay."""
+        container = QWidget()
+        lay = QHBoxLayout(container)
+        lay.setContentsMargins(0, 5, 0, 0)
+        lay.setSpacing(8)
+        lay.setAlignment(Qt.AlignLeft)
+        self.content_lay.addWidget(container)
+        return lay
+
+    def update_data(self, data, user_selected_skills=[]):
+        """Populasi data pekerjaan ke UI."""
+        self.det_title.setText(data.get("Judul_Pekerjaan", "-"))
+        self.det_company.setText(data.get("Nama_Perusahaan", "-"))
+        self.det_loc.setText(data.get("Lokasi", "-"))
+        self.det_type.setText(data.get("Jenis_Pekerjaan", "-"))
+        
+        # Salary
+        self._clear_layout(self.salary_lay)
+        sal = data.get("Rentang_Gaji", "-")
+        self.salary_lay.addWidget(self._create_tag(sal, "#F39C12"))
+        self.salary_lay.addStretch()
+
+        # Skills
+        self._clear_layout(self.match_tags_lay)
+        self._clear_layout(self.missing_tags_lay)
+        raw_skills = data.get("Skills", "-")
+        if raw_skills != "-":
+            job_skills = [s.strip() for s in raw_skills.split("|")]
+            user_set = {s.lower() for s in user_selected_skills}
+            matched = [s for s in job_skills if s.lower() in user_set]
+            missing = [s for s in job_skills if s.lower() not in user_set]
+            
+            self.lbl_match_title.setVisible(len(matched) > 0)
+            for s in matched: self.match_tags_lay.addWidget(self._create_tag(s, "#27AE60"))
+            self.match_tags_lay.addStretch()
+
+            self.lbl_missing_title.setVisible(len(missing) > 0)
+            for s in missing: self.missing_tags_lay.addWidget(self._create_tag(s, "#C0392B"))
+            self.missing_tags_lay.addStretch()
+
+        # Benefits
+        self._clear_layout(self.benefit_tags_lay)
+        raw_ben = data.get("Benefit_Pekerjaan", "-")
+        if raw_ben != "-":
+            for b in [x.strip() for x in raw_ben.split("|")]:
+                self.benefit_tags_lay.addWidget(self._create_tag(b, "#2C687B"))
+            self.benefit_tags_lay.addStretch()
+
+        # Requirements & Description
+        req = data.get("Kualifikasi_Persyaratan", "-")
+        self.det_req.setText("• " + req.replace(" | ", "\n• ").replace("\n", "\n• ") if req != "-" else "-")
+        self.det_desc.setText(data.get("Deskripsi_Pekerjaan", "-"))
+        
+        link = data.get("Link_Lowongan", "#")
+        self.det_link.setText(f'<a href="{link}" style="color: #2C687B; text-decoration: none;">Buka di browser ↗</a>')
+
+    def _create_tag(self, text, color):
+        lbl = QLabel(text)
+        lbl.setStyleSheet(f"color: {color}; border: 1px solid {color}; border-radius: 6px; padding: 4px 12px; font-size: 14px; font-weight: bold;")
+        return lbl
+
+    def _clear_layout(self, layout):
+        while layout.count():
+            item = layout.takeAt(0)
+            if item.widget(): item.widget().deleteLater()

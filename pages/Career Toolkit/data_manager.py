@@ -3,15 +3,26 @@ import os
 import uuid
 from datetime import datetime
 
+import sys
+# Coba impor modul_database, jika belum ada di sys.path, tambahkan dulu
+try:
+    from modul_database import get_root_dir
+except ImportError:
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    sys.path.insert(0, os.path.join(base_dir, "pages", "Modul"))
+    from modul_database import get_root_dir
+
 class CVDataManager:
     def __init__(self):
-        # Jalur file disesuaikan dengan struktur folder projek
-        # Mengasumsikan skrip dijalankan dari root (main.py)
-        self.db_path = os.path.join("database", "curiculum-vitae.json")
-        self.temp_path = os.path.join("database", "curiculum-vitae-temp.json")
+        # Gunakan modul database untuk mendapatkan root directory
+        root = get_root_dir()
+        db_folder = os.path.join(root, "database", "Database Permanen", "Career Toolkit")
+        
+        self.db_path = os.path.join(db_folder, "curiculum-vitae.json")
+        self.temp_path = os.path.join(db_folder, "curiculum-vitae-temp.json")
         
         # Pastikan folder database ada
-        os.makedirs("database", exist_ok=True)
+        os.makedirs(db_folder, exist_ok=True)
         
         # Inisialisasi file jika belum ada
         self._ensure_file_exists(self.db_path, [])

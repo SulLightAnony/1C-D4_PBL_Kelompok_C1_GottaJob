@@ -7,9 +7,9 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 
 # Import komponen pro dari ui_components
-from .data_manager import CVDataManager
-from .ui_components import CVCard, ExperienceInputWidget, EducationInputWidget, TemplateCard, CVPreviewWidget
-from .pdf_generator import CVRenderer
+from data_manager import CVDataManager
+from ui_components import CVCard, ExperienceInputWidget, EducationInputWidget, TemplateCard, CVPreviewWidget
+from pdf_generator import CVRenderer
 
 class CareerToolkitPage(QWidget):
     def __init__(self, parent=None):

@@ -5,8 +5,25 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout,
                              QStackedWidget)
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QFont, QPixmap, QIcon
-from pages.career_toolkit.toolkit_main import CareerToolkitPage
-from pages.dashboard import DashboardPage
+
+# IMPORT file menu
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pages", "Dashboard"))
+from dashboard import DashboardPage
+
+# Live Discovery ada di folder dengan spasi → gunakan sys.path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pages", "Live Discovery"))
+from live_discovery import LiveDiscoveryPage
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pages", "Job Archive"))
+from job_archive import JobArchivePage
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pages", "Career Toolkit"))
+from toolkit_main import CareerToolkitPage
+
+# Tambahkan path untuk modul database agar bisa dibersihkan saat tutup
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pages", "Modul"))
+from modul_database import bersihkan_database_sementara
 
 class Dashboard(QMainWindow):
     def __init__(self):
@@ -60,11 +77,11 @@ class Dashboard(QMainWindow):
         # TOMBOL MENU
         self.menu_buttons = []
         
-        self.btn_dashboard = self.create_menu_btn("  Dashboard", 0, "dashboard.png")
-        self.btn_discovery = self.create_menu_btn("  Live Discovery", 1, "search.png")
-        self.btn_archive   = self.create_menu_btn("  Job Archive", 2, "folder.png")
-        self.btn_directory = self.create_menu_btn("  Job Posting", 3, "post.png")
-        self.btn_toolkit   = self.create_menu_btn("  Career Toolkit", 4, "toolbox.png")
+        self.btn_dashboard = self.create_menu_btn("  Dashboard", 0, "Dashboard", "dashboard.png")
+        self.btn_discovery = self.create_menu_btn("  Live Discovery", 1, "Live Discovery", "search.png")
+        self.btn_archive   = self.create_menu_btn("  Job Archive", 2, "Job Archive", "folder.png")
+        self.btn_directory = self.create_menu_btn("  Job Posting", 3, "Job Posting", "post.png")
+        self.btn_toolkit   = self.create_menu_btn("  Career Toolkit", 4, "Career Toolkit", "toolbox.png")
 
         self.btn_dashboard.setObjectName("ActiveMenu")
 
@@ -74,13 +91,18 @@ class Dashboard(QMainWindow):
 
         # MENU
         self.halaman_dashboard = DashboardPage() # <--- PENTING: Membuat objek halaman
-        self.toolkit_page = CareerToolkitPage()
         
+        self.halaman_discovery = LiveDiscoveryPage()
+        
+        self.halaman_archive = JobArchivePage()
+        
+        self.toolkit_page = CareerToolkitPage()
+
         self.content_stack.addWidget(self.halaman_dashboard)         # Index 0
-        self.content_stack.addWidget(self.create_page("Discovery"))  # Index 1 (Sementara)
-        self.content_stack.addWidget(self.create_page("Archive"))    # Index 2 (Sementara)
+        self.content_stack.addWidget(self.halaman_discovery)         # Index 1
+        self.content_stack.addWidget(self.halaman_archive)           # Index 2 (Sudah dibuat)
         self.content_stack.addWidget(self.create_page("Directory"))  # Index 3 (Sementara)
-        self.content_stack.addWidget(self.toolkit_page)             # Index 4
+        self.content_stack.addWidget(self.toolkit_page)              # Index 4
 
         self.layout_utama.addWidget(self.sidebar)
         self.layout_utama.addWidget(self.content_stack)
@@ -102,14 +124,14 @@ class Dashboard(QMainWindow):
         layout.addStretch()
         self.layout_sidebar.addWidget(container)
 
-    def create_menu_btn(self, text, index, icon_name=None):
+    def create_menu_btn(self, text, index, folder_name, icon_name=None):
         btn = QPushButton(text)
         font = QFont("Segoe UI", 18) 
         btn.setFont(font)
 
         if icon_name:
             base_path = os.path.dirname(os.path.abspath(__file__))
-            icon_path = os.path.join(base_path, 'assets', icon_name)
+            icon_path = os.path.join(base_path, 'assets', folder_name, icon_name)
             
             icon = QIcon(icon_path)
             if not icon.isNull():
@@ -136,6 +158,14 @@ class Dashboard(QMainWindow):
         label.setAlignment(Qt.AlignCenter)
         layout.addWidget(label)
         return page
+
+    def closeEvent(self, event):
+        """Dijalankan saat user menutup aplikasi."""
+        try:
+            bersihkan_database_sementara()
+        except:
+            pass
+        event.accept()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
