@@ -68,7 +68,7 @@ class JobDashboardWidget(QWidget):
         chart_card_lay = QVBoxLayout(chart_card)
         chart_card_lay.setContentsMargins(0, 20, 0, 50)
         
-        lbl_chart = QLabel("Diagram Persentase Skill", alignment=Qt.AlignHCenter)
+        lbl_chart = QLabel("Tren skill minggu ini", alignment=Qt.AlignHCenter)
         lbl_chart.setStyleSheet("font-size: 16px; font-weight: bold; color: #2C687B; background-color: transparent;")
         chart_card_lay.addWidget(lbl_chart)
         chart_card_lay.addSpacing(20)

@@ -60,9 +60,27 @@ def simpan_ke_database_sementara(data, nama_file):
         
     full_path = os.path.join(db_dir, nama_file)
     
+    existing_data = []
+    if os.path.exists(full_path):
+        try:
+            with open(full_path, "r", encoding="utf-8") as f:
+                existing_data = json.load(f)
+        except Exception as e:
+            print(f"Error membaca database sementara lama: {e}")
+            existing_data = []
+            
+    # Hindari duplikat berdasarkan Link_Lowongan
+    seen_links = {item.get("Link_Lowongan") for item in existing_data if item.get("Link_Lowongan") and item.get("Link_Lowongan") != "-"}
+    for item in data:
+        link = item.get("Link_Lowongan", "-")
+        if link == "-" or link not in seen_links:
+            existing_data.append(item)
+            if link != "-":
+                seen_links.add(link)
+    
     try:
         with open(full_path, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
+            json.dump(existing_data, f, ensure_ascii=False, indent=4)
         return full_path
     except Exception as e:
         print(f"Error saat menyimpan ke database sementara: {e}")

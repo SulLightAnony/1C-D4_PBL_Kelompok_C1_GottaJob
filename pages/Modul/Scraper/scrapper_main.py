@@ -137,7 +137,7 @@ if __name__ == "__main__":
 
     try:
         for idx, kw in enumerate(list_keywords):
-            hasil_scraping = mesin_scraper.scrape_keyword_page_1_only(kw)
+            hasil_scraping = mesin_scraper.scrape_keyword(kw)
 
             # Filter: hanya simpan job yang judulnya mengandung semua kata dari keyword
             hasil_relevan, jml_tidak_relevan = filter_relevan(hasil_scraping, kw)
