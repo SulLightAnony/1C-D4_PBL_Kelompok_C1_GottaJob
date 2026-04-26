@@ -7,6 +7,11 @@ from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QFont, QPixmap, QIcon
 
 # IMPORT file menu
+base_dir = os.path.dirname(os.path.abspath(__file__))
+pages_path = os.path.join(base_dir, "pages")
+
+if pages_path not in sys.path:
+    sys.path.insert(0, pages_path)
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pages", "Dashboard"))
 from dashboard import DashboardPage
@@ -25,6 +30,12 @@ from toolkit_main import CareerToolkitPage
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pages", "Modul"))
 from modul_database import bersihkan_database_sementara
 
+#Path untuk modul pengolahan_data
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pages", "Modul"))
+from modul_pengolahan_data import hitung_persentase_skill
+
+
+from dashboard import DashboardPage
 class Dashboard(QMainWindow):
     def __init__(self):
         super().__init__()
