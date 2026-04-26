@@ -93,15 +93,21 @@ class GlintsScraper:
         return self._dedup_list(items)
 
     # ------------------------------------------------------------------
-    def scrape_keyword_page_1_only(self, keyword):
+    def scrape_keyword(self, keyword, page=1):
         query = keyword.replace(" ", "%20")
         url = (
             f"https://glints.com/id/opportunities/jobs/explore"
             f"?keyword={query}&country=ID&locationName=Indonesia"
         )
+        url = (
+            f"https://glints.com/id/opportunities/jobs/explore"
+            f"?keyword={query}&country=ID&locationName=Indonesia"
+        )
+        # Jangan tambahkan &page= di URL karena Glints server memblokirnya untuk guest
+            
         data_ekstrak = []
 
-        print(f"\n [Glints] Scraping keyword: {keyword.upper()}")
+        print(f"\n [Glints] Scraping keyword: {keyword.upper()} (Page: {page})")
 
         try:
             # =========================================================
@@ -111,9 +117,96 @@ class GlintsScraper:
             self.page.goto(url, wait_until="domcontentloaded")
             time.sleep(random.uniform(3.0, 5.0))
 
+            # Upaya Bypass Login Wall / Popup Modal (Pertama kali)
+            try:
+                self.page.keyboard.press("Escape")
+                time.sleep(1)
+                
+                # Hapus elemen login nudge (Glints hard wall)
+                self.page.evaluate('''
+                    // Hapus banner login yang menutupi jobs
+                    const nudge = document.getElementById('see-more-jobs-login-nudge');
+                    if(nudge) nudge.remove();
+                    
+                    const overlay = document.querySelector('[class*="LoginNudgeViewsc__Overlay"]');
+                    if(overlay) overlay.remove();
+                    
+                    const blurredContainer = document.querySelector('[class*="LoginNudgeViewsc__BlurredJobCardListContainer"]');
+                    if(blurredContainer) {
+                        blurredContainer.style.filter = 'none';
+                        blurredContainer.style.opacity = '1';
+                    }
+                    
+                    // Hapus pop-up modal login & signup
+                    const popup = document.getElementById('login-signup-popup');
+                    if(popup) {
+                        let parent = popup.parentElement;
+                        while(parent && parent.tagName !== 'BODY') {
+                            if(window.getComputedStyle(parent).position === 'fixed') {
+                                parent.remove();
+                                break;
+                            }
+                            parent = parent.parentElement;
+                        }
+                        if (document.body.contains(popup)) popup.remove();
+                    }
+                    
+                    // Kembalikan kemampuan scroll halaman
+                    document.body.style.overflow = 'auto';
+                    document.documentElement.style.overflow = 'auto';
+                    
+                    // Hapus efek blur jika ada class yang menggunakan blur
+                    const blurredElements = document.querySelectorAll('*');
+                    for (let el of blurredElements) {
+                        const style = window.getComputedStyle(el);
+                        if (style.filter.includes('blur')) {
+                            el.style.filter = 'none';
+                        }
+                    }
+                ''')
+                time.sleep(1)
+            except:
+                pass
+
+            # Fungsi pembantu untuk membunuh dinding login yang mungkin muncul tiba-tiba saat scroll
+            def kill_login_wall():
+                try:
+                    self.page.evaluate('''
+                        const nudge = document.getElementById('see-more-jobs-login-nudge');
+                        if(nudge) nudge.remove();
+                        const overlay = document.querySelector('[class*="LoginNudgeViewsc__Overlay"]');
+                        if(overlay) overlay.remove();
+                        const blurredContainer = document.querySelector('[class*="LoginNudgeViewsc__BlurredJobCardListContainer"]');
+                        if(blurredContainer) {
+                            blurredContainer.style.filter = 'none';
+                            blurredContainer.style.opacity = '1';
+                        }
+                        const popup = document.getElementById('login-signup-popup');
+                        if(popup) {
+                            let parent = popup.parentElement;
+                            while(parent && parent.tagName !== 'BODY') {
+                                if(window.getComputedStyle(parent).position === 'fixed') { parent.remove(); break; }
+                                parent = parent.parentElement;
+                            }
+                            if (document.body.contains(popup)) popup.remove();
+                        }
+                        document.body.style.overflow = 'auto';
+                        document.documentElement.style.overflow = 'auto';
+                        const blurredElements = document.querySelectorAll('*');
+                        for (let el of blurredElements) {
+                            const style = window.getComputedStyle(el);
+                            if (style.filter.includes('blur')) el.style.filter = 'none';
+                        }
+                    ''')
+                except:
+                    pass
+
+            kill_login_wall()
+
             try:
                 self.page.wait_for_selector(
                     "a[href*='/id/opportunities/jobs/']",
+                    state="attached",
                     timeout=20000
                 )
             except:
@@ -124,9 +217,21 @@ class GlintsScraper:
                     pass
                 return []
 
-            for _ in range(3):
-                self.page.mouse.wheel(0, 900)
-                time.sleep(0.8)
+            # Infinite Scroll Logic untuk mendapatkan data pekerjaan halaman ke-N
+            target_items = page * 30
+            max_scroll_attempts = page * 10
+            
+            print(f" [Fase 1] Melakukan infinite scroll untuk mencapai ~{target_items} pekerjaan (Target Halaman {page})...")
+            
+            for _ in range(max_scroll_attempts):
+                self.page.mouse.wheel(0, 1500)
+                time.sleep(1.2)
+                kill_login_wall() # Terus hancurkan wall jika muncul
+                
+                # Cek jumlah pekerjaan yang sudah termuat di DOM
+                current_count = self.page.locator("a[href*='/id/opportunities/jobs/']").count()
+                if current_count >= target_items:
+                    break
 
             link_elems = self.page.locator("a[href*='/id/opportunities/jobs/']")
             total = link_elems.count()
@@ -144,7 +249,12 @@ class GlintsScraper:
                         seen.add(clean_href)
                         job_links.append(full_url)
 
-            print(f" [Fase 1] Berhasil kumpulkan {len(job_links)} job unik.")
+            # Hanya ambil potongan (slice) pekerjaan untuk 'page' ini (misal page 2: index 30 sampai 60)
+            start_idx = (page - 1) * 30
+            end_idx = page * 30
+            job_links = job_links[start_idx:end_idx]
+            
+            print(f" [Fase 1] Berhasil kumpulkan {len(job_links)} job unik untuk Halaman {page}.")
 
             if not job_links:
                 print(" [Fase 1] Tidak ada link job ditemukan.")

@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import (
     QListWidget, QListWidgetItem, QStackedWidget
 )
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, QObject
+from PyQt5.QtGui import QIcon
 
 # Tambahkan path untuk modul pengolahan, visualisasi data, dan database
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -37,9 +38,10 @@ class ScraperWorker(QObject):
     result_signal = pyqtSignal(str)   # kirim PATH FILE setelah selesai
     done_signal   = pyqtSignal()      # sinyal selesai
 
-    def __init__(self, keywords: list):
+    def __init__(self, keywords: list, pages: list):
         super().__init__()
         self.keywords = keywords
+        self.pages = pages
         self._stopped = False
 
     def run(self):
@@ -71,13 +73,14 @@ class ScraperWorker(QObject):
         total_tidak_relevan = 0
         total_duplikat      = 0
 
-        self.log_signal.emit("🔧 Memulai mesin scraper (Playwright)...")
+        self.log_signal.emit(" Memulai pencarian...")
         mesin = GlintsScraper()
 
         try:
             for idx, kw in enumerate(self.keywords):
-                self.log_signal.emit(f"\n🔍 Keyword [{idx+1}/{len(self.keywords)}]: {kw.upper()}")
-                hasil = mesin.scrape_keyword_page_1_only(kw)
+                page_num = self.pages[idx]
+                self.log_signal.emit(f"\n🔍 Keyword [{idx+1}/{len(self.keywords)}]: {kw.upper()} (Page {page_num})")
+                hasil = mesin.scrape_keyword(kw, page=page_num)
 
                 relevan, jml_buang = filter_relevan(hasil, kw)
                 total_tidak_relevan += jml_buang
@@ -119,6 +122,7 @@ class ScraperWorker(QObject):
                     self.log_signal.emit("\n❌ Gagal menyimpan data.")
             else:
                 self.log_signal.emit("\n⚠️  Tidak ada data yang berhasil dikumpulkan.")
+                self.result_signal.emit("EMPTY")
 
         except Exception as e:
             self.log_signal.emit(f"\n[ERROR] {e}")
@@ -212,6 +216,8 @@ class LiveDiscoveryPage(QWidget):
         self._running = False
         self.last_scraped_file = None
         self.user_selected_skills = []
+        self.keyword_pages = {}
+        self.last_search_raw = ""
 
         root = QVBoxLayout(self)
         root.setContentsMargins(28, 22, 28, 22)
@@ -325,16 +331,28 @@ class LiveDiscoveryPage(QWidget):
         if self._running:
             return
 
-        # Bersihkan database sementara sebelum memulai pencarian baru
-        bersihkan_database_sementara()
+        if self.last_search_raw != raw:
+            # Bersihkan database sementara dan reset paginasi jika keyword berubah
+            bersihkan_database_sementara()
+            self.keyword_pages = {}
+            self.last_search_raw = raw
 
         keywords = [kw.strip() for kw in raw.split(",") if kw.strip()]
+        
+        pages_to_fetch = []
+        for kw in keywords:
+            kw_lower = kw.lower()
+            current_page = self.keyword_pages.get(kw_lower, 1)
+            pages_to_fetch.append(current_page)
+            # Increment the page for the next time this keyword is searched
+            self.keyword_pages[kw_lower] = current_page + 1
+            
         self._running = True
         self.btn_scrape.setEnabled(False)
         self.progress.setVisible(True)
 
         self._thread = QThread()
-        self._worker = ScraperWorker(keywords)
+        self._worker = ScraperWorker(keywords, pages_to_fetch)
         self._worker.moveToThread(self._thread)
 
         self._worker.log_signal.connect(print)
@@ -344,10 +362,16 @@ class LiveDiscoveryPage(QWidget):
         self._worker.done_signal.connect(self._on_done)
         self._worker.done_signal.connect(self._thread.quit)
 
-        self.btn_scrape.setText("⌛ Mencari...")
+        icon_path = os.path.join(root_dir, "assets", "live discovery", "refresh.png")
+        self.btn_scrape.setIcon(QIcon(icon_path))
+        self.btn_scrape.setText(" Sedang mencari pekerjaan...")
         self._thread.start()
 
     def _handle_result(self, file_path):
+        if file_path == "EMPTY":
+            QMessageBox.information(self, "Informasi", "Tidak ada lowongan pekerjaan lagi yang relevan.")
+            return
+            
         try:
             from modul_pengolahan_data import hitung_persentase_skill
             self.last_scraped_file = file_path
@@ -478,6 +502,7 @@ class LiveDiscoveryPage(QWidget):
     def _on_done(self):
         self._running = False
         self.btn_scrape.setEnabled(True)
+        self.btn_scrape.setIcon(QIcon())
         self.btn_scrape.setText("▶  Cari Pekerjaan")
         self.progress.setVisible(False)
         self.status_lbl.setText("Proses selesai.")
