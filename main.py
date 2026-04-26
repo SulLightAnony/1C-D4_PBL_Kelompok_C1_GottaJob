@@ -18,6 +18,9 @@ from live_discovery import LiveDiscoveryPage
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pages", "Job Archive"))
 from job_archive import JobArchivePage
 
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pages", "Career Toolkit"))
+from toolkit_main import CareerToolkitPage
+
 # Tambahkan path untuk modul database agar bisa dibersihkan saat tutup
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pages", "Modul"))
 from modul_database import bersihkan_database_sementara
@@ -47,7 +50,7 @@ class Dashboard(QMainWindow):
                 background-color: transparent;
                 padding: 18px 25px;
                 text-align: left;
-                font-size: 22px;
+                font-size: 21px;
                 border: none;
                 border-radius: 12px;
                 margin: 8px 15px;
@@ -92,12 +95,14 @@ class Dashboard(QMainWindow):
         self.halaman_discovery = LiveDiscoveryPage()
         
         self.halaman_archive = JobArchivePage()
+        
+        self.toolkit_page = CareerToolkitPage()
 
         self.content_stack.addWidget(self.halaman_dashboard)         # Index 0
         self.content_stack.addWidget(self.halaman_discovery)         # Index 1
         self.content_stack.addWidget(self.halaman_archive)           # Index 2 (Sudah dibuat)
         self.content_stack.addWidget(self.create_page("Directory"))  # Index 3 (Sementara)
-        self.content_stack.addWidget(self.create_page("Toolkit"))    # Index 4 (Sementara)
+        self.content_stack.addWidget(self.toolkit_page)              # Index 4
 
         self.layout_utama.addWidget(self.sidebar)
         self.layout_utama.addWidget(self.content_stack)

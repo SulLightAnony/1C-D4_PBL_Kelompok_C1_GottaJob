@@ -444,7 +444,7 @@ class JobMatchTable(QTableWidget):
             btn_widget = QWidget()
             btn_widget.setStyleSheet("background-color: transparent;")
             btn_lay = QHBoxLayout(btn_widget)
-            btn_lay.setContentsMargins(30, 0, 0, 0)
+            btn_lay.setContentsMargins(70, 0, 0, 0)
             btn_lay.setSpacing(10)
             btn_lay.setAlignment(Qt.AlignCenter)
             
