@@ -174,12 +174,28 @@ class DashboardPage(QWidget):
         trend_title.setStyleSheet("font-weight: bold; color: #555; margin-bottom: 10px;")
         trend_layout.addWidget(trend_title)
         
-        skills = [("Flutter", 60), ("Swift", 60), ("iOS Development", 60), ("Kotlin", 40), ("React Native", 100)]
-        for skill, val in skills:
-            trend_layout.addWidget(SkillProgress(skill, val))
-        
+        #path archive
+        archive_json = os.path.join(current_dir, "..", "..", "database", "Database Permanen", "Job Archive", "game_developer.json") 
+        try:
+            with open(archive_json, 'r', encoding='utf-8') as f:
+                raw_data = json.load(f)
+            if isinstance(raw_data, dict):
+                pass
+            hasil_stats = hitung_persentase_skill(archive_json)
+            
+            if isinstance(hasil_stats, dict) and hasil_stats:
+                count = 0
+
+                for persentase in sorted(hasil_stats.keys(), reverse=True, key=float):
+                    for skill_name in hasil_stats[persentase]:
+                        if count < 5:
+                            trend_layout.addWidget(SkillProgress(skill_name, int(float(persentase))))
+                            count += 1
+        except Exception as e:
+            print(f"Error Tren Skill: {e}")
+            trend_layout.addWidget(QLabel("Gagal memuat tren skill."))
         left_col.addWidget(trend_card)
-        body_layout.addLayout(left_col, 2)
+        body_layout.addLayout(left_col,2)
 
         # --- KOLOM KANAN (Insight & Aktivitas) ---
         right_col = QVBoxLayout()
