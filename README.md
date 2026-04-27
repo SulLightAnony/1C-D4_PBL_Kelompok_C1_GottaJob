@@ -1,1 +1,4 @@
-# Jangan lupa untuk mendownload library ekstrak pdf. Lakukan dengan ketik "pip install fpdf2" di terminal.
+# Hal-hal yang perlu diinstall: 
+# pip install PyQt5 fpdf matplotlib playwright
+# playwright install
+

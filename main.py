@@ -7,6 +7,11 @@ from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QFont, QPixmap, QIcon
 
 # IMPORT file menu
+base_dir = os.path.dirname(os.path.abspath(__file__))
+pages_path = os.path.join(base_dir, "pages")
+
+if pages_path not in sys.path:
+    sys.path.insert(0, pages_path)
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pages", "Dashboard"))
 from dashboard import DashboardPage
@@ -25,6 +30,15 @@ from toolkit_main import CareerToolkitPage
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pages", "Modul"))
 from modul_database import bersihkan_database_sementara
 
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pages", "Job Posting"))
+from job_posting import JobPostingPage
+
+#Path untuk modul pengolahan_data
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pages", "Modul"))
+from modul_pengolahan_data import hitung_persentase_skill
+
+
+from dashboard import DashboardPage
 class Dashboard(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -97,11 +111,13 @@ class Dashboard(QMainWindow):
         self.halaman_archive = JobArchivePage()
         
         self.toolkit_page = CareerToolkitPage()
+        
+        self.job_posting_page = JobPostingPage()
 
         self.content_stack.addWidget(self.halaman_dashboard)         # Index 0
         self.content_stack.addWidget(self.halaman_discovery)         # Index 1
         self.content_stack.addWidget(self.halaman_archive)           # Index 2 (Sudah dibuat)
-        self.content_stack.addWidget(self.create_page("Directory"))  # Index 3 (Sementara)
+        self.content_stack.addWidget(self.job_posting_page)          # Index 3 (Job Posting)
         self.content_stack.addWidget(self.toolkit_page)              # Index 4
 
         self.layout_utama.addWidget(self.sidebar)

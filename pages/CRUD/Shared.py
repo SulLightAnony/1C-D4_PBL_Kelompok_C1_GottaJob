@@ -8,7 +8,7 @@ import datetime
 # ─────────────────────────────────────────────
 # Root project = 2 level di atas file ini (pages/CRUD/Shared.py → root)
 _ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-FILE_NAME = os.path.join(_ROOT, "database", "Data_Upload_Job.JSON")
+FILE_NAME = os.path.join(_ROOT, "database", "Database Permanen", "Job Posting", "Data_Upload_Job.JSON")
 
 FIELDS = [
     ("Judul_Pekerjaan",         "Judul Pekerjaan         "),
