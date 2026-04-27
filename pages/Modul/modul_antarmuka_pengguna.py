@@ -303,7 +303,36 @@ class BestMatchCard(QFrame):
         layout.addWidget(self.scroll)
 
     def update_data(self, data, user_skills):
-        self.lbl_perc.setText(f"{data.get('match_percentage', 0)}%")
+        perc = data.get('match_percentage', 0)
+        self.lbl_perc.setText(f"{perc}%")
+        
+        # Tentukan warna berdasarkan persentase
+        if perc >= 70:
+            color = "#27AE60" # Hijau
+        elif perc >= 40:
+            color = "#F39C12" # Oranye
+        else:
+            color = "#C0392B" # Merah
+            
+        # Update warna badge
+        self.lbl_perc.setStyleSheet(f"""
+            font-size: 36px;
+            font-weight: bold;
+            color: white;
+            background-color: {color};
+            border-radius: 12px;
+            padding: 10px;
+        """)
+        
+        # Update warna border card
+        self.setStyleSheet(f"""
+            QFrame#PanelCard {{
+                background-color: white;
+                border: 2px solid {color};
+                border-radius: 16px;
+            }}
+        """)
+
         self.lbl_title.setText(data.get("Judul_Pekerjaan", "-"))
         self.lbl_company.setText(data.get("Nama_Perusahaan", "-"))
         self.lbl_location.setText(f"📍 {data.get('Lokasi', '-')}")

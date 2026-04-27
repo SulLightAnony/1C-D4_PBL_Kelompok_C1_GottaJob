@@ -236,9 +236,9 @@ class JobArchivePage(QWidget):
         self.main_layout.setSpacing(18)
 
         # ── Panel Atas (Pemilihan Data) ──
-        box = QFrame()
-        box.setObjectName("PanelCard")
-        box_layout = QVBoxLayout(box)
+        self.file_selection_panel = QFrame()
+        self.file_selection_panel.setObjectName("PanelCard")
+        box_layout = QVBoxLayout(self.file_selection_panel)
         box_layout.setContentsMargins(16, 16, 16, 16)
 
         # Judul dengan Icon
@@ -284,7 +284,7 @@ class JobArchivePage(QWidget):
         box_layout.addSpacing(10)
         box_layout.addLayout(ctrl_layout)
 
-        self.main_layout.addWidget(box)
+        self.main_layout.addWidget(self.file_selection_panel)
 
         self.main_stack = QStackedWidget()
         self.main_layout.addWidget(self.main_stack, stretch=1)
@@ -341,6 +341,10 @@ class JobArchivePage(QWidget):
         self.main_stack.addWidget(self.dashboard_view)
         self.main_stack.addWidget(self.table_view)
         self.main_stack.addWidget(self.detail_view)
+
+        # Hubungkan perubahan halaman untuk mengatur visibilitas panel file
+        self.main_stack.currentChanged.connect(self._update_panel_visibility)
+        self.dashboard_view.right_stack.currentChanged.connect(self._update_panel_visibility)
         
         # Load daftar file pertama kali (tanpa auto-check link agar tidak mengganggu start-up)
         self.load_file_list(auto_check=True)
@@ -616,3 +620,14 @@ class JobArchivePage(QWidget):
                     )
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Gagal menghapus data: {e}")
+    def _update_panel_visibility(self):
+        """Mengatur visibilitas panel pemilihan file berdasarkan halaman yang aktif."""
+        # Panel hanya terlihat jika main_stack ada di dashboard_view 
+        # DAN right_stack (di dalam dashboard_view) ada di halaman 0 (Pilih Skill)
+        if self.main_stack.currentWidget() == self.dashboard_view:
+            if self.dashboard_view.right_stack.currentIndex() == 0:
+                self.file_selection_panel.setVisible(True)
+            else:
+                self.file_selection_panel.setVisible(False)
+        else:
+            self.file_selection_panel.setVisible(False)

@@ -144,12 +144,11 @@ def cari_pekerjaan_cocok(file_path, selected_skills, selected_job_types=None):
     hasil_pencarian = []
 
     for item in data:
-        # Filter berdasarkan jenis pekerjaan jika ada yang dipilih
+        # Tentukan apakah jenis pekerjaan cocok (jika ada filter)
+        is_type_match = True
         if user_types_set:
             job_type = item.get("Jenis_Pekerjaan", "").lower()
-            # Cek apakah setidaknya satu tipe pilihan user ada di tipe pekerjaan lowongan
-            if not any(t in job_type or job_type in t for t in user_types_set):
-                continue
+            is_type_match = any(t in job_type or job_type in t for t in user_types_set)
 
         raw_skills = item.get("Skills", "")
         job_skills = []
@@ -163,24 +162,24 @@ def cari_pekerjaan_cocok(file_path, selected_skills, selected_job_types=None):
         
         job_skills_set = set(job_skills)
         
-        if not job_skills_set:
-            continue
-
         # Hitung irisan (skill yang cocok)
         matched_skills = user_skills_set.intersection(job_skills_set)
         
         # Persentase kecocokan: (berapa skill user yang ada di lowongan) / (total skill lowongan)
-        persentase = (len(matched_skills) / len(job_skills_set)) * 100
-        
-        # Tambahkan data jika ada kecocokan > 0
-        if persentase > 0:
-            job_data = item.copy()
-            job_data["match_percentage"] = round(persentase, 1)
-            job_data["matched_skills"] = [s for s in job_skills if s.lower() in user_skills_set]
-            hasil_pencarian.append(job_data)
+        if job_skills_set:
+            persentase = (len(matched_skills) / len(job_skills_set)) * 100
+        else:
+            persentase = 0.0
+            
+        # Tambahkan data pekerjaan ke hasil pencarian
+        job_data = item.copy()
+        job_data["match_percentage"] = round(persentase, 1)
+        job_data["matched_skills"] = [s for s in job_skills if s.lower() in user_skills_set]
+        job_data["is_type_match"] = is_type_match
+        hasil_pencarian.append(job_data)
 
-    # Urutkan berdasarkan persentase tertinggi
-    hasil_pencarian.sort(key=lambda x: x["match_percentage"], reverse=True)
+    # Urutkan: 1. Berdasarkan persentase skill, 2. Berdasarkan kecocokan tipe
+    hasil_pencarian.sort(key=lambda x: (x["match_percentage"], x["is_type_match"]), reverse=True)
     return hasil_pencarian
 
 def ambil_insight_pasar(file_path):

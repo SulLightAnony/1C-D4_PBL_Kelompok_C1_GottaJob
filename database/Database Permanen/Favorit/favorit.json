@@ -1,18 +1,18 @@
 {
-    "Judul_Pekerjaan": "Game Developer",
-    "Jenis_Pekerjaan": "Full-time",
-    "Nama_Perusahaan": "PT POV Media Indonesia",
-    "Lokasi": "Jl. Bukit Cemara Indah No.46, Mekarsaluyu, Kec. Cimenyan, Kabupaten Bandung, Jawa Barat 40198",
-    "Rentang_Gaji": "Rp4.000.000/Bulan",
-    "Skills": "Game Design | 3D Modeling | Game Development | Roblox Studio | Lua",
-    "Benefit_Pekerjaan": "THR | BPJS Kesehatan | Transport Money | BPJS Tenaga Kerja",
-    "Kualifikasi_Persyaratan": "Wajib Domisili Bandung (Bersedia bekerja dari kantor/WFO). | Menguasai Roblox Studio secara mendalam. | Hybrid Skill: Memiliki kemampuan kuat di Building (Desain Visual) dan Scripting (Luau). | Nilai plus jika menguasai Blender (untuk Mesh/3D Modeling). | Mampu bekerja mandiri (Solo Dev) dan disiplin dengan deadline. | ⚠️Catatan Penting untuk Pelamar: | Mohon sertakan LINK GAME atau PORTOFOLIO Roblox yang pernah kamu buat di dalam CV atau profil kamu. Lamaran tanpa contoh game yang bisa dimainkan tidak akan diproses.",
-    "Deskripsi_Pekerjaan": "Kami mencari Roblox Game Developer berbakat yang menguasai Building & Scripting sekaligus untuk bergabung dengan tim kami secara Full-time (WFO) di Bandung. Kamu akan bertanggung jawab penuh dalam menciptakan dunia game yang imersif dan fungsional.\nMerancang dan membangun Map/Environment yang detail, estetik, dan rapi di Roblox Studio.\nMenulis script (Luau) untuk mekanik game, UI/UX, sistem data (DataStore), dan interaksi pemain.\nMelakukan optimasi aset dan script agar game berjalan lancar (anti-lag) di berbagai perangkat.\nBekerja sama dengan manajemen untuk merealisasikan konsep game menjadi produk jadi.",
-    "Link_Lowongan": "https://glints.com/id/opportunities/jobs/game-developer/bcc6909e-a3cf-4ce7-8c26-3b1d28267cc6",
-    "match_percentage": 40.0,
+    "Judul_Pekerjaan": "Web Developer Intern",
+    "Jenis_Pekerjaan": "magang",
+    "Nama_Perusahaan": "MarviO",
+    "Lokasi": "Jl. Danau Beratan VI, No. 2A, Jimbaran, Kuta Selatan",
+    "Rentang_Gaji": "Rp700.000 - 750.000/Bulan",
+    "Skills": "Network Troubleshooting | Java | Node.js | Python | Technical Support | Teamwork | C++ | PHP | PostgreSQL | Laravel | Microsoft SQL Server | Help Desk | IT Support | Time Management | MongoDB | MySQL | Troubleshooting",
+    "Benefit_Pekerjaan": "Career Path | Training/Certification",
+    "Kualifikasi_Persyaratan": "Mahasiswa / siswa jurusan RPL / Informatika / TI / Sistem Informasi | Paham dasar pemrograman (HTML, CSS, JS / PHP / Python menjadi nilai plus) | Mau belajar & cepat beradaptasi",
+    "Deskripsi_Pekerjaan": "Note : Nominal uang saku yang tercantum merupakan estimasi dan bersifat tentatif. Besaran yang diterima dapat menyesuaikan kebijakan perusahaan serta ketentuan yang berlaku.\nMembantu pengembangan website & aplikasi\nMaintenance sistem dan testing aplikasi\nUpdate konten website / landing page\nMembantu proses debugging & troubleshooting\nSupport tim IT / developer\nDokumentasi pekerjaan teknis sederhana\nBelajar implementasi project real\nBersedia kerja onsite (di utamakan wilayah Bali)\nMemiliki laptop pribadi\nSiap magang minimal 3 bulan",
+    "Link_Lowongan": "https://glints.com/id/opportunities/jobs/web-developer-intern/0d2a78e0-115b-4118-b78b-afe94de10dff",
+    "match_percentage": 11.8,
     "matched_skills": [
-        "3d modeling",
-        "game development"
+        "postgresql",
+        "mongodb"
     ],
-    "source_file": "C:\\Users\\farre\\OneDrive\\Dokumen\\GitHub\\1C-D4_PBL_Kelompok_C1_GottaJob\\database\\Database Permanen\\Job Archive\\game_developer.json"
+    "source_file": "C:\\Users\\farre\\OneDrive\\Dokumen\\GitHub\\1C-D4_PBL_Kelompok_C1_GottaJob\\database\\Database Permanen\\Job Archive\\web_developer.json"
 }
