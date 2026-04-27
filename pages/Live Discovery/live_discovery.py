@@ -28,7 +28,7 @@ if db_mod_dir not in sys.path:
 from modul_visualisasi_data import PieChartWidget
 from modul_antarmuka_pengguna import JobMatchResultContainer, JobDetailPanel, JobDashboardWidget
 from modul_database import (simpan_ke_database_sementara, simpan_ke_database_permanen, 
-                            bersihkan_database_sementara, set_favorit, get_favorit)
+                            bersihkan_database_sementara, set_favorit, get_favorit, catat_aktivitas)
 
 # ─────────────────────────────────────────────────────────────
 # Worker: jalankan scraper di thread terpisah agar UI tidak freeze
@@ -207,6 +207,8 @@ QFrame#PanelCard {
 
 
 class LiveDiscoveryPage(QWidget):
+    favorite_changed = pyqtSignal()
+
     def __init__(self):
         super().__init__()
         self.setObjectName("LiveDiscoveryPage")
@@ -383,6 +385,8 @@ class LiveDiscoveryPage(QWidget):
                 with open(file_path, "r", encoding="utf-8") as f:
                     total_jobs = len(json.load(f))
                 
+                catat_aktivitas(f"<b>Live Discovery Selesai</b><br>{os.path.basename(file_path).replace('.json', '')} · {total_jobs} hasil")
+
                 unique_types = ambil_jenis_pekerjaan_unik(file_path)
                 
                 total_unique_skills = sum(len(skills) for skills in hasil.values())
@@ -477,6 +481,8 @@ class LiveDiscoveryPage(QWidget):
                 self, "Berhasil", 
                 f"Lowongan '{job_data.get('Judul_Pekerjaan')}' berhasil disimpan secara permanen ke Job Archive!"
             )
+            catat_aktivitas(f"<b>Lowongan disimpan</b><br>{job_data.get('Nama_Perusahaan')}")
+            self.favorite_changed.emit()
         else:
             QMessageBox.warning(self, "Gagal", "Gagal menyimpan lowongan secara permanen.")
 
@@ -495,12 +501,16 @@ class LiveDiscoveryPage(QWidget):
 
         # 2. Simpan ke database permanen (Otomatis)
         if self.last_scraped_file:
-            simpan_ke_database_permanen(job_data, self.last_scraped_file)
-        
+            path_saved = simpan_ke_database_permanen(job_data, self.last_scraped_file)
+            job_data["source_file"] = path_saved if isinstance(path_saved, str) and path_saved != "DUPLICATE" else None
+
         # 3. Set sebagai favorit utama
         if set_favorit(job_data):
             QMessageBox.information(self, "Berhasil", f"'{job_data.get('Judul_Pekerjaan')}' sekarang menjadi favorit utama Anda!")
             
+            catat_aktivitas(f"<b>Pekerjaan Favorit Diganti</b><br>{job_data.get('Judul_Pekerjaan')}")
+            self.favorite_changed.emit()
+
             # 4. Refresh tabel untuk mengubah warna tombol
             self.match_results.set_data(
                 self.current_matches, 

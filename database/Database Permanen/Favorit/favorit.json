@@ -1,17 +1,18 @@
 {
-    "Judul_Pekerjaan": "Unity WebGL Game Developer (TikTok Mini Game)",
+    "Judul_Pekerjaan": "Game Developer",
     "Jenis_Pekerjaan": "Full-time",
-    "Nama_Perusahaan": "FMTPLA",
-    "Lokasi": "Sleman",
-    "Rentang_Gaji": "Rp10.000.000 - 12.000.000/Bulan",
-    "Skills": "Unity3D | Game Development | C#",
-    "Benefit_Pekerjaan": "Career Path",
-    "Kualifikasi_Persyaratan": "Remote/Dari rumah | 1 - 3 tahun pengalaman | Minimal Diploma (D1 - D4)",
-    "Deskripsi_Pekerjaan": "Deskripsi pekerjaan Unity WebGL Game Developer (TikTok Mini Game) FMTPLA\nWe’re looking for a Unity developer to build a lightweight WebGL game designed for TikTok.\nThis is not a traditional mobile app.\nNo App Store / Google Play release, no heavy backend, no complex systems.\nThe goal is simple:\n👉 Build a fast, addictive, hyper-casual game that runs smoothly in a WebGL environment and fits TikTok usage (short sessions, instant play, high retention).\n⸻\nScope\nDevelop a Unity-based WebGL game\nOptimize for performance, low build size, and mobile browsers\nImplement simple game mechanics (arcade / puzzle / reaction-based)\nEnsure smooth touch controls and responsiveness\nIntegrate basic SDK elements if needed (TikTok environment)\n⸻\nWhat we don’t need\nNo App Store submission\nNo complex UI systems\nNo heavy multiplayer/backend\nNo overengineering\nIf you tend to overbuild → this is not for you.\n⸻\nWhat we’re looking for\nStrong experience with Unity + WebGL builds\nAbility to create simple but highly engaging gameplay loops\nGood understanding of mobile performance constraints\nFast execution and iteration mindset\n⸻\nProject type\nFull-time\nImmediate start\nPotential for long-term collaboration if it performs\n⸻\nHow to apply\nMandatory:\nSend your portfolio of games (live links preferred).\nIf you don’t have playable examples → don’t apply",
-    "Link_Lowongan": "https://glints.com/id/opportunities/jobs/unity-webgl-game-developer-tiktok-mini-game/3655fdee-9195-45ca-847a-8034caae5883",
-    "match_percentage": 66.7,
+    "Nama_Perusahaan": "PT POV Media Indonesia",
+    "Lokasi": "Jl. Bukit Cemara Indah No.46, Mekarsaluyu, Kec. Cimenyan, Kabupaten Bandung, Jawa Barat 40198",
+    "Rentang_Gaji": "Rp4.000.000/Bulan",
+    "Skills": "Game Design | 3D Modeling | Game Development | Roblox Studio | Lua",
+    "Benefit_Pekerjaan": "THR | BPJS Kesehatan | Transport Money | BPJS Tenaga Kerja",
+    "Kualifikasi_Persyaratan": "Wajib Domisili Bandung (Bersedia bekerja dari kantor/WFO). | Menguasai Roblox Studio secara mendalam. | Hybrid Skill: Memiliki kemampuan kuat di Building (Desain Visual) dan Scripting (Luau). | Nilai plus jika menguasai Blender (untuk Mesh/3D Modeling). | Mampu bekerja mandiri (Solo Dev) dan disiplin dengan deadline. | ⚠️Catatan Penting untuk Pelamar: | Mohon sertakan LINK GAME atau PORTOFOLIO Roblox yang pernah kamu buat di dalam CV atau profil kamu. Lamaran tanpa contoh game yang bisa dimainkan tidak akan diproses.",
+    "Deskripsi_Pekerjaan": "Kami mencari Roblox Game Developer berbakat yang menguasai Building & Scripting sekaligus untuk bergabung dengan tim kami secara Full-time (WFO) di Bandung. Kamu akan bertanggung jawab penuh dalam menciptakan dunia game yang imersif dan fungsional.\nMerancang dan membangun Map/Environment yang detail, estetik, dan rapi di Roblox Studio.\nMenulis script (Luau) untuk mekanik game, UI/UX, sistem data (DataStore), dan interaksi pemain.\nMelakukan optimasi aset dan script agar game berjalan lancar (anti-lag) di berbagai perangkat.\nBekerja sama dengan manajemen untuk merealisasikan konsep game menjadi produk jadi.",
+    "Link_Lowongan": "https://glints.com/id/opportunities/jobs/game-developer/bcc6909e-a3cf-4ce7-8c26-3b1d28267cc6",
+    "match_percentage": 40.0,
     "matched_skills": [
-        "game development",
-        "c#"
-    ]
+        "3d modeling",
+        "game development"
+    ],
+    "source_file": "C:\\Users\\farre\\OneDrive\\Dokumen\\GitHub\\1C-D4_PBL_Kelompok_C1_GottaJob\\database\\Database Permanen\\Job Archive\\game_developer.json"
 }

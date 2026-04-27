@@ -111,6 +111,7 @@ class JobDashboardWidget(QWidget):
             QListWidget::indicator:checked { background-color: #2C687B; border: 2px solid #2C687B; }
         """
         self.skill_list.setStyleSheet(list_style)
+        self.skill_list.itemClicked.connect(self._toggle_item_check)
         self.skill_list.itemDoubleClicked.connect(self._toggle_item_check)
         page_skill_lay.addWidget(self.skill_list, stretch=1)
         page_skill_lay.addSpacing(15)
@@ -158,6 +159,7 @@ class JobDashboardWidget(QWidget):
         
         self.job_type_list = QListWidget()
         self.job_type_list.setStyleSheet(list_style)
+        self.job_type_list.itemClicked.connect(self._toggle_item_check)
         self.job_type_list.itemDoubleClicked.connect(self._toggle_item_check)
         page_type_lay.addWidget(self.job_type_list, stretch=1)
         page_type_lay.addSpacing(15)

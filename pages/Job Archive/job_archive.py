@@ -148,7 +148,7 @@ if process_dir not in sys.path:
 
 from modul_visualisasi_data import PieChartWidget
 from modul_pengolahan_data import hitung_persentase_skill, cari_pekerjaan_cocok, ambil_jenis_pekerjaan_unik
-from modul_database import get_database_permanen_dir, set_favorit, get_favorit
+from modul_database import get_database_permanen_dir, set_favorit, get_favorit, catat_aktivitas
 from modul_antarmuka_pengguna import JobMatchResultContainer, JobDetailPanel, JobDashboardWidget
 
 # ─────────────────────────────────────────────────────────────
@@ -221,6 +221,8 @@ QPushButton:hover {
 """.replace("__ICON_PATH__", icon_path)
 
 class JobArchivePage(QWidget):
+    favorite_changed = pyqtSignal()
+
     def __init__(self):
         super().__init__()
         self.setObjectName("JobArchivePage")
@@ -422,6 +424,7 @@ class JobArchivePage(QWidget):
                         json.dump(new_data, f, ensure_ascii=False, indent=4)
             
             QMessageBox.information(self, "Berhasil", f"Berhasil menghapus {total_deleted} lowongan kadaluarsa.")
+            self.favorite_changed.emit()
             self.load_file_list(auto_check=True)
 
     def _on_file_selected(self, index):
@@ -527,9 +530,18 @@ class JobArchivePage(QWidget):
             if res == QMessageBox.No:
                 return
 
+        # Tambahkan informasi file asal agar Dashboard tahu arsip mana yang harus dibaca
+        job_data["source_file"] = self.current_file
+
         if set_favorit(job_data):
             QMessageBox.information(self, "Berhasil", f"'{job_data.get('Judul_Pekerjaan')}' sekarang menjadi favorit utama Anda!")
             
+            # Catat aktivitas
+            catat_aktivitas(f"<b>Pekerjaan Favorit Diganti</b><br>{job_data.get('Judul_Pekerjaan')}")
+
+            # Emit signal agar dashboard bisa refresh
+            self.favorite_changed.emit()
+
             # Refresh tabel
             self.match_results.set_data(
                 self.current_matches, 
@@ -572,6 +584,7 @@ class JobArchivePage(QWidget):
             if not new_data:
                 os.remove(self.current_file)
                 QMessageBox.information(self, "Berhasil", "Data terakhir dihapus, file arsip dibersihkan.")
+                catat_aktivitas(f"<b>Arsip Dihapus</b><br>{os.path.basename(self.current_file)}")
                 self.load_file_list(auto_check=True)
                 self.main_stack.setCurrentWidget(self.dashboard_view)
             else:
@@ -579,7 +592,11 @@ class JobArchivePage(QWidget):
                     json.dump(new_data, f, ensure_ascii=False, indent=4)
                 
                 QMessageBox.information(self, "Berhasil", "Pekerjaan berhasil dihapus dari arsip.")
+                catat_aktivitas(f"<b>Lowongan Dihapus</b><br>{job_data.get('Judul_Pekerjaan')}")
                 
+                # Emit signal agar dashboard bisa refresh (tren skill mungkin berubah)
+                self.favorite_changed.emit()
+
                 # 4. Refresh tampilan tabel
                 # Update current_matches list
                 self.current_matches = [m for m in self.current_matches if m.get("Link_Lowongan") != target_link]

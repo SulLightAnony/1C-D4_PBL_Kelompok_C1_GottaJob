@@ -76,7 +76,7 @@ def hitung_persentase_skill(file_path):
         all_skills = []
         lines = raw_skills.split("\n")
         for line in lines:
-            parts = line.split(" | ")
+            parts = line.split("|")
             for p in parts:
                 cleaned = p.strip()
                 if cleaned and cleaned != "-":
@@ -155,7 +155,7 @@ def cari_pekerjaan_cocok(file_path, selected_skills, selected_job_types=None):
         job_skills = []
         lines = raw_skills.split("\n")
         for line in lines:
-            parts = line.split(" | ")
+            parts = line.split("|")
             for p in parts:
                 cleaned = p.strip()
                 if cleaned and cleaned != "-":
@@ -181,5 +181,84 @@ def cari_pekerjaan_cocok(file_path, selected_skills, selected_job_types=None):
 
     # Urutkan berdasarkan persentase tertinggi
     hasil_pencarian.sort(key=lambda x: x["match_percentage"], reverse=True)
-    
     return hasil_pencarian
+
+def ambil_insight_pasar(file_path):
+    """
+    Menghasilkan teks insight pasar (skill dominan, status kontrak, dan rata-rata gaji)
+    berdasarkan data dalam file JSON.
+    """
+    if not os.path.exists(file_path):
+        return None
+
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            all_jobs = json.load(f)
+        
+        if not all_jobs:
+            return None
+
+        # 1. Insight Skill
+        teks_insight = "Belum ada tren skill yang terdeteksi."
+        hasil_stats = hitung_persentase_skill(file_path)
+        if hasil_stats:
+            persentase_top = list(hasil_stats.keys())[0]
+            skill_top = " & ".join(hasil_stats[persentase_top][:2])
+            teks_insight = f"{skill_top} mendominasi {persentase_top}% lowongan — Skill ini paling banyak dicari perusahaan."
+
+        # 2. Insight Kontrak
+        teks_kontrak = "Data status pekerjaan belum tersedia."
+        status_list = [j.get("Jenis_Pekerjaan", "Full-time") for j in all_jobs]
+        most_common_status_list = Counter(status_list).most_common(1)
+        if most_common_status_list:
+            most_common_status = most_common_status_list[0][0]
+            teks_kontrak = f"Mayoritas posisi berstatus {most_common_status}."
+
+        # 3. Insight Gaji
+        teks_gaji = "Informasi gaji belum tersedia."
+        import re
+        gaji_list = []
+        for j in all_jobs:
+            gaji_str = j.get("Rentang_Gaji", "")
+            # Bersihkan titik dan ambil angka
+            angka = re.findall(r'\d+', gaji_str.replace('.', ''))
+            if angka:
+                rata_rata_job = sum(map(int, angka)) / len(angka)
+                gaji_list.append(rata_rata_job)
+        
+        if gaji_list:
+            avg_gaji = sum(gaji_list) / len(gaji_list)
+            teks_gaji = f"Gaji rata-rata sekitar Rp {avg_gaji/1_000_000:.1f} jt/bulan berdasarkan data lowongan yang tersedia."
+
+        return {
+            "skill": teks_insight,
+            "kontrak": teks_kontrak,
+            "gaji": teks_gaji
+        }
+    except Exception as e:
+        print(f"Error ambil_insight_pasar: {e}")
+        return None
+
+def ambil_top_skills(file_path, limit=5):
+    """
+    Mengambil N skill teratas berdasarkan persentase kemunculannya.
+    Mengembalikan list of tuple: [(skill_name, persentase), ...]
+    """
+    hasil_stats = hitung_persentase_skill(file_path)
+    if not hasil_stats:
+        return []
+
+    top_skills = []
+    count = 0
+    # hasil_stats sudah terurut berdasarkan persentase (keys) dari yang terbesar
+    for persentase in hasil_stats.keys():
+        for skill_name in hasil_stats[persentase]:
+            if count < limit:
+                top_skills.append((skill_name, int(float(persentase))))
+                count += 1
+            else:
+                break
+        if count >= limit:
+            break
+            
+    return top_skills
