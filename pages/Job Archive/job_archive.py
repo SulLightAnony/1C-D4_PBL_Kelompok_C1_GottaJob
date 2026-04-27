@@ -147,7 +147,7 @@ if process_dir not in sys.path:
     sys.path.insert(0, process_dir)
 
 from modul_visualisasi_data import PieChartWidget
-from modul_pengolahan_data import hitung_persentase_skill, cari_pekerjaan_cocok
+from modul_pengolahan_data import hitung_persentase_skill, cari_pekerjaan_cocok, ambil_jenis_pekerjaan_unik
 from modul_database import get_database_permanen_dir, set_favorit, get_favorit
 from modul_antarmuka_pengguna import JobMatchResultContainer, JobDetailPanel, JobDashboardWidget
 
@@ -447,6 +447,9 @@ class JobArchivePage(QWidget):
                 
                 total_jobs = len(data_json)
                 total_skills = sum(len(s) for s in hasil_olah.values())
+                
+                unique_types = ambil_jenis_pekerjaan_unik(file_path)
+                        
                 max_p = max(hasil_olah.keys())
                 dominant_skill = hasil_olah[max_p][0]
                 
@@ -463,6 +466,13 @@ class JobArchivePage(QWidget):
                     item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
                     item.setCheckState(Qt.Unchecked)
                     self.skill_list.addItem(item)
+                    
+                self.dashboard_view.job_type_list.clear()
+                for jt in unique_types:
+                    item = QListWidgetItem(jt)
+                    item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
+                    item.setCheckState(Qt.Unchecked)
+                    self.dashboard_view.job_type_list.addItem(item)
             else:
                 self.chart.set_data({})
         except Exception as e:
@@ -479,8 +489,14 @@ class JobArchivePage(QWidget):
             QMessageBox.warning(self, "Peringatan", "Pilih minimal satu skill.")
             return
 
+        selected_job_types = []
+        for i in range(self.dashboard_view.job_type_list.count()):
+            item = self.dashboard_view.job_type_list.item(i)
+            if item.checkState() == Qt.Checked:
+                selected_job_types.append(item.text())
+
         self.user_skills = [s.lower() for s in selected]
-        hasil = cari_pekerjaan_cocok(self.current_file, selected)
+        hasil = cari_pekerjaan_cocok(self.current_file, selected, selected_job_types)
         
         if not hasil:
             QMessageBox.information(self, "Info", "Tidak ada kecocokan.")
@@ -582,4 +598,4 @@ class JobArchivePage(QWidget):
                         fav_link=fav_link
                     )
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Gagal menghapus data: {e}")
+            QMessageBox.critical(self, "Error", f"Gagal menghapus data: {e}")

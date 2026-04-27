@@ -67,6 +67,7 @@ class ScraperWorker(QObject):
         )
         DB_DIR = os.path.join(ROOT_DIR, "database")
         os.makedirs(DB_DIR, exist_ok=True)
+        search_icon_path = os.path.join(ROOT_DIR, "assets", "live discovery", "search.png").replace("\\", "/")
 
         global_seen_links  = set()
         data_bersih_unik   = []
@@ -79,7 +80,7 @@ class ScraperWorker(QObject):
         try:
             for idx, kw in enumerate(self.keywords):
                 page_num = self.pages[idx]
-                self.log_signal.emit(f"\n🔍 Keyword [{idx+1}/{len(self.keywords)}]: {kw.upper()} (Page {page_num})")
+                self.log_signal.emit(f"<img src='{search_icon_path}' width='14' height='14'> Keyword [{idx+1}/{len(self.keywords)}]: {kw.upper()} (Page {page_num})")
                 hasil = mesin.scrape_keyword(kw, page=page_num)
 
                 relevan, jml_buang = filter_relevan(hasil, kw)
@@ -373,13 +374,16 @@ class LiveDiscoveryPage(QWidget):
             return
             
         try:
-            from modul_pengolahan_data import hitung_persentase_skill
+            from modul_pengolahan_data import hitung_persentase_skill, ambil_jenis_pekerjaan_unik
             self.last_scraped_file = file_path
             
             hasil = hitung_persentase_skill(file_path)
             if hasil:
+                total_jobs = 0
                 with open(file_path, "r", encoding="utf-8") as f:
                     total_jobs = len(json.load(f))
+                
+                unique_types = ambil_jenis_pekerjaan_unik(file_path)
                 
                 total_unique_skills = sum(len(skills) for skills in hasil.values())
                 max_perc = max(hasil.keys())
@@ -401,6 +405,13 @@ class LiveDiscoveryPage(QWidget):
                     item.setCheckState(Qt.Unchecked)
                     self.skill_list.addItem(item)
                 
+                self.dashboard_view.job_type_list.clear()
+                for jt in unique_types:
+                    item = QListWidgetItem(jt)
+                    item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
+                    item.setCheckState(Qt.Unchecked)
+                    self.dashboard_view.job_type_list.addItem(item)
+                
                 self.main_stack.setCurrentWidget(self.dashboard_view)
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Gagal mengolah data: {e}")
@@ -421,10 +432,16 @@ class LiveDiscoveryPage(QWidget):
             QMessageBox.warning(self, "Peringatan", "Pilih minimal satu skill.")
             return
 
+        selected_job_types = []
+        for i in range(self.dashboard_view.job_type_list.count()):
+            item = self.dashboard_view.job_type_list.item(i)
+            if item.checkState() == Qt.Checked:
+                selected_job_types.append(item.text())
+
         self.user_selected_skills = [s.lower() for s in selected_skills]
         try:
             from modul_pengolahan_data import cari_pekerjaan_cocok
-            hasil = cari_pekerjaan_cocok(self.last_scraped_file, selected_skills)
+            hasil = cari_pekerjaan_cocok(self.last_scraped_file, selected_skills, selected_job_types)
             if not hasil:
                 QMessageBox.information(self, "Informasi", "Tidak ada pekerjaan yang cocok.")
                 return

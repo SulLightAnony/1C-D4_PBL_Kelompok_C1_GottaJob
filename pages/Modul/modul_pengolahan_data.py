@@ -103,10 +103,30 @@ def hitung_persentase_skill(file_path):
 
     return hasil_final
 
-def cari_pekerjaan_cocok(file_path, selected_skills):
+def ambil_jenis_pekerjaan_unik(file_path):
+    """
+    Mengambil daftar jenis pekerjaan unik dari file JSON,
+    dengan normalisasi casing agar tidak ada duplikat.
+    """
+    if not os.path.exists(file_path):
+        return []
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    unique_types = set()
+    for item in data:
+        t = item.get("Jenis_Pekerjaan", "").strip()
+        if t and t != "-":
+            # Normalisasi ke Title Case agar 'magang' dan 'Magang' jadi satu
+            unique_types.add(t.title())
+            
+    return sorted(list(unique_types))
+
+def cari_pekerjaan_cocok(file_path, selected_skills, selected_job_types=None):
     """
     Mencari pekerjaan yang memiliki kecocokan skill paling tinggi 
-    dengan list skill yang dipilih user.
+    dengan list skill yang dipilih user dan tipe pekerjaan opsional.
     """
     if not os.path.exists(file_path) or not selected_skills:
         return []
@@ -115,9 +135,22 @@ def cari_pekerjaan_cocok(file_path, selected_skills):
         data = json.load(f)
 
     user_skills_set = set(s.lower() for s in selected_skills)
+    
+    if selected_job_types:
+        user_types_set = set(t.lower() for t in selected_job_types)
+    else:
+        user_types_set = set()
+
     hasil_pencarian = []
 
     for item in data:
+        # Filter berdasarkan jenis pekerjaan jika ada yang dipilih
+        if user_types_set:
+            job_type = item.get("Jenis_Pekerjaan", "").lower()
+            # Cek apakah setidaknya satu tipe pilihan user ada di tipe pekerjaan lowongan
+            if not any(t in job_type or job_type in t for t in user_types_set):
+                continue
+
         raw_skills = item.get("Skills", "")
         job_skills = []
         lines = raw_skills.split("\n")
@@ -137,8 +170,6 @@ def cari_pekerjaan_cocok(file_path, selected_skills):
         matched_skills = user_skills_set.intersection(job_skills_set)
         
         # Persentase kecocokan: (berapa skill user yang ada di lowongan) / (total skill lowongan)
-        # Atau (berapa skill user yang ada di lowongan) / (total skill terpilih)
-        # Kita pakai: (skill yang cocok) / (total skill yang dibutuhkan lowongan tersebut)
         persentase = (len(matched_skills) / len(job_skills_set)) * 100
         
         # Tambahkan data jika ada kecocokan > 0

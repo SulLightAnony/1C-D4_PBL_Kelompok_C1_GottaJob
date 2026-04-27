@@ -77,52 +77,92 @@ class JobDashboardWidget(QWidget):
         left_container.addWidget(chart_card, stretch=1)
         main_layout.addLayout(left_container, stretch=2)
 
-        # ── KANAN: Daftar Skill (Full Height) ──
+        # ── KANAN: Daftar Skill & Job Type (Full Height) ──
         right_panel = QFrame()
         right_panel.setObjectName("PanelCard")
         right_lay = QVBoxLayout(right_panel)
-        right_lay.setContentsMargins(20, 20, 20, 20)
+        right_lay.setContentsMargins(0, 0, 0, 0)
+        
+        self.right_stack = QStackedWidget()
+        
+        # --- PAGE 1: SKILL LIST ---
+        page_skill = QWidget()
+        page_skill_lay = QVBoxLayout(page_skill)
+        page_skill_lay.setContentsMargins(20, 20, 20, 20)
         
         right_title = QLabel("Daftar Skill Pekerjaan", alignment=Qt.AlignCenter)
         right_title.setStyleSheet("font-size: 16px; font-weight: bold; color: #2C687B; background-color: transparent;")
-        right_lay.addWidget(right_title)
-        right_lay.addSpacing(15)
+        page_skill_lay.addWidget(right_title)
+        page_skill_lay.addSpacing(15)
         
         self.skill_list = QListWidget()
-        self.skill_list.setStyleSheet("""
+        list_style = """
             QListWidget { 
-                border: none; 
-                background-color: #F7FBFC; 
-                border-radius: 8px; 
-                font-size: 14px;
-                color: #1E3A4A;
+                border: none; background-color: #F7FBFC; border-radius: 8px; font-size: 14px; color: #1E3A4A;
             }
-            QListWidget::item { 
-                padding: 10px; 
-                border-bottom: 1px solid #E0E7EF; 
-                color: #1E3A4A;
-            }
-            QListWidget::item:hover {
-                background-color: #EBF4F6;
-            }
-            QListWidget::item:selected {
-                background-color: #E2EFF1;
-                color: #2C687B;
-                border-left: 4px solid #2C687B;
-            }
+            QListWidget::item { padding: 10px; border-bottom: 1px solid #E0E7EF; color: #1E3A4A; }
+            QListWidget::item:hover { background-color: #EBF4F6; }
+            QListWidget::item:selected { background-color: #E2EFF1; color: #2C687B; border-left: 4px solid #2C687B; }
             QScrollBar:vertical { border: none; background: #F3F4F6; width: 8px; border-radius: 4px; }
             QScrollBar::handle:vertical { background: #B2D2D9; border-radius: 4px; }
             QScrollBar:horizontal { border: none; background: #F3F4F6; height: 8px; border-radius: 4px; }
             QScrollBar::handle:horizontal { background: #B2D2D9; border-radius: 4px; }
             QListWidget::indicator { width: 18px; height: 18px; border: 2px solid #B2D2D9; border-radius: 4px; background-color: white; }
             QListWidget::indicator:checked { background-color: #2C687B; border: 2px solid #2C687B; }
-        """)
+        """
+        self.skill_list.setStyleSheet(list_style)
         self.skill_list.itemDoubleClicked.connect(self._toggle_item_check)
-        right_lay.addWidget(self.skill_list, stretch=1)
-        right_lay.addSpacing(15)
+        page_skill_lay.addWidget(self.skill_list, stretch=1)
+        page_skill_lay.addSpacing(15)
+        
+        self.btn_next_job_type = QPushButton(" Pilih jenis pekerjaan")
+        base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        self.btn_next_job_type.setCursor(Qt.PointingHandCursor)
+        self.btn_next_job_type.setStyleSheet("""
+            QPushButton {
+                background-color: #2C687B; color: white;
+                font-size: 14px; font-weight: bold;
+                border-radius: 8px; padding: 10px;
+            }
+            QPushButton:hover { background-color: #3B7C91; }
+        """)
+        self.btn_next_job_type.clicked.connect(lambda: self.right_stack.setCurrentIndex(1))
+        page_skill_lay.addWidget(self.btn_next_job_type)
+        self.right_stack.addWidget(page_skill)
+        
+        # --- PAGE 2: JOB TYPE LIST ---
+        page_type = QWidget()
+        page_type_lay = QVBoxLayout(page_type)
+        page_type_lay.setContentsMargins(20, 20, 20, 20)
+        
+        header_type_lay = QHBoxLayout()
+        btn_back_skill = QPushButton("← Kembali")
+        btn_back_skill.setCursor(Qt.PointingHandCursor)
+        btn_back_skill.setStyleSheet("""
+            QPushButton {
+                background-color: transparent; color: #2C687B;
+                font-size: 14px; font-weight: bold;
+                border: 1px solid #2C687B; border-radius: 6px; padding: 5px 15px;
+            }
+            QPushButton:hover { background-color: #E2EFF1; }
+        """)
+        btn_back_skill.clicked.connect(lambda: self.right_stack.setCurrentIndex(0))
+        header_type_lay.addWidget(btn_back_skill)
+        
+        type_title = QLabel("Tipe Pekerjaan")
+        type_title.setStyleSheet("font-size: 16px; font-weight: bold; color: #2C687B; background-color: transparent;")
+        header_type_lay.addWidget(type_title, stretch=1, alignment=Qt.AlignCenter)
+        header_type_lay.addSpacing(70) # balance for the wider back button
+        page_type_lay.addLayout(header_type_lay)
+        page_type_lay.addSpacing(15)
+        
+        self.job_type_list = QListWidget()
+        self.job_type_list.setStyleSheet(list_style)
+        self.job_type_list.itemDoubleClicked.connect(self._toggle_item_check)
+        page_type_lay.addWidget(self.job_type_list, stretch=1)
+        page_type_lay.addSpacing(15)
         
         self.btn_find_match = QPushButton(" Cari pekerjaan yang cocok")
-        base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         search_icon_path = os.path.join(base_path, 'assets', 'Job Archive', 'search.png')
         self.btn_find_match.setIcon(QIcon(search_icon_path))
         self.btn_find_match.setIconSize(QSize(18, 18))
@@ -136,8 +176,10 @@ class JobDashboardWidget(QWidget):
             QPushButton:hover { background-color: #3B7C91; }
         """)
         self.btn_find_match.clicked.connect(self.find_match_clicked.emit)
-        right_lay.addWidget(self.btn_find_match)
+        page_type_lay.addWidget(self.btn_find_match)
+        self.right_stack.addWidget(page_type)
         
+        right_lay.addWidget(self.right_stack)
         main_layout.addWidget(right_panel, stretch=1)
 
     def update_stats(self, total_jobs, total_skills, dominant_skill):
@@ -340,10 +382,11 @@ class JobMatchTable(QTableWidget):
         super().__init__(parent)
         self.setColumnCount(4)
         self.setHorizontalHeaderLabels(["Judul Pekerjaan", "Perusahaan", "Kecocokan", "Aksi"])
-        self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
         self.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
         self.horizontalHeader().setSectionResizeMode(3, QHeaderView.Fixed)
-        self.setColumnWidth(3, 300)
+        self.setColumnWidth(3, 245)
         self.verticalHeader().setDefaultSectionSize(70)
         self.verticalHeader().setVisible(False)
         self.setShowGrid(False)
@@ -411,6 +454,13 @@ class JobMatchTable(QTableWidget):
         else:
             self.setColumnHidden(3, False)
 
+        # Setup icon paths once
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        root_dir = os.path.dirname(os.path.dirname(current_dir))
+        save_icon_path = os.path.join(root_dir, "assets", "modul", "save.png")
+        star_icon_path = os.path.join(root_dir, "assets", "modul", "star.png")
+        delete_icon_path = os.path.join(root_dir, "assets", "modul", "delete.png")
+
         for row, data in enumerate(hasil):
             # 1. Judul Pekerjaan
             self.setItem(row, 0, QTableWidgetItem(data.get("Judul_Pekerjaan", "-")))
@@ -444,13 +494,14 @@ class JobMatchTable(QTableWidget):
             btn_widget = QWidget()
             btn_widget.setStyleSheet("background-color: transparent;")
             btn_lay = QHBoxLayout(btn_widget)
-            btn_lay.setContentsMargins(70, 0, 0, 0)
+            btn_lay.setContentsMargins(10, 0, 10, 0)
             btn_lay.setSpacing(10)
             btn_lay.setAlignment(Qt.AlignCenter)
             
             # 4. Tombol Simpan
             if show_save:
-                btn_save = QPushButton("💾 Simpan")
+                btn_save = QPushButton(" Simpan")
+                btn_save.setIcon(QIcon(save_icon_path))
                 btn_save.setCursor(Qt.PointingHandCursor)
                 btn_save.setStyleSheet("""
                     QPushButton {
@@ -466,7 +517,8 @@ class JobMatchTable(QTableWidget):
             # 5. Tombol Favorit
             if show_favorite:
                 is_fav = (fav_link == data.get("Link_Lowongan"))
-                btn_fav = QPushButton("⭐ Terfavorit" if is_fav else "⭐ Favorit")
+                btn_fav = QPushButton(" Terfavorit" if is_fav else " Favorit")
+                btn_fav.setIcon(QIcon(star_icon_path))
                 btn_fav.setCursor(Qt.PointingHandCursor)
                 
                 if is_fav:
@@ -493,7 +545,8 @@ class JobMatchTable(QTableWidget):
 
             # 6. Tombol Hapus
             if show_delete:
-                btn_del = QPushButton("🗑️ Hapus")
+                btn_del = QPushButton(" Hapus")
+                btn_del.setIcon(QIcon(delete_icon_path))
                 btn_del.setCursor(Qt.PointingHandCursor)
                 btn_del.setStyleSheet("""
                     QPushButton {

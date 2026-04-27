@@ -9,9 +9,8 @@
     "Kualifikasi_Persyaratan": "Remote/Dari rumah | 1 - 3 tahun pengalaman | Minimal Diploma (D1 - D4)",
     "Deskripsi_Pekerjaan": "Deskripsi pekerjaan Unity WebGL Game Developer (TikTok Mini Game) FMTPLA\nWe’re looking for a Unity developer to build a lightweight WebGL game designed for TikTok.\nThis is not a traditional mobile app.\nNo App Store / Google Play release, no heavy backend, no complex systems.\nThe goal is simple:\n👉 Build a fast, addictive, hyper-casual game that runs smoothly in a WebGL environment and fits TikTok usage (short sessions, instant play, high retention).\n⸻\nScope\nDevelop a Unity-based WebGL game\nOptimize for performance, low build size, and mobile browsers\nImplement simple game mechanics (arcade / puzzle / reaction-based)\nEnsure smooth touch controls and responsiveness\nIntegrate basic SDK elements if needed (TikTok environment)\n⸻\nWhat we don’t need\nNo App Store submission\nNo complex UI systems\nNo heavy multiplayer/backend\nNo overengineering\nIf you tend to overbuild → this is not for you.\n⸻\nWhat we’re looking for\nStrong experience with Unity + WebGL builds\nAbility to create simple but highly engaging gameplay loops\nGood understanding of mobile performance constraints\nFast execution and iteration mindset\n⸻\nProject type\nFull-time\nImmediate start\nPotential for long-term collaboration if it performs\n⸻\nHow to apply\nMandatory:\nSend your portfolio of games (live links preferred).\nIf you don’t have playable examples → don’t apply",
     "Link_Lowongan": "https://glints.com/id/opportunities/jobs/unity-webgl-game-developer-tiktok-mini-game/3655fdee-9195-45ca-847a-8034caae5883",
-    "match_percentage": 100.0,
+    "match_percentage": 66.7,
     "matched_skills": [
-        "unity3d",
         "game development",
         "c#"
     ]
