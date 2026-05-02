@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
+from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, QScrollArea, QPushButton, QGraphicsBlurEffect, 
                              QFrame, QProgressBar, QGraphicsDropShadowEffect, QSpacerItem, QSizePolicy)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor
@@ -78,10 +78,83 @@ class InsightBox(QLabel):
             border-left: 5px solid {border};
             border-top: none; border-right: none; border-bottom: none;
             border-radius: 10px;
-            font-size: 13px;
+            font-size: 17px;
             font-weight: 500;
         """)
 
+class ModalGapSkill(QFrame):
+    def __init__(self, parent, gap_skills):
+        super().__init__(parent)
+        # Overlay gelap transparan menutupi seluruh dashboard
+        self.setGeometry(0, 0, parent.width(), parent.height())
+        self.setStyleSheet("background-color: rgba(0, 0, 0, 0.4); border: none;")
+        
+        # Kontainer Modal (Kotak Putih di Tengah)
+        self.modal_content = Card(self, border_color="#2C687B")
+        self.modal_content.setFixedSize(500, 400)
+        
+        # Posisikan ke tengah
+        self.posisi_tengah()
+
+        layout = QVBoxLayout(self.modal_content)
+        layout.setContentsMargins(30, 30, 30, 30)
+        layout.setSpacing(15)
+
+        # Judul Modal
+        title = QLabel("Gap Skill Terdeteksi")
+        title.setStyleSheet("font-size: 22px; font-weight: bold; color: #2C687B;")
+        layout.addWidget(title)
+
+        desc = QLabel("Berikut adalah skill yang perlu kamu pelajari untuk meningkatkan kecocokan:")
+        desc.setWordWrap(True)
+        desc.setStyleSheet("color: #666; font-size: 14px;")
+        layout.addWidget(desc)
+
+        # Scroll Area untuk Skill yang Belum Dikuasai
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.NoFrame)
+        scroll.setStyleSheet("background: transparent;")
+        
+        container = QWidget()
+        container_layout = QVBoxLayout(container)
+        container_layout.setAlignment(Qt.AlignTop)
+
+        if gap_skills:
+            for skill in gap_skills:
+                item = QLabel(f"• {skill}")
+                item.setStyleSheet("font-size: 16px; color: #333; padding: 5px;")
+                container_layout.addWidget(item)
+        else:
+            container_layout.addWidget(QLabel("Selamat! Semua skill sudah kamu kuasai."))
+
+        scroll.setWidget(container)
+        layout.addWidget(scroll)
+
+        # Tombol Exit / Kembali
+        btn_exit = QPushButton("Kembali ke Dashboard")
+        btn_exit.setCursor(Qt.PointingHandCursor)
+        btn_exit.setStyleSheet("""
+            QPushButton {
+                background-color: #2C687B; color: white;
+                border-radius: 10px; padding: 12px;
+                font-weight: bold; font-size: 14px;
+            }
+            QPushButton:hover { background-color: #3d8ba5; }
+        """)
+        btn_exit.clicked.connect(self.tutup_modal)
+        layout.addWidget(btn_exit)
+
+    def posisi_tengah(self):
+        qr = self.modal_content.frameGeometry()
+        cp = self.parent().rect().center()
+        qr.moveCenter(cp)
+        self.modal_content.move(qr.topLeft())
+
+    def tutup_modal(self):
+        # Hapus efek blur pada dashboard
+        self.parent().content_area.setGraphicsEffect(None)
+        self.deleteLater()
 class DashboardPage(QWidget):
     def __init__(self):
         super().__init__()
@@ -101,11 +174,11 @@ class DashboardPage(QWidget):
         self.main_layout.addWidget(header_widget)
 
         # --- CONTENT AREA ---
-        content_area = QWidget()
-        content_area.setStyleSheet("background-color: #E2E4E4;")
-        self.main_layout.addWidget(content_area)
+        self.content_area = QWidget()
+        self.content_area.setStyleSheet("background-color: #E2E4E4;")
+        self.main_layout.addWidget(self.content_area)
 
-        body_outer_layout = QVBoxLayout(content_area)
+        body_outer_layout = QVBoxLayout(self.content_area)
         body_outer_layout.setContentsMargins(40, 20, 40, 40)
         
         body_layout = QHBoxLayout()
@@ -153,16 +226,69 @@ class DashboardPage(QWidget):
             name_info.setText(f"<b>{judul.upper()}</b><br><font color='#777'>{perusahaan} | {jenis}</font>")
             salary.setText(gaji)
 
+            #scroll area untuk tag skill
+            scroll_tags = QScrollArea()
+            scroll_tags.setWidgetResizable(True)
+            scroll_tags.setFixedHeight(50) 
+            scroll_tags.setFrameShape(QFrame.NoFrame)
+            scroll_tags.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff) # Scroll halus tanpa bar kaku
+            scroll_tags.setStyleSheet("background: transparent;")
+
+            container_tags = QWidget()
+            container_tags.setStyleSheet("background: transparent;")
+            tags_h = QHBoxLayout(container_tags)
+            tags_h.setContentsMargins(0, 0, 0, 0)
+
             # Tags Skills
-            skill_list = job_data.get("Skills", "").split(" | ")
-            for s in skill_list:
-                tag = QLabel(s.strip())
-                tag.setStyleSheet("background-color: #1A1A1A; color: white; padding: 6px 15px; border-radius: 10px; font-size: 11px; font-weight: bold;")
-                tags_layout.addWidget(tag)
+            owned_skills = job_data.get("matched_skills", [])
+
+            if not owned_skills:
+                owned_skills = job_data.get("Skills", "").split(" | ")
+            
+            for s in owned_skills:
+                skill_text = s.strip().title()
+                if skill_text:
+                    tag = QLabel(skill_text)
+                    tag.setStyleSheet("""
+                        background-color: #1A1A1A; 
+                        color: white; 
+                        padding: 6px 15px; 
+                        border-radius: 10px; 
+                        font-size: 11px; 
+                        font-weight: bold;
+                    """)
+                    tags_layout.addWidget(tag)
             tags_layout.addStretch()
 
             dev_layout.addSpacing(20)
-            dev_layout.addWidget(SkillProgress("Kecocokan skill", match_val))
+            
+            #layout untuk nampung bar dan button
+            match_btn_layout = QHBoxLayout()
+            match_btn_layout.setSpacing(15)
+
+            match_btn_layout.addWidget(SkillProgress("Kecocokan skill", match_val), 4)
+
+            #button lihat gap skill
+            btn_gap = QPushButton("Lihat Gap Skill")
+            btn_gap.setCursor(Qt.PointingHandCursor)
+            btn_gap.setStyleSheet("""
+                QPushButton {
+                    background-color: #D1D5DB; 
+                    color: #374151;
+                    border-radius: 8px; 
+                    padding: 8px 15px;
+                    font-weight: bold; 
+                    font-size: 12px; 
+                    border: 1px solid #9CA3AF;
+                }
+                QPushButton:hover { background-color: #BEC3CC; }
+            """)
+
+            btn_gap.clicked.connect(self.buka_gap_skill)
+
+            match_btn_layout.addWidget(btn_gap, 1)
+
+            dev_layout.addLayout(match_btn_layout)
         
         left_col.addWidget(dev_card)
 
@@ -173,24 +299,34 @@ class DashboardPage(QWidget):
         trend_title = QLabel("TREN SKILL MINGGU INI")
         trend_title.setStyleSheet("font-weight: bold; color: #555; margin-bottom: 10px;")
         trend_layout.addWidget(trend_title)
-        
-        #path archive
-        archive_json = os.path.join(current_dir, "..", "..", "database", "Database Permanen", "Job Archive", "game_developer.json") 
-        try:
-            with open(archive_json, 'r', encoding='utf-8') as f:
-                raw_data = json.load(f)
-            if isinstance(raw_data, dict):
-                pass
-            hasil_stats = hitung_persentase_skill(archive_json)
-            
-            if isinstance(hasil_stats, dict) and hasil_stats:
-                count = 0
 
-                for persentase in sorted(hasil_stats.keys(), reverse=True, key=float):
-                    for skill_name in hasil_stats[persentase]:
-                        if count < 5:
-                            trend_layout.addWidget(SkillProgress(skill_name, int(float(persentase))))
-                            count += 1
+        #pembersihan data lama
+        while trend_layout.count() > 1:
+            item = trend_layout.takeAt(1)
+            if item.widget():
+                item.widget.deleteLater()
+        
+        try:
+            #logika scanning folder archive
+            job_title = job_data.get("Judul_Pekerjaan", "").lower().replace(" ", "_")
+            file_target = f"{job_title}.json"
+            folder_archive = os.path.join(current_dir,"..","..","database", "Database Permanen", "Job Archive", file_target)
+            # List semua file json di folder Job Archive
+            if os.path.exists(folder_archive):
+                hasil_stats = hitung_persentase_skill(folder_archive)
+
+                if isinstance(hasil_stats, dict) and hasil_stats:
+                    count = 0
+                    for persentase in sorted(hasil_stats.keys(), reverse=True, key=float):
+                        for skill_name in hasil_stats[persentase]:
+                            if count < 5:
+                                trend_layout.addWidget(SkillProgress(skill_name, int(float(persentase))))
+                                count += 1
+                else:
+                    trend_layout.addWidget(QLabel("Belum ada statistik untuk kategori ini."))
+
+            else:
+                trend_layout.addWidget(QLabel(f"File {file_target} belum tersedia di Archive."))
         except Exception as e:
             print(f"Error Tren Skill: {e}")
             trend_layout.addWidget(QLabel("Gagal memuat tren skill."))
@@ -211,46 +347,57 @@ class DashboardPage(QWidget):
         ins_title.setStyleSheet("font-weight: bold; color: #555; margin-top: 5px;")
         ins_card_layout.addWidget(ins_title)
 
-        #ambil data
-        archive_json = os.path.join(current_dir, "..", "..", "database", "Database Permanen", "Job Archive", "game_developer.json")
-
-        #default teks gagal
-        teks_skill = "Belum ada tren skill yang terdeteksi."
-        teks_kontrak = "Data status pekerjaan belum tersedia."
-        teks_gaji = "Informasi gaji belum tersedia."
+        #bersihkan data sebelumnya
+        while ins_card_layout.count() > 1:
+            item = ins_card_layout.takeAt(1)
+            if item.widget():
+                item.widget().deleteLater()
 
         try:
-            with open(archive_json, 'r', encoding='utf-8') as f:
-                all_jobs = json.load(f)
-            if all_jobs:
-                hasil_stats = hitung_persentase_skill(archive_json)
-                if hasil_stats:
-                    persentase_top = list(hasil_stats.keys()) [0]
-                    skill_top = " & ".join(hasil_stats[persentase_top][:2])
-                    teks_insight = f"{skill_top} mendominasi {persentase_top}% lowongan — fokus di sini untuk ROI terbesar."
+            job_title = job_data.get("Judul_Pekerjaan", "").lower().replace(" ", "_")
+            file_target = f"{job_title}.json"
+            archive_json = os.path.join(current_dir,"..","..","database", "Database Permanen", "Job Archive", file_target)
 
-                status_list = [j.get("Jenis_Pekerjaan", "Full-time") for j in all_jobs]
-                from collections import Counter
-                most_common_status = Counter(status_list).most_common(1)[0][0]
-                teks_kontrak = f"Mayoritas posisi berstatus {most_common_status} — cocok untuk bangun portofolio awal."
+            # Default teks jika data tidak lengkap
+            teks_insight = "Belum ada tren skill yang terdeteksi."
+            teks_kontrak = "Data status pekerjaan belum tersedia."
+            teks_gaji = "Informasi gaji belum tersedia."
+            
+            if os.path.exists(archive_json):
+                with open(archive_json, 'r', encoding='utf-8') as f:
+                    all_jobs = json.load(f)
 
-                import re
-                gaji_list = []
-                for j in all_jobs:
-                    gaji_str = j.get("Rentang_Gaji", "")
-                    angka = re.findall(r'\d+', gaji_str.replace('.', ''))
-                    if angka:
-                        # Ambil rata-rata dari batas bawah dan atas jika ada
-                        rata_rata_job = sum(map(int, angka)) / len(angka)
-                        gaji_list.append(rata_rata_job)
-                
-                if gaji_list:
-                    avg_gaji = sum(gaji_list) / len(gaji_list)
-                    teks_gaji = f"Gaji rata-rata sekitar Rp {avg_gaji/1_000_000:.1f} jt/bulan berdasarkan data pasar saat ini."
-                
-                ins_card_layout.addWidget(InsightBox(teks_insight, "#D8F3DC", "#52B788", "#1B4332"))
-                ins_card_layout.addWidget(InsightBox(teks_kontrak, "#FFE5D9", "#FB8B24", "#5F0F40"))
-                ins_card_layout.addWidget(InsightBox(teks_gaji, "#CAF0F8", "#00B4D8", "#03045E"))
+                if all_jobs:
+                    hasil_stats = hitung_persentase_skill(archive_json)
+                    if hasil_stats:
+                        persentase_top = list(hasil_stats.keys()) [0]
+                        skill_top = " & ".join(hasil_stats[persentase_top][:2])
+                        teks_insight = f"fokus kuasai {skill_top}."
+
+                    status_list = [j.get("Jenis_Pekerjaan", "Full-time") for j in all_jobs]
+                    from collections import Counter
+                    most_common_status = Counter(status_list).most_common(1)[0][0]
+                    teks_kontrak = f"Didominasi posisi {most_common_status}."
+
+                    import re
+                    gaji_list = []
+                    for j in all_jobs:
+                        gaji_str = j.get("Rentang_Gaji", "")
+                        angka = re.findall(r'\d+', gaji_str.replace('.', ''))
+                        if angka:
+                            # Ambil rata-rata dari batas bawah dan atas jika ada
+                            rata_rata_job = sum(map(int, angka)) / len(angka)
+                            gaji_list.append(rata_rata_job)
+                    
+                    if gaji_list:
+                        avg_gaji = sum(gaji_list) / len(gaji_list)
+                        teks_gaji = f"Gaji rata-rata sekitar Rp {avg_gaji/1_000_000:.1f} jt/bulan"
+                    
+                    ins_card_layout.addWidget(InsightBox(teks_insight, "#D8F3DC", "#52B788", "#1B4332"))
+                    ins_card_layout.addWidget(InsightBox(teks_kontrak, "#FFE5D9", "#FB8B24", "#5F0F40"))
+                    ins_card_layout.addWidget(InsightBox(teks_gaji, "#CAF0F8", "#00B4D8", "#03045E"))
+            else:
+                ins_card_layout.addWidget(QLabel(f"File {file_target} belum ada di archive."))
         except Exception as e:
             ins_card_layout.addWidget(QLabel(f"Gagal memuat insight: {e}"))
 
@@ -270,3 +417,30 @@ class DashboardPage(QWidget):
 
         body_layout.addLayout(right_col, 1)
         body_outer_layout.addStretch()
+
+        #gap_skill
+    def buka_gap_skill(self):
+        # 1. Tambahkan Efek Blur pada area konten
+        self.blur_effect = QGraphicsBlurEffect()
+        self.blur_effect.setBlurRadius(15)
+        self.content_area.setGraphicsEffect(self.blur_effect)
+
+        # 2. Ambil data skill dari JSON (Logika Gap Skill)
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        path_json = os.path.join(current_dir, "..", "..", "database", "Database Permanen", "Favorit", "favorit.json")
+        job_data = load_favorite_job(path_json)
+        
+        gap_list = []
+        if job_data:
+            #ambil semua skill yang ada di lowongan favorit
+            semua_skill = [s.strip().lower() for s in job_data.get("Skills", "").split("|") if s.strip()]
+
+            #ambil matched skill
+            skill_dimiliki = [s.strip().lower() for s in job_data.get("matched_skills", [])]
+
+            #filter : agar yang masuk tidak ada di skill_dimiliki
+            gap_list = [s.title() for s in semua_skill if s not in skill_dimiliki]
+
+        # 3. Tampilkan Modal
+        self.modal = ModalGapSkill(self, gap_list)
+        self.modal.show()
