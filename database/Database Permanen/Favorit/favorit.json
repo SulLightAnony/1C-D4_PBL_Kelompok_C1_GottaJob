@@ -1,18 +1,17 @@
 {
-    "Judul_Pekerjaan": "Unity WebGL Game Developer (TikTok Mini Game)",
-    "Jenis_Pekerjaan": "Full-time",
-    "Nama_Perusahaan": "FMTPLA",
-    "Lokasi": "Sleman",
-    "Rentang_Gaji": "Rp10.000.000 - 12.000.000/Bulan",
-    "Skills": "Unity3D | Game Development | C#",
-    "Benefit_Pekerjaan": "Career Path",
-    "Kualifikasi_Persyaratan": "Remote/Dari rumah | 1 - 3 tahun pengalaman | Minimal Diploma (D1 - D4)",
-    "Deskripsi_Pekerjaan": "Deskripsi pekerjaan Unity WebGL Game Developer (TikTok Mini Game) FMTPLA\nWe’re looking for a Unity developer to build a lightweight WebGL game designed for TikTok.\nThis is not a traditional mobile app.\nNo App Store / Google Play release, no heavy backend, no complex systems.\nThe goal is simple:\n👉 Build a fast, addictive, hyper-casual game that runs smoothly in a WebGL environment and fits TikTok usage (short sessions, instant play, high retention).\n⸻\nScope\nDevelop a Unity-based WebGL game\nOptimize for performance, low build size, and mobile browsers\nImplement simple game mechanics (arcade / puzzle / reaction-based)\nEnsure smooth touch controls and responsiveness\nIntegrate basic SDK elements if needed (TikTok environment)\n⸻\nWhat we don’t need\nNo App Store submission\nNo complex UI systems\nNo heavy multiplayer/backend\nNo overengineering\nIf you tend to overbuild → this is not for you.\n⸻\nWhat we’re looking for\nStrong experience with Unity + WebGL builds\nAbility to create simple but highly engaging gameplay loops\nGood understanding of mobile performance constraints\nFast execution and iteration mindset\n⸻\nProject type\nFull-time\nImmediate start\nPotential for long-term collaboration if it performs\n⸻\nHow to apply\nMandatory:\nSend your portfolio of games (live links preferred).\nIf you don’t have playable examples → don’t apply",
-    "Link_Lowongan": "https://glints.com/id/opportunities/jobs/unity-webgl-game-developer-tiktok-mini-game/3655fdee-9195-45ca-847a-8034caae5883",
-    "match_percentage": 100.0,
+    "Judul_Pekerjaan": "Web Developer",
+    "Jenis_Pekerjaan": "Penuh Waktu",
+    "Nama_Perusahaan": "PT. AURORA NEXUS DIGITAL TECHNOLOGY",
+    "Lokasi": "Pollux Habibie Meisterstadt, Jl. Blk. F No.02-03, Teluk Tering, Batam Kota, Batam City, Riau Islands 29432",
+    "Rentang_Gaji": "-",
+    "Skills": "HTML | Linux | Frontend Development",
+    "Benefit_Pekerjaan": "THR | Health Insurance | Work Insurance",
+    "Kualifikasi_Persyaratan": "Experience: This position requires 3+ years of professional web development experience with the ability to undertake project development tasks independently. | Frontend Skills: Proficient in HTML5 and at least one mainstream frontend framework (such as Vue, React, or Angular). | Backend Skills: Familiar with at least one backend development language (such as PHP, Node.js, Python, or Java) and database management (such as MySQL, MongoDB, etc.). | Competencies: Strong logical thinking and problem-solving skills; meticulous and responsible work attitude with excellent teamwork spirit. | Language: Proficient in Chinese or English for daily communication, technical exchange, and documentation.",
+    "Deskripsi_Pekerjaan": "请用中文或英语联系我们\n岗位职责：\n1.网站开发与维护： 负责公司官方网站、电商平台及内部 Web 系统的设计、编码、测试及日常维护工作。\n2.前端界面实现： 与 UI/UX 设计师紧密合作，将设计稿转化为高质量的响应式网页，确保在不同浏览器和移动端上的兼容性。\n3.性能与安全优化： 持续优化网站的加载速度、运行效率及系统安全性，提升用户体验并预防潜在的技术风险。\n4.前后端对接： 负责前端页面与后端 API 接口的联调与集成，参与数据库结构的设计与数据交互逻辑的实现。\n5.技术故障处理： 及时修复网站漏洞（Bug），解决服务器相关问题，并根据业务需求和用户反馈进行功能迭代升级。\n岗位要求：\n1.此岗位需要具备 3 年以上 的专业网站开发经验，能够独立承担项目开发任务\n2.精通 HTML5 并至少熟练掌握一种主流前端框架（如 Vue、React 或 Angular）。\n3.熟悉至少一种后端开发语言（如 PHP、Node.js、Python 或 Java）以及数据库管理（如 MySQL、MongoDB 等）。\n4.拥有较强的逻辑思维能力和解决问题的能力，工作细致负责，具备良好的团队协作精神。\n5.此岗位需要能够使用汉语或英语进行日常沟通、技术交流及文档编写。\nPlease contact us in Chinese or English.\nWeb Development & Maintenance: Responsible for the design, coding, testing, and daily maintenance of the company's official website, e-commerce platforms, and internal web systems.\nFrontend Implementation: Collaborate closely with UI/UX designers to transform design mockups into high-quality, responsive web pages, ensuring compatibility across various browsers and mobile devices.\nPerformance & Security Optimization: Continuously optimize website loading speed, operational efficiency, and system security to enhance user experience and prevent potential technical risks.\nBackend Integration: Responsible for the debugging and integration of frontend pages with backend APIs; participate in database structure design and the implementation of data interaction logic.\nTechnical Troubleshooting: Timely repair of website bugs, resolution of server-related issues, and functional iterations based on business requirements and user feedback.",
+    "Link_Lowongan": "https://glints.com/id/opportunities/jobs/web-developer/a714bcfa-7d45-45fc-a254-32a2195934c5",
+    "match_percentage": 33.3,
     "matched_skills": [
-        "unity3d",
-        "game development",
-        "c#"
+        "html"
     ]
+
 }

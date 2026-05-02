@@ -226,6 +226,23 @@ class DashboardPage(QWidget):
             name_info.setText(f"<b>{judul.upper()}</b><br><font color='#777'>{perusahaan} | {jenis}</font>")
             salary.setText(gaji)
 
+
+            skill_list = job_data.get("Skills", "").split(" | ")
+            for s in skill_list:
+                tag = QLabel(s.strip())
+                tag.setStyleSheet("background-color: #1A1A1A; color: white; padding: 6px 15px; border-radius: 10px; font-size: 11px; font-weight: bold;")
+                self.tags_layout.addWidget(tag)
+            self.tags_layout.addStretch()
+
+            self.dev_layout.addSpacing(20)
+            self.dev_layout.addWidget(SkillProgress("Kecocokan skill", match_val))
+        else:
+            self.name_info.setText("<b>Belum ada pekerjaan favorit</b><br><font color='#777'>Pilih dari Job Archive</font>")
+            import glob
+            all_archives = glob.glob(os.path.join(db_dir, "*.json"))
+            if all_archives:
+                archive_json = all_archives[0]
+
             #scroll area untuk tag skill
             scroll_tags = QScrollArea()
             scroll_tags.setWidgetResizable(True)
@@ -292,12 +309,28 @@ class DashboardPage(QWidget):
         
         left_col.addWidget(dev_card)
 
+
         # 2. TREN SKILL MINGGU INI
         trend_card = Card(border_color="transparent")
         trend_layout = QVBoxLayout(trend_card)
         trend_layout.setContentsMargins(25, 25, 25, 25)
         trend_title = QLabel("TREN SKILL MINGGU INI")
         trend_title.setStyleSheet("font-weight: bold; color: #555; margin-bottom: 10px;")
+
+        self.trend_layout.addWidget(trend_title)
+        
+        try:
+            if archive_json and os.path.exists(archive_json):
+                top_skills = ambil_top_skills(archive_json, limit=5)
+                
+                if top_skills:
+                    for skill_name, persentase in top_skills:
+                        self.trend_layout.addWidget(SkillProgress(skill_name, persentase))
+                else:
+                    self.trend_layout.addWidget(QLabel("Belum ada data skill di arsip terpilih."))
+            else:
+                self.trend_layout.addWidget(QLabel("Silakan cari pekerjaan di Live Discovery terlebih dahulu."))
+
         trend_layout.addWidget(trend_title)
 
         #pembersihan data lama
@@ -327,6 +360,7 @@ class DashboardPage(QWidget):
 
             else:
                 trend_layout.addWidget(QLabel(f"File {file_target} belum tersedia di Archive."))
+
         except Exception as e:
             print(f"Error Tren Skill: {e}")
             trend_layout.addWidget(QLabel("Gagal memuat tren skill."))
@@ -345,6 +379,22 @@ class DashboardPage(QWidget):
         # Insight Pasar
         ins_title = QLabel("INSIGHT PASAR")
         ins_title.setStyleSheet("font-weight: bold; color: #555; margin-top: 5px;")
+
+        self.ins_card_layout.addWidget(ins_title)
+
+        try:
+            if archive_json and os.path.exists(archive_json):
+                insight_data = ambil_insight_pasar(archive_json)
+                
+                if insight_data:
+                    self.ins_card_layout.addWidget(InsightBox(insight_data["skill"], "#D8F3DC", "#52B788", "#1B4332"))
+                    self.ins_card_layout.addWidget(InsightBox(insight_data["kontrak"], "#FFE5D9", "#FB8B24", "#5F0F40"))
+                    self.ins_card_layout.addWidget(InsightBox(insight_data["gaji"], "#CAF0F8", "#00B4D8", "#03045E"))
+                else:
+                    self.ins_card_layout.addWidget(QLabel("Belum ada data untuk insight."))
+            else:
+                self.ins_card_layout.addWidget(QLabel("Insight akan muncul setelah Anda mencari pekerjaan."))
+
         ins_card_layout.addWidget(ins_title)
 
         #bersihkan data sebelumnya
@@ -398,6 +448,7 @@ class DashboardPage(QWidget):
                     ins_card_layout.addWidget(InsightBox(teks_gaji, "#CAF0F8", "#00B4D8", "#03045E"))
             else:
                 ins_card_layout.addWidget(QLabel(f"File {file_target} belum ada di archive."))
+
         except Exception as e:
             ins_card_layout.addWidget(QLabel(f"Gagal memuat insight: {e}"))
 
@@ -409,11 +460,19 @@ class DashboardPage(QWidget):
         act_lay.setContentsMargins(25, 25, 25, 25)
         act_lbl = QLabel("AKTIVITAS TERKINI")
         act_lbl.setStyleSheet("font-weight: bold; color: #555; margin-bottom: 10px;")
-        act_lay.addWidget(act_lbl)
-        act_lay.addWidget(QLabel("• <b>Live Discovery Selesai</b><br>ios developer · 12 hasil"))
-        act_lay.addWidget(QLabel("• <b>Lowongan disimpan</b><br>PT Sigma Global Teknologi"))
-        act_lay.addWidget(QLabel("• <b>Live Discovery Selesai</b><br>mobile developer · 5 hasil"))
-        right_col.addWidget(act_card)
+        self.act_lay.addWidget(act_lbl)
+        
+        list_aktivitas = get_aktivitas()
+        if list_aktivitas:
+            for act in list_aktivitas:
+                msg_lbl = QLabel(f"• {act.get('pesan')}")
+                msg_lbl.setWordWrap(True)
+                msg_lbl.setStyleSheet("font-size: 13px; color: #333; margin-bottom: 5px;")
+                self.act_lay.addWidget(msg_lbl)
+        else:
+            self.act_lay.addWidget(QLabel("Belum ada aktivitas tercatat."))
+
+
 
         body_layout.addLayout(right_col, 1)
         body_outer_layout.addStretch()
@@ -444,3 +503,4 @@ class DashboardPage(QWidget):
         # 3. Tampilkan Modal
         self.modal = ModalGapSkill(self, gap_list)
         self.modal.show()
+
