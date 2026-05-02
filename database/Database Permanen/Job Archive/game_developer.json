@@ -18,23 +18,6 @@
         ]
     },
     {
-        "Judul_Pekerjaan": "Unity Game Developer (Mobile)",
-        "Jenis_Pekerjaan": "Freelance",
-        "Nama_Perusahaan": "Web Developer",
-        "Lokasi": "-",
-        "Rentang_Gaji": "Rp5.000.000 - 10.000.000/Bulan",
-        "Skills": "C# | Unity NGUI | Unity3D",
-        "Benefit_Pekerjaan": "-",
-        "Kualifikasi_Persyaratan": "Mobile Track Record: At least 2+ years of experience specifically developing and deploying games for iOS and Android. | Tech Stack: Proficiency in C# and Unity, with specific experience in URP (Universal Render Pipeline) for mobile performance. | Input Systems: Experience with Unity’s Input System package for touch gestures and multi-touch functionality. | Portfolio: Mandatory. Must show mobile-specific projects. Bonus points for links to live games on the App Store or Google Play. | Optimization Skills: Knowledge of Draw Call Batching, Occlusion Culling, and Shader optimization for mobile GPUs. | Project Details | Type: Project-Based. | Location: Hybrid. | Duration: +/- 3 months.",
-        "Deskripsi_Pekerjaan": "We are looking for a Unity Game Developer with a focus on Mobile Platforms (iOS/Android) for a high-priority project.\nThis is a project-based role for a developer who understands that mobile development isn’t just about \"shrinking\" a PC game—it’s about performance, accessibility, and intuitive touch gameplay.\nMobile Gameplay: Implement responsive touch-based controls and mobile-friendly UI/UX.\nOptimization: Use the Unity Profiler to identify and fix bottlenecks in CPU, GPU, and memory usage to maintain a high FPS.\nAsset Management: Efficiently manage texture compression, draw calls, and build sizes for App Store and Google Play requirements.\nSystem Integration: Handle mobile-specific features such as push notifications, in-app purchases, or ad SDKs if required.",
-        "Link_Lowongan": "https://glints.com/id/opportunities/jobs/unity-game-developer-mobile/499d2935-2cd4-4452-bd4f-de2b836b1eef",
-        "match_percentage": 66.7,
-        "matched_skills": [
-            "c#",
-            "unity3d"
-        ]
-    },
-    {
         "Judul_Pekerjaan": "Game Developer",
         "Jenis_Pekerjaan": "Full-time",
         "Nama_Perusahaan": "PT POV Media Indonesia",

@@ -107,8 +107,12 @@ class Dashboard(QMainWindow):
         self.halaman_dashboard = DashboardPage() # <--- PENTING: Membuat objek halaman
         
         self.halaman_discovery = LiveDiscoveryPage()
+        # Koneksi signal refresh dashboard dari Live Discovery
+        self.halaman_discovery.favorite_changed.connect(self.halaman_dashboard.load_data)
         
         self.halaman_archive = JobArchivePage()
+        # Koneksi signal refresh dashboard
+        self.halaman_archive.favorite_changed.connect(self.halaman_dashboard.load_data)
         
         self.toolkit_page = CareerToolkitPage()
         
