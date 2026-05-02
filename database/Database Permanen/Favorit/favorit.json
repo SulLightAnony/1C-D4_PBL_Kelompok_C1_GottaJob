@@ -13,4 +13,20 @@
     "matched_skills": [
         "html"
     ]
+    "Judul_Pekerjaan": "Web Developer Intern",
+    "Jenis_Pekerjaan": "magang",
+    "Nama_Perusahaan": "MarviO",
+    "Lokasi": "Jl. Danau Beratan VI, No. 2A, Jimbaran, Kuta Selatan",
+    "Rentang_Gaji": "Rp700.000 - 750.000/Bulan",
+    "Skills": "Network Troubleshooting | Java | Node.js | Python | Technical Support | Teamwork | C++ | PHP | PostgreSQL | Laravel | Microsoft SQL Server | Help Desk | IT Support | Time Management | MongoDB | MySQL | Troubleshooting",
+    "Benefit_Pekerjaan": "Career Path | Training/Certification",
+    "Kualifikasi_Persyaratan": "Mahasiswa / siswa jurusan RPL / Informatika / TI / Sistem Informasi | Paham dasar pemrograman (HTML, CSS, JS / PHP / Python menjadi nilai plus) | Mau belajar & cepat beradaptasi",
+    "Deskripsi_Pekerjaan": "Note : Nominal uang saku yang tercantum merupakan estimasi dan bersifat tentatif. Besaran yang diterima dapat menyesuaikan kebijakan perusahaan serta ketentuan yang berlaku.\nMembantu pengembangan website & aplikasi\nMaintenance sistem dan testing aplikasi\nUpdate konten website / landing page\nMembantu proses debugging & troubleshooting\nSupport tim IT / developer\nDokumentasi pekerjaan teknis sederhana\nBelajar implementasi project real\nBersedia kerja onsite (di utamakan wilayah Bali)\nMemiliki laptop pribadi\nSiap magang minimal 3 bulan",
+    "Link_Lowongan": "https://glints.com/id/opportunities/jobs/web-developer-intern/0d2a78e0-115b-4118-b78b-afe94de10dff",
+    "match_percentage": 11.8,
+    "matched_skills": [
+        "postgresql",
+        "mongodb"
+    ],
+    "source_file": "C:\\Users\\farre\\OneDrive\\Dokumen\\GitHub\\1C-D4_PBL_Kelompok_C1_GottaJob\\database\\Database Permanen\\Job Archive\\web_developer.json"
 }

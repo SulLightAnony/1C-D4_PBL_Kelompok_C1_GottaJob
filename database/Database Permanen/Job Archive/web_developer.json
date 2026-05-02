@@ -15,6 +15,57 @@
             "laravel",
             "php",
             "mysql"
+        "Jenis_Pekerjaan": "tetap",
+        "Nama_Perusahaan": "PT. Partnership Procurement Solution",
+        "Lokasi": "Jl. Golf Barat III No.1, Sukamiskin, Kec. Arcamanik, Kota Bandung, Jawa Barat 40293",
+        "Rentang_Gaji": "Rp3.000.000 - 5.000.000/Bulan",
+        "Skills": "Laravel | JavaScript | MySQL | Microsoft SQL Server | PostgreSQL",
+        "Benefit_Pekerjaan": "THR | Sales Commission | Training/Certification",
+        "Kualifikasi_Persyaratan": "Jurusan Teknik Informatika D3/S1 dengan mempunyai pengetahuan terkait JavaScript/MySQL/PostgreSQL/Microsoft SQL Server, pemahaman tentang framework Laravel, Pemahaman terkait Reduce, Google Cloud Storage, dan Pemahaman tentang AI lebih disukai. | Kami menghargai keterampilan dan pengalaman Anda, tetapi kami juga menghargai kesiapan Anda untuk belajar dan berkembang bersama kami. Kami mencari individu yang tidak hanya memiliki keterampilan teknis, tetapi juga memiliki semangat kerja sama, inovasi, dan komitmen terhadap kualitas. PT. Partnership Procurement Solution menyediakan lingkungan kerja yang dinamis.",
+        "Deskripsi_Pekerjaan": "Deskripsi pekerjaan Web Developer PT. Partnership Procurement Solution\nKami sedang mencari seorang Full Stack Developer atau Web Developer yang akan bertanggung jawab atas pengembangan dan pemeliharaan aplikasi web. Posisi ini memerlukan kemampuan untuk mengelola seluruh proses pengembangan web dari awal hingga akhir, termasuk desain, pengkodean, pengujian, dan pemeliharaan. Anda akan bekerja dalam tim yang dinamis, berkolaborasi dengan para profesional lainnya untuk mencapai hasil yang optimal. Tugas utama Anda mencakup pengembangan front-end dan back-end, serta integrasi antar sistem. Anda juga harus mampu mengelola basis data dengan efektivitas tinggi menggunakan MySQL/PostgreSQL/Microsoft SQL Server. Penggunaan framework Laravel akan menjadi peluang besar.",
+        "Link_Lowongan": "https://glints.com/id/opportunities/jobs/web-developer/9e2f5017-8d5f-4956-a15b-6263b46aaeca",
+        "match_percentage": 80.0,
+        "matched_skills": [
+            "laravel",
+            "javascript",
+            "mysql",
+            "microsoft sql server"
+        ]
+    },
+    {
+        "Judul_Pekerjaan": "Web Developer",
+        "Jenis_Pekerjaan": "Penuh Waktu",
+        "Nama_Perusahaan": "PT. CITRA WARNA ABADI",
+        "Lokasi": "Jl. Bayu No.9 Rt.03 / Rw.10 Sudimoro, Parangjoro, Sukoharjo, Jawa Tengah 57552 - Indonesia",
+        "Rentang_Gaji": "Rp2.500.000 - 3.500.000/Bulan",
+        "Skills": "PostgreSQL | jQuery | MySQL | Microsoft SQL Server | JavaScript | Laravel",
+        "Benefit_Pekerjaan": "Career Path | THR | Annual Leave | Team-building events | Laptop Provided | BPJS Tenaga Kerja | Perform Bonus | BPJS Kesehatan | Training/Certification",
+        "Kualifikasi_Persyaratan": "Kerja di lokasi | 1 - 3 tahun pengalaman | Minimal Diploma (D1 - D4) | Laki-laki saja",
+        "Deskripsi_Pekerjaan": "PT. Citra Warna Abadi (CWA), sebuah perusahaan nasional yang berbasis di Sukoharjo, Kabupaten Sukoharjo, Jawa Tengah, telah beroperasi sejak tahun 2010. Dengan lokasi strategis di Jl. Bayu No.9, RT.03/10 Sudimoro Parangjoro, CWA terus berusaha memenuhi kebutuhan pasar akan cat tembok berkualitas tinggi dan bahan pelapis lainnya. Kami berkomitmen untuk memberikan layanan pelanggan yang memuaskan serta menjalin hubungan bisnis yang saling menguntungkan. Dalam rangka mendukung pertumbuhan perusahaan, kami membuka kesempatan bagi individu yang memiliki keterampilan dan pengalaman yang sesuai untuk bergabung dalam tim kami.\nSebagai Web Developer atau Full Stack Developer, Anda akan menjadi bagian dari tim yang bertanggung jawab atas pengembangan dan pemeliharaan platform web yang mendukung operasional perusahaan. Beberapa tanggung jawab utama Anda termasuk merancang, mengembangkan, dan memelihara aplikasi web yang efisien dan andal, menerapkan desain antarmuka pengguna yang intuitif, serta memastikan integrasi sistem yang lancar. Selain itu, Anda juga akan bekerja sama dengan tim teknis lainnya untuk memastikan semua elemen teknologi berjalan dengan baik dan memenuhi kebutuhan bisnis perusahaan.\nKami mencari kandidat yang memenuhi persyaratan berikut ini: Anda harus laki-laki, memiliki pendidikan sederajat diploma, dan memiliki pengalaman kerja minimal 1 hingga 3 tahun. Keterampilan yang dibutuhkan termasuk pemahaman mendalam tentang JavaScript, jQuery, MySQL, PostgreSQL, Microsoft SQL Server, serta pengalaman dengan framework Laravel. PT. Citra Warna Abadi menawarkan kesempatan kerja yang dinamis dan penuh tantangan di lingkungan profesional yang mendukung perkembangan karier Anda. Bergabunglah dengan tim kami dan berkontribusi pada pencapaian tujuan bisnis perusahaan.",
+        "Link_Lowongan": "https://glints.com/id/opportunities/jobs/web-developer/0758b9bc-e476-4398-94cb-6577baf0f388",
+        "match_percentage": 66.7,
+        "matched_skills": [
+            "mysql",
+            "microsoft sql server",
+            "javascript",
+            "laravel"
+        ]
+    },
+    {
+        "Judul_Pekerjaan": "Web Developer",
+        "Jenis_Pekerjaan": "Penuh Waktu",
+        "Nama_Perusahaan": "PT Fauzi Panca Manunggal",
+        "Lokasi": "Graha Inti Fauzi, Jl. Buncit Raya No.22 Lantai 12, RT.2/RW.7, Pejaten Bar., Ps. Minggu, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12510",
+        "Rentang_Gaji": "Rp4.000.000/Bulan",
+        "Skills": "Node.js | Microsoft SQL Server | JavaScript",
+        "Benefit_Pekerjaan": "BPJS Kesehatan | BPJS Tenaga Kerja | Meal Allowance | Transport Money | THR",
+        "Kualifikasi_Persyaratan": "Kerja di lokasi | 1 - 3 tahun pengalaman | Minimal Diploma (D1 - D4)",
+        "Deskripsi_Pekerjaan": "1. Pria/Wanita berpenampilan rapi\n2. Menguasai dasar pemrograman: PHP, HTML, CSS, JavaScript,\n3. Menguasai database: MySQL / MariaDB\n4. Mengerti penggunaan: XAMPP / Laragon (untuk server lokal)\n5. Memiliki ketelitian yang tinggi, integritas yang kuat, serta proaktif dalam bekerja.\n6. Memiliki kemampuan koordinasi dan komunikasi yang efektif saat bekerja dalam tim.",
+        "Link_Lowongan": "https://glints.com/id/opportunities/jobs/web-developer/1ac54530-6d1b-463b-b5a0-238f304882ec",
+        "match_percentage": 66.7,
+        "matched_skills": [
+            "microsoft sql server",
+            "javascript"
         ]
     },
     {
@@ -33,6 +84,14 @@
             "mysql",
             "javascript",
             "php"
+        "Benefit_Pekerjaan": "Career Path | BPJS Tenaga Kerja | BPJS Kesehatan",
+        "Kualifikasi_Persyaratan": "Laki-laki / Perempuan | Usia Maksimal 35 Tahun | Minimal memiliki pengalaman 2 tahun di bidang yang sama | Pendidikan Minimal D3 Sistem Informasi / Teknik Informatika | Mahir dalam PHP 8.x | Terampil dalam membangun dan mengonsumsi RESTful APIs | Menguasai MySQL | Menguasai JavaScript | Memahami celah keamanan web | Mampu mendiagnosis masalah teknis yang kompleks dan memberikan solusi yang efektif secara biaya dan waktu. | Cepat belajar teknologi baru di tengah perkembangan industri teknologi finansial yang dinamis.",
+        "Deskripsi_Pekerjaan": "-",
+        "Link_Lowongan": "https://glints.com/id/opportunities/jobs/web-developer/84fba5da-6397-42bd-b879-d30f44e5797e",
+        "match_percentage": 66.7,
+        "matched_skills": [
+            "mysql",
+            "javascript"
         ]
     },
     {
@@ -69,61 +128,174 @@
         "matched_skills": [
             "php",
             "laravel",
-            "mysql"
-        ]
-    },
-    {
-        "Judul_Pekerjaan": "Web Developer",
-        "Jenis_Pekerjaan": "tetap",
-        "Nama_Perusahaan": "CV. Tomojoyo Niaga",
-        "Lokasi": "Pare-Kab.Kediri- Jawa Timur",
-        "Rentang_Gaji": "Rp2.500.000 - 3.000.000/Bulan",
-        "Skills": "UX Design | Vue.js | JavaScript | jQuery | React.js | UI Design | Front-End Architecture | TypeScript | HTML | Frontend Development | CSS",
-        "Benefit_Pekerjaan": "Training/Certification | Transport Money | Perform Bonus | Makan siang | Career Path | THR",
-        "Kualifikasi_Persyaratan": "Kerja di lokasi | 1 - 3 tahun pengalaman | Minimal Diploma (D1 - D4) | 21-30 tahun",
-        "Deskripsi_Pekerjaan": "CV. Tomojoyo Niaga adalah perusahaan digital marketing terkemuka yang berfokus pada membantu perusahaan berkembang di era digital. Dengan pemahaman mendalam tentang dunia digital dan komitmen terhadap inovasi, kami menyediakan strategi khusus yang menghasilkan hasil nyata dan mendukung pertumbuhan bisnis. Kami sedang mencari individu berbakat untuk bergabung dalam tim kami sebagai Web Developer. Posisi ini memberikan kesempatan bagi Anda untuk berkontribusi dalam pengembangan web yang memadukan estetika dan fungsionalitas. Bergabunglah dengan kami untuk berpartisipasi dalam proyek-proyek yang berbeda, mendukung visi dan misi kami untuk menjadi perusahaan digital marketing terkemuka di Indonesia.\nTugas-tugas utama Web Developer termasuk merancang dan membangun antarmuka web yang intuitif dan responsif. Anda akan bertanggung jawab atas pengembangan front-end, mulai dari desain awal hingga peluncuran produk akhir. Beberapa tanggung jawab utama meliputi pengembangan arsitektur front-end, penulisan kode JavaScript, jQuery, HTML, Vue.js, CSS, UI/UX desain, dan pemrograman menggunakan React.js serta TypeScript. Keahlian Anda akan digunakan untuk meningkatkan kecepatan loading halaman, memastikan responsivitas yang baik di berbagai perangkat, dan memberikan pengalaman pengguna yang luar biasa.\nKualifikasi untuk posisi ini mencakup pendidikan minimal diploma dan pengalaman kerja antara satu hingga tiga tahun. Kandidat harus memiliki keahlian dalam front-end architecture, JavaScript, jQuery, HTML, Vue.js, CSS, UI/UX design, React.js, dan TypeScript. Keterampilan teknis yang kuat serta kemampuan untuk bekerja dalam tim adalah kebutuhan mutlak. Kami mencari individu yang tidak hanya mahir dalam teknologi, tetapi juga memiliki dedikasi dan inovasi untuk berkontribusi dalam pengembangan web yang berkelanjutan dan efektif. Bergabunglah dengan kami untuk kesempatan yang tak tergantikan di dunia digital marketing.",
-        "Link_Lowongan": "https://glints.com/id/opportunities/jobs/web-developer/3d88646c-e95c-46bb-a559-9a17187f5c1f",
-        "match_percentage": 36.4,
-        "matched_skills": [
-            "ux design",
-            "javascript",
-            "html",
-            "css"
-        ]
-    },
-    {
-        "Judul_Pekerjaan": "Web Developer",
-        "Jenis_Pekerjaan": "Kontrak",
-        "Nama_Perusahaan": "PT Yogura Tekindo",
-        "Lokasi": "Jalan Kamboja No. 50 C, Kel. Sukajadi, Kec. Sukajadi, Kota Pekanbaru",
-        "Rentang_Gaji": "-",
-        "Skills": "Node.js | React.js | Microsoft SQL Server | MongoDB | MySQL | JavaScript | Laravel | C++ | jQuery | PostgreSQL",
-        "Benefit_Pekerjaan": "THR | Tunjangan Hari Raya | Bpjs Ketenagakerjaan | Career Path | Bpjs Kesehatan",
-        "Kualifikasi_Persyaratan": "Pendidikan minimal D3/S1 di bidang Teknik Informatika, Sistem Informasi, atau bidang terkait. | Memiliki pengalaman minimal 1 tahun di bidang pengembangan sistem / web (fresh graduate dipersilakan melamar jika memiliki portofolio). | Menguasai dasar UI/UX design dan tools terkait (Figma, Adobe XD, atau sejenisnya). | Memahami pengembangan website (frontend/backend) serta proses deployment dan hosting. | Terbiasa melakukan maintenance sistem, troubleshooting, dan backup data. | Memiliki kemampuan komunikasi yang baik dan mampu bekerja sama dengan tim (terutama dengan tim desain).",
-        "Deskripsi_Pekerjaan": "Merancang UI/UX serta sistem aplikasi sesuai dengan kebutuhan perusahaan.\nMengembangkan sistem aplikasi berdasarkan rancangan yang telah ditentukan.\nMembangun dan mengelola website resmi perusahaan untuk setiap holding dan sub-perusahaan.\nMelakukan setup, hosting, launching, serta backup sistem dan website yang telah dikembangkan.\nMelakukan evaluasi, perbaikan (improvement), dan pemeliharaan (maintenance) terhadap sistem yang berjalan.\nMemberikan dukungan kepada tim desain grafis untuk kebutuhan sub-perusahaan (media sosial, poster, dan materi visual lainnya).\nMelakukan backup dan maintenance seluruh data akun media sosial serta website perusahaan.",
-        "Link_Lowongan": "https://glints.com/id/opportunities/jobs/web-developer/51390305-29b2-40bc-8a4d-e4023e979dfe",
-        "match_percentage": 40.0,
+        "Jenis_Pekerjaan": "Freelance",
+        "Nama_Perusahaan": "PT. Sinar Multi Kehidupan",
+        "Lokasi": "Jln. Alam Raya Komplek Perum. Citra Garden 1 Blok F7 No. 1, RT.5/RW.9, Kalideres, Kec. Kalideres, Kota Jakarta Barat, Daerah Khusus Ibukota Jakarta 11840",
+        "Rentang_Gaji": "Rp1.000.000 - 1.200.000/Bulan",
+        "Skills": "MySQL | jQuery | JavaScript",
+        "Benefit_Pekerjaan": "Free Wi-Fi | THR | Overtime Pay",
+        "Kualifikasi_Persyaratan": "Remote/Dari rumah | Pengalaman kurang dari 1 tahun | Minimal SMA/SMK | 18-25 tahun",
+        "Deskripsi_Pekerjaan": "🚀 Lowongan Freelance – Fullstack Web Developer\n📍 Remote / Project Based\nKami sedang mencari Fullstack Web Developer (Freelance) yang berpengalaman dan mampu mengembangkan serta mengintegrasikan sistem internal perusahaan dengan berbagai API eksternal. Jika kamu terbiasa bekerja dengan sistem yang kompleks, API integration, dan database yang terstruktur — ini untuk kamu.\nMengembangkan dan mengoptimalkan website berbasis web (frontend & backend)\nMengintegrasikan sistem internal dengan API pihak ketiga (SAPX, Lion Parcel, dll)\nMembuat dan mengelola REST API untuk kebutuhan internal\nMelakukan debugging, testing, dan improvement sistem\nMenyusun dokumentasi teknis integrasi sistem\nBerkolaborasi dengan tim IT dan operasional\nMenguasai:\nBackend: PHP / Node.js (nilai plus jika terbiasa dengan custom framework)\nDatabase: MySQL / MariaDB\nAPI Integration (RESTful API, JSON, webhook)\nFrontend: HTML, CSS, JavaScript (jQuery / AJAX / Bootstrap / Tailwind menjadi nilai tambah)\nMemahami struktur database yang kompleks dan sistem transaksi\nTerbiasa dengan version control (Git)\nMampu bekerja secara mandiri dan memenuhi deadline\n⭐ Nilai Tambah\nPernah mengintegrasikan API\nMemahami flow shipment tracking, resi, manifest, dan tarif\nPernah mengerjakan sistem ERP atau integrasi dengan sistem seperti SAP",
+        "Link_Lowongan": "https://glints.com/id/opportunities/jobs/web-developer/1c41f8c5-318c-4f96-a387-6978f222cbab",
+        "match_percentage": 66.7,
         "matched_skills": [
             "mysql",
-            "javascript",
-            "laravel",
-            "c++"
+            "javascript"
         ]
     },
     {
         "Judul_Pekerjaan": "Web Developer",
         "Jenis_Pekerjaan": "Penuh Waktu",
-        "Nama_Perusahaan": "PT. AURORA NEXUS DIGITAL TECHNOLOGY",
-        "Lokasi": "Pollux Habibie Meisterstadt, Jl. Blk. F No.02-03, Teluk Tering, Batam Kota, Batam City, Riau Islands 29432",
-        "Rentang_Gaji": "-",
-        "Skills": "HTML | Linux | Frontend Development",
-        "Benefit_Pekerjaan": "THR | Health Insurance | Work Insurance",
-        "Kualifikasi_Persyaratan": "Experience: This position requires 3+ years of professional web development experience with the ability to undertake project development tasks independently. | Frontend Skills: Proficient in HTML5 and at least one mainstream frontend framework (such as Vue, React, or Angular). | Backend Skills: Familiar with at least one backend development language (such as PHP, Node.js, Python, or Java) and database management (such as MySQL, MongoDB, etc.). | Competencies: Strong logical thinking and problem-solving skills; meticulous and responsible work attitude with excellent teamwork spirit. | Language: Proficient in Chinese or English for daily communication, technical exchange, and documentation.",
-        "Deskripsi_Pekerjaan": "请用中文或英语联系我们\n岗位职责：\n1.网站开发与维护： 负责公司官方网站、电商平台及内部 Web 系统的设计、编码、测试及日常维护工作。\n2.前端界面实现： 与 UI/UX 设计师紧密合作，将设计稿转化为高质量的响应式网页，确保在不同浏览器和移动端上的兼容性。\n3.性能与安全优化： 持续优化网站的加载速度、运行效率及系统安全性，提升用户体验并预防潜在的技术风险。\n4.前后端对接： 负责前端页面与后端 API 接口的联调与集成，参与数据库结构的设计与数据交互逻辑的实现。\n5.技术故障处理： 及时修复网站漏洞（Bug），解决服务器相关问题，并根据业务需求和用户反馈进行功能迭代升级。\n岗位要求：\n1.此岗位需要具备 3 年以上 的专业网站开发经验，能够独立承担项目开发任务\n2.精通 HTML5 并至少熟练掌握一种主流前端框架（如 Vue、React 或 Angular）。\n3.熟悉至少一种后端开发语言（如 PHP、Node.js、Python 或 Java）以及数据库管理（如 MySQL、MongoDB 等）。\n4.拥有较强的逻辑思维能力和解决问题的能力，工作细致负责，具备良好的团队协作精神。\n5.此岗位需要能够使用汉语或英语进行日常沟通、技术交流及文档编写。\nPlease contact us in Chinese or English.\nWeb Development & Maintenance: Responsible for the design, coding, testing, and daily maintenance of the company's official website, e-commerce platforms, and internal web systems.\nFrontend Implementation: Collaborate closely with UI/UX designers to transform design mockups into high-quality, responsive web pages, ensuring compatibility across various browsers and mobile devices.\nPerformance & Security Optimization: Continuously optimize website loading speed, operational efficiency, and system security to enhance user experience and prevent potential technical risks.\nBackend Integration: Responsible for the debugging and integration of frontend pages with backend APIs; participate in database structure design and the implementation of data interaction logic.\nTechnical Troubleshooting: Timely repair of website bugs, resolution of server-related issues, and functional iterations based on business requirements and user feedback.",
-        "Link_Lowongan": "https://glints.com/id/opportunities/jobs/web-developer/a714bcfa-7d45-45fc-a254-32a2195934c5",
-        "match_percentage": 33.3,
+        "Nama_Perusahaan": "Jogja Tama",
+        "Lokasi": "Jl. Arimbi No.1, Kragilan, Sinduadi, Kec. Mlati, Kabupaten Sleman, Daerah Istimewa Yogyakarta 55284",
+        "Rentang_Gaji": "Rp2.624.387 - 3.000.000/Bulan",
+        "Skills": "Laravel | PHP | MySQL",
+        "Benefit_Pekerjaan": "BPJS Tenaga Kerja | BPJS Kesehatan",
+        "Kualifikasi_Persyaratan": "Pendidikan minimal S1 Ilmu komputer/ Sistem Informasi/ Informasi teknologi | Pengalaman minimal 1 tahun di bidang yang sama | Menguasai PHP, javascript, MySQL, bootstrap | Mampu menggunakan framework Laravel | Menguasai wordpress dan elementor | Komunikatif dan mampu bekerja dalam tim | Memiliki laptop pribadi",
+        "Deskripsi_Pekerjaan": "Membangun perangkat lunak yang kuat dan dapat ditingkatkan dengan membuat fitur baru, melakukan debugging, dan mengoptimalkan aplikasi\nMengembangkan dan mengusulkan produk atau fitur baru dengan memantau industri\nMembuat kode untuk mengembangkan aplikasi web fungsional di perangkat mobile dan desktop\nImplementasi keamanan dan perlindungan data\nDesain dan implementasi solusi penyimpanan data\nBekerja sama dengan desainer, manajer produk, dan administrator sistem untuk mengidentifikasi dan membangun fitur baru",
+        "Link_Lowongan": "https://glints.com/id/opportunities/jobs/web-developer/2e0ef5ab-4d8a-4e1f-ae21-f471b0478339",
+        "match_percentage": 66.7,
         "matched_skills": [
-            "html"
+            "laravel",
+            "mysql"
+        ]
+    },
+    {
+        "Judul_Pekerjaan": "Web Developer (PHP Laravel)",
+        "Jenis_Pekerjaan": "Kontrak",
+        "Nama_Perusahaan": "PT Terang Inti Pesona",
+        "Lokasi": "Taman Meruya Ilir Blok H3 No. 16, Desa/Kelurahan Meruya Utara, Kec. Kembangan, Kota Adm. Jakarta Barat, Provinsi DKI Jakarta, Kode Pos: 11620",
+        "Rentang_Gaji": "Rp10.000.000 - 11.000.000/Bulan",
+        "Skills": "MySQL | PostgreSQL | Laravel",
+        "Benefit_Pekerjaan": "THR | BPJS Kesehatan | BPJS Tenaga Kerja",
+        "Kualifikasi_Persyaratan": "Develop, test, and maintain web applications using PHP and Laravel | Design and implement RESTful APIs | Collaborate with frontend developers, designers, and product teams | Optimize application performance and scalability | Troubleshoot, debug, and upgrade existing systems | Write clean, secure, and well-documented code | Participate in code reviews and technical discussions",
+        "Deskripsi_Pekerjaan": "We are looking for a skilled PHP Laravel Developer to join our development team. You will be responsible for building, maintaining, and improving web applications using the Laravel framework. The ideal candidate has a strong understanding of backend development, clean coding practices, and modern web technologies.\nDevelop, test, and maintain web applications using PHP and Laravel\nDesign and implement RESTful APIs\nCollaborate with frontend developers, designers, and product teams\nOptimize application performance and scalability\nTroubleshoot, debug, and upgrade existing systems\nWrite clean, secure, and well-documented code\nParticipate in code reviews and technical discussions",
+        "Link_Lowongan": "https://glints.com/id/opportunities/jobs/web-developer-php-laravel/b47c7a85-7728-4228-beb7-bc07aaf88579",
+        "match_percentage": 66.7,
+        "matched_skills": [
+            "mysql",
+            "laravel"
+        ]
+    },
+    {
+        "Judul_Pekerjaan": "Web Developer",
+        "Jenis_Pekerjaan": "Penuh Waktu",
+        "Nama_Perusahaan": "PT Holicindo Dasa Anugrah",
+        "Lokasi": "Komplek Jersindo, Jl. Raya Cimindi No.115, Cibeureum, Cimahi Selatan, Cimahi City, West Java 40535",
+        "Rentang_Gaji": "Rp2.000.000 - 3.000.000/Bulan",
+        "Skills": "HTML | JavaScript | MySQL",
+        "Benefit_Pekerjaan": "-",
+        "Kualifikasi_Persyaratan": "Kerja di lokasi | 1 - 3 tahun pengalaman | Minimal SMA/SMK",
+        "Deskripsi_Pekerjaan": "Minimal 2 tahun pengalaman",
+        "Link_Lowongan": "https://glints.com/id/opportunities/jobs/web-developer/f6041f68-ccdd-47a7-b63a-9849dff6deb8",
+        "match_percentage": 66.7,
+        "matched_skills": [
+            "javascript",
+            "mysql"
+        ]
+    },
+    {
+        "Judul_Pekerjaan": "Web Full-Stack Developer",
+        "Jenis_Pekerjaan": "Penuh Waktu",
+        "Nama_Perusahaan": "Educa Studio",
+        "Lokasi": "Jl. Gilingrejo No.10, Gendongan, Kec. Tingkir, Kota Salatiga, Jawa Tengah 50743",
+        "Rentang_Gaji": "Rp2.698.273 - 3.500.000/Bulan",
+        "Skills": "Laravel | PHP | JavaScript | MySQL | HTML | React.js",
+        "Benefit_Pekerjaan": "BPJS Kesehatan | Team-building events | THR | Career Path | BPJS Tenaga Kerja",
+        "Kualifikasi_Persyaratan": "Memiliki Pengalaman Min. 2 tahun sebagai Full Stack | Menguasai bahasa pemrograman PHP | Memiliki kemampuan OOP dan design pattern yang kuat | Baik dalam membuat dan mengoptimalkan query SQL | Berpengalaman bekerja dengan jQuery dan Bootstrap | Memiliki kemampuan komunikasi yang baik | Memahami konsep dan praktik terbaik keamanan web | Informasi Kerja | Bekerja Onsite di kantor Salatiga | Hari Kerja Senin - Jumat",
+        "Deskripsi_Pekerjaan": "Bertanggung jawab atas pengembangan dan pemeliharaan platform website perusahaan\nMelakukan perancangan dan implementasi web end-to-end\nMengelola integrasi sistem, termasuk API dan database\nMemastikan standar performa, keamanan, dan kualitas platform terpenuhi\nMelakukan pengujian dan debugging guna memastikan stabilitas sistem dan platform bebas error maupun bug\nBerkolaborasi dengan tim dalam pengembangan dan peningkatan kualitas produk",
+        "Link_Lowongan": "https://glints.com/id/opportunities/jobs/web-full-stack-developer/d7229ac1-905e-4bd4-9bde-85af59a53c8b",
+        "match_percentage": 50.0,
+        "matched_skills": [
+            "laravel",
+            "javascript",
+            "mysql"
+        ]
+    },
+    {
+        "Judul_Pekerjaan": "Web Developer",
+        "Jenis_Pekerjaan": "Penuh Waktu",
+        "Nama_Perusahaan": "PT Indotech Berkah Abadi",
+        "Lokasi": "Jongke Tengah no. 30 RT.01/RW.23, Jongke Tengah, Sendangadi, Kec. Mlati, Kabupaten Sleman, Daerah Istimewa Yogyakarta 55285",
+        "Rentang_Gaji": "Rp2.500.000 - 2.600.000/Bulan",
+        "Skills": "Front-End Architecture | JavaScript | CSS | Frontend Development",
+        "Benefit_Pekerjaan": "Annual Leave | Team-building events | BPJS Kesehatan | Career Path | Transport Money",
+        "Kualifikasi_Persyaratan": "Pendidikan minimal D3/S1 Teknik Informatika, Sistem Informasi, atau bidang terkait. | Memiliki pengalaman sebagai Web Developer minimal 1 tahun (fresh graduate dipertimbangkan dengan portofolio). | Menguasai HTML, CSS, JavaScript, PHP atau framework sejenis. | Memahami SEO, optimasi performa website, dan user experience. | Memahami pembuatan dan optimasi landing page. | Terbiasa melakukan maintenance dan monitoring website. | Memahami Google Analytics, Google Search Console, dan Google Business menjadi nilai tambah. | Memiliki kemampuan problem solving yang baik, teliti, komunikatif, dan mampu bekerja dalam tim.",
+        "Deskripsi_Pekerjaan": "PT Indotech Berkah Abadi membuka kesempatan bergabung sebagai:\nWEB DEVELOPER\nMelakukan pengembangan website perusahaan yang lengkap, optimal, dan menarik secara tampilan maupun fungsi.\nMelakukan update konten website secara rutin dan berkualitas.\nMengelola dan mengoptimalkan performa website meliputi:\nSpeed website\nSEO (Search Engine Optimization)\nLanding page\nContent pilar (artikel utama mitra/perusahaan)\nOptimasi konten website\nGoogle Business Profile\nMelakukan proses pengumpulan dan pengelolaan data email pengunjung website.\nMelakukan monitoring, evaluasi, serta perbaikan kinerja website secara berkala untuk meningkatkan performa dan efektivitas.\nMemberikan solusi teknis serta improvement berkelanjutan terhadap pengembangan website.",
+        "Link_Lowongan": "https://glints.com/id/opportunities/jobs/web-developer/93535e55-0a78-40b2-aca2-68a962d839df",
+        "match_percentage": 25.0,
+        "matched_skills": [
+            "javascript"
+        ]
+    },
+    {
+        "Judul_Pekerjaan": "Web Developer",
+        "Jenis_Pekerjaan": "Penuh Waktu",
+        "Nama_Perusahaan": "PT Delightly Digital Solusi",
+        "Lokasi": "Komplek Cimindi Raya Blok C-11, RT 04 RW 04, Kelurahan Pasir Kaliki, Kecamatan Cimahi Utara, Kota Cimahi, Provinsi Jawa Barat",
+        "Rentang_Gaji": "Rp2.500.000 - 4.000.000/Bulan",
+        "Skills": "CSS | JavaScript | HTML | MySQL | WordPress Development",
+        "Benefit_Pekerjaan": "THR | Training/Certification | Transport Money | Meal Allowance | Perform Bonus",
+        "Kualifikasi_Persyaratan": "Berpengalaman minimal 1 tahun sebagai Web Developer | Menguasai HTML, CSS, JavaScript, dan teknologi pendukung lainnya | Terbiasa menggunakan WordPress dan Elementor, termasuk tema, plugin, page builder, dan basic editing PHP | Memiliki pemahaman yang baik tentang technical SEO dan optimasi website | Memiliki pengalaman mengelola lingkungan web hosting seperti cPanel, Plesk, VPS, atau cloud hosting | Memiliki basic skill copywriting | Paham membuat website yang responsif, rapi, dan fungsional | Terbiasa bekerja berdasarkan brief, revisi, dan deadline | Memiliki problem solving dan troubleshooting yang baik | Lampirkan portfolio website atau project yang pernah dikerjakan",
+        "Deskripsi_Pekerjaan": "Web Developer\nKami sedang mencari Web Developer yang mampu mengerjakan website dengan rapi, cepat, dan sesuai kebutuhan perusahaan maupun klien. Posisi ini cocok untuk kandidat yang memahami alur development dari awal hingga revisi, terbiasa bekerja berdasarkan brief, mampu mengejar target, dan siap mengikuti sistem kerja perusahaan.\nMembangun dan mengembangkan website sesuai brief dan kebutuhan project\nMelakukan update, perbaikan, dan maintenance website\nMemastikan website berjalan dengan baik, responsif, dan user-friendly\nBekerja sama dengan tim desain, content, dan admin untuk kebutuhan project\nMenyelesaikan pekerjaan sesuai deadline, target, dan SOP perusahaan\nSiap mengikuti alur kerja perusahaan\nNilai Plus\nMemahami atau pernah mengerjakan AI Agent\nMemiliki pengalaman integrasi AI ke website atau sistem kerja\nKemampuan coding yang kuat sangat disukai\nTerbiasa mengerjakan project end-to-end dari frontend sampai backend menjadi nilai tambah",
+        "Link_Lowongan": "https://glints.com/id/opportunities/jobs/web-developer/bc9861bb-d7f7-4e51-bafc-cdce7579e5c8",
+        "match_percentage": 40.0,
+        "matched_skills": [
+            "javascript",
+            "mysql"
+        ]
+    },
+    {
+        "Judul_Pekerjaan": "Web Developer",
+        "Jenis_Pekerjaan": "Penuh Waktu",
+        "Nama_Perusahaan": "Lumecreative.id",
+        "Lokasi": "Gading Serpong",
+        "Rentang_Gaji": "Rp4.560.000 - 6.840.000/Bulan",
+        "Skills": "Microsoft SQL Server | React.js | MongoDB | MySQL | PostgreSQL | Laravel | Node.js | JavaScript | C++ | jQuery",
+        "Benefit_Pekerjaan": "THR | Near Public Transport | Career Path",
+        "Kualifikasi_Persyaratan": "Kerja di lokasi | 3 - 5 tahun pengalaman | Minimal Sarjana (S1) | 25-30 tahun | Laki-laki saja",
+        "Deskripsi_Pekerjaan": "Perusahaan Lumecreative.id adalah sebuah perusahaan yang berfokus pada pengembangan teknologi dan solusi digital untuk berbagai industri. Dengan visi untuk menjadi pionir dalam inovasi teknologi di Indonesia, Lumecreative.id terus berinovasi dan menciptakan nilai tambah bagi pelanggan dengan solusi yang efisien dan andal. Karena perusahaan kami terus berkembang, kami mencari individu yang memiliki bakat dan dedikasi tinggi untuk bergabung dengan tim kami. Sebagai Full Stack Developer atau Web Developer, Anda akan berkesempatan untuk berkontribusi dalam proyek-proyek menarik yang memengaruhi dunia teknologi di masa depan.\nTugas-tugas utama sebagai Full Stack Developer atau Web Developer di Lumecreative.id mencakup pengembangan aplikasi web dari awal hingga akhir, mulai dari desain antarmuka hingga integrasi database. Anda akan bekerja dalam tim multidisipliner untuk mengembangkan platform digital yang efisien dan andal. Tugas-tugas ini mencakup pemrograman web menggunakan Node.js, JavaScript, jQuery, MySQL, PostgreSQL, React.js, Microsoft SQL Server, Laravel, serta MongoDB. Anda juga akan bertanggung jawab atas pengelolaan data dan pengembangan algoritma untuk meningkatkan kinerja aplikasi. Keahlian dalam C++ akan sangat dihargai dalam proses pengembangan perangkat lunak kompleks.\nLumecreative.id mencari kandidat yang sudah memiliki gelar S1 dan usia laki-laki dengan pengalaman minimal 3 hingga 5 tahun di bidangnya. Anda harus memiliki keahlian yang mendalam dalam penggunaan Node.js, JavaScript, jQuery, MySQL, PostgreSQL, React.js, Microsoft SQL Server, Laravel, MongoDB, serta C++. Keberhasilan di perusahaan ini akan didasarkan pada kemampuan Anda untuk bekerja dalam tim, mengembangkan solusi teknologi yang inovatif, dan memastikan kualitas tinggi dari setiap proyek yang Anda kerjakan. Kami menawarkan lingkungan kerja yang dinamis dan penuh tantangan, serta kesempatan untuk berkembang profesional di bidang teknologi.",
+        "Link_Lowongan": "https://glints.com/id/opportunities/jobs/web-developer/8381f496-c95f-45ff-b352-3326024e41cc",
+        "match_percentage": 40.0,
+        "matched_skills": [
+            "microsoft sql server",
+            "mysql",
+            "laravel",
+            "javascript"
+        ]
+    },
+    {
+        "Judul_Pekerjaan": "Web Developer Intern",
+        "Jenis_Pekerjaan": "magang",
+        "Nama_Perusahaan": "MarviO",
+        "Lokasi": "Jl. Danau Beratan VI, No. 2A, Jimbaran, Kuta Selatan",
+        "Rentang_Gaji": "Rp700.000 - 750.000/Bulan",
+        "Skills": "Network Troubleshooting | Java | Node.js | Python | Technical Support | Teamwork | C++ | PHP | PostgreSQL | Laravel | Microsoft SQL Server | Help Desk | IT Support | Time Management | MongoDB | MySQL | Troubleshooting",
+        "Benefit_Pekerjaan": "Career Path | Training/Certification",
+        "Kualifikasi_Persyaratan": "Mahasiswa / siswa jurusan RPL / Informatika / TI / Sistem Informasi | Paham dasar pemrograman (HTML, CSS, JS / PHP / Python menjadi nilai plus) | Mau belajar & cepat beradaptasi",
+        "Deskripsi_Pekerjaan": "Note : Nominal uang saku yang tercantum merupakan estimasi dan bersifat tentatif. Besaran yang diterima dapat menyesuaikan kebijakan perusahaan serta ketentuan yang berlaku.\nMembantu pengembangan website & aplikasi\nMaintenance sistem dan testing aplikasi\nUpdate konten website / landing page\nMembantu proses debugging & troubleshooting\nSupport tim IT / developer\nDokumentasi pekerjaan teknis sederhana\nBelajar implementasi project real\nBersedia kerja onsite (di utamakan wilayah Bali)\nMemiliki laptop pribadi\nSiap magang minimal 3 bulan",
+        "Link_Lowongan": "https://glints.com/id/opportunities/jobs/web-developer-intern/0d2a78e0-115b-4118-b78b-afe94de10dff",
+        "match_percentage": 17.6,
+        "matched_skills": [
+            "laravel",
+            "microsoft sql server",
+            "mysql"
+        ]
+    },
+    {
+        "Judul_Pekerjaan": "Web Developer",
+        "Jenis_Pekerjaan": "Penuh Waktu",
+        "Nama_Perusahaan": "Pt Sumber Data Indonesia",
+        "Lokasi": "Jl. Keuangan I No.31 Cilandak, Jakarta Selatan",
+        "Rentang_Gaji": "-",
+        "Skills": "Next.Js | HTML | Vue.js | JavaScript | CSS | React.js",
+        "Benefit_Pekerjaan": "Career Path | BPJS Tenaga Kerja | Meal Allowance | THR | BPJS Kesehatan",
+        "Kualifikasi_Persyaratan": "Menguasai HTML, CSS, JavaScript | Berpengalaman dengan Framework (React / Vue / NextJS / sejenisnya) | Memahami API integration | Memiliki kemampuan problem solving yang baik",
+        "Deskripsi_Pekerjaan": "Merancang & Mengembangkan Situs / Web\nMenerjemahkan Design Visual ke dalam kode\nIntegrasi sistem / database\nMelakukan pengujian / memperbaiki bug\nmenjaga perform & Keamanan situs",
+        "Link_Lowongan": "https://glints.com/id/opportunities/jobs/web-developer/5606b899-0505-4e26-92b3-8dc3441f94ab",
+        "match_percentage": 16.7,
+        "matched_skills": [
+            "javascript"
         ]
     }
 ]

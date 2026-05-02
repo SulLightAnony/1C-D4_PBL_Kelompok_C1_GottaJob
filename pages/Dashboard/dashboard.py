@@ -7,19 +7,9 @@ from PyQt5.QtGui import QColor
 import json
 import os
 
-file_path = "../../database/Database Permanen/Favorit/favorit.json"
-
-def load_favorite_job(file_path):
-    try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-        return data
-    except Exception as e:
-        print(f"Gagal membaca file JSON: {e}")
-        return None
-
 #import modul pengolahan data
-from Modul.modul_pengolahan_data import hitung_persentase_skill
+from Modul.modul_pengolahan_data import hitung_persentase_skill, ambil_insight_pasar, ambil_top_skills
+from Modul.modul_database import get_database_permanen_dir, get_favorit, get_aktivitas
 
 class Card(QFrame):
     def __init__(self, parent=None, border_color="#AAD9B7"):
@@ -189,258 +179,176 @@ class DashboardPage(QWidget):
         left_col = QVBoxLayout()
         left_col.setSpacing(20)
 
-        # 1. KARTU LOWONGAN FAVORIT (Buat objeknya dulu)
-        dev_card = Card(border_color="#AAD9B7")
-        dev_layout = QVBoxLayout(dev_card)
-        dev_layout.setContentsMargins(25, 25, 25, 25)
+        # 1. KARTU LOWONGAN FAVORIT
+        self.dev_card = Card(border_color="#AAD9B7")
+        self.dev_layout = QVBoxLayout(self.dev_card)
+        self.dev_layout.setContentsMargins(25, 25, 25, 25)
+        
+        left_col.addWidget(self.dev_card)
 
+        # 2. TREN SKILL MINGGU INI
+        self.trend_card = Card(border_color="transparent")
+        self.trend_layout = QVBoxLayout(self.trend_card)
+        self.trend_layout.setContentsMargins(25, 25, 25, 25)
+        
+        left_col.addWidget(self.trend_card)
+        body_layout.addLayout(left_col, 2)
+
+        # --- KOLOM KANAN (Insight & Aktivitas) ---
+        right_col = QVBoxLayout()
+        right_col.setSpacing(20)
+
+        self.insight_card = Card(border_color="transparent")
+        self.ins_card_layout = QVBoxLayout(self.insight_card)
+        self.ins_card_layout.setContentsMargins(20, 20, 20, 20)
+        self.ins_card_layout.setSpacing(15)
+        
+        right_col.addWidget(self.insight_card)
+
+        # Aktivitas Terkini
+        self.act_card = Card(border_color="transparent")
+        self.act_lay = QVBoxLayout(self.act_card)
+        self.act_lay.setContentsMargins(25, 25, 25, 25)
+        
+        right_col.addWidget(self.act_card)
+
+        body_layout.addLayout(right_col, 1)
+        body_outer_layout.addStretch()
+
+        # Load data pertama kali
+        self.load_data()
+
+    def clear_layout(self, layout):
+        if layout is not None:
+            while layout.count():
+                item = layout.takeAt(0)
+                widget = item.widget()
+                if widget is not None:
+                    widget.deleteLater()
+                else:
+                    self.clear_layout(item.layout())
+
+    def load_data(self):
+        # Bersihkan layout lama
+        self.clear_layout(self.dev_layout)
+        self.clear_layout(self.trend_layout)
+        self.clear_layout(self.ins_card_layout)
+        self.clear_layout(self.act_lay)
+        
+        # 1. Populating Favorit
         header_fav = QLabel("Lowongan Favorit")
         header_fav.setStyleSheet("font-weight: bold; color: #888; font-size: 24px;")
-        dev_layout.addWidget(header_fav)
-
+        self.dev_layout.addWidget(header_fav)
+        
+        self.name_info = QLabel()
+        self.salary = QLabel()
+        self.salary.setStyleSheet("font-weight: bold; color: #333; font-size: 15px;")
+        
         top_info = QHBoxLayout()
-        name_info = QLabel() # Kosongkan dulu
-        salary = QLabel() # Kosongkan dulu
-        salary.setStyleSheet("font-weight: bold; color: #333; font-size: 15px;")
-        top_info.addWidget(name_info)
+        top_info.addWidget(self.name_info)
         top_info.addStretch()
-        top_info.addWidget(salary)
-        dev_layout.addLayout(top_info)
+        top_info.addWidget(self.salary)
+        self.dev_layout.addLayout(top_info)
+        
+        self.tags_layout = QHBoxLayout()
+        self.dev_layout.addLayout(self.tags_layout)
 
-        tags_layout = QHBoxLayout() # Layout untuk tags hitam
-        dev_layout.addLayout(tags_layout)
+        # Ambil favorit dari modul_database
+        job_data = get_favorit()
         
-        # LOGIKA PENGISIAN DATA DARI JSON
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        path_json = os.path.join(current_dir, "..", "..", "database", "Database Permanen", "Favorit", "favorit.json")
-        
-        job_data = load_favorite_job(path_json)
+        # Tentukan file arsip mana yang akan dibaca untuk tren
+        # Prioritas: 1. source_file dari favorit, 2. File pertama di folder archive
+        db_dir = get_database_permanen_dir()
+        archive_json = None
         
         if job_data:
+            archive_json = job_data.get("source_file")
+            
+            # Jika source_file tidak ada atau tidak valid, coba tebak dari judul/folder
+            if not archive_json or not os.path.exists(archive_json):
+                import glob
+                all_archives = glob.glob(os.path.join(db_dir, "*.json"))
+                if all_archives:
+                    archive_json = all_archives[0]
+
             judul = job_data.get("Judul_Pekerjaan", "Lowongan")
             perusahaan = job_data.get("Nama_Perusahaan", "Perusahaan")
             jenis = job_data.get("Jenis_Pekerjaan", "-")
             gaji = job_data.get("Rentang_Gaji", "-")
             match_val = int(job_data.get("match_percentage", 0))
 
-            name_info.setText(f"<b>{judul.upper()}</b><br><font color='#777'>{perusahaan} | {jenis}</font>")
-            salary.setText(gaji)
+            self.name_info.setText(f"<b>{judul.upper()}</b><br><font color='#777'>{perusahaan} | {jenis}</font>")
+            self.salary.setText(gaji)
 
-            #scroll area untuk tag skill
-            scroll_tags = QScrollArea()
-            scroll_tags.setWidgetResizable(True)
-            scroll_tags.setFixedHeight(50) 
-            scroll_tags.setFrameShape(QFrame.NoFrame)
-            scroll_tags.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff) # Scroll halus tanpa bar kaku
-            scroll_tags.setStyleSheet("background: transparent;")
+            skill_list = job_data.get("Skills", "").split(" | ")
+            for s in skill_list:
+                tag = QLabel(s.strip())
+                tag.setStyleSheet("background-color: #1A1A1A; color: white; padding: 6px 15px; border-radius: 10px; font-size: 11px; font-weight: bold;")
+                self.tags_layout.addWidget(tag)
+            self.tags_layout.addStretch()
 
-            container_tags = QWidget()
-            container_tags.setStyleSheet("background: transparent;")
-            tags_h = QHBoxLayout(container_tags)
-            tags_h.setContentsMargins(0, 0, 0, 0)
+            self.dev_layout.addSpacing(20)
+            self.dev_layout.addWidget(SkillProgress("Kecocokan skill", match_val))
+        else:
+            self.name_info.setText("<b>Belum ada pekerjaan favorit</b><br><font color='#777'>Pilih dari Job Archive</font>")
+            import glob
+            all_archives = glob.glob(os.path.join(db_dir, "*.json"))
+            if all_archives:
+                archive_json = all_archives[0]
 
-            # Tags Skills
-            owned_skills = job_data.get("matched_skills", [])
-
-            if not owned_skills:
-                owned_skills = job_data.get("Skills", "").split(" | ")
-            
-            for s in owned_skills:
-                skill_text = s.strip().title()
-                if skill_text:
-                    tag = QLabel(skill_text)
-                    tag.setStyleSheet("""
-                        background-color: #1A1A1A; 
-                        color: white; 
-                        padding: 6px 15px; 
-                        border-radius: 10px; 
-                        font-size: 11px; 
-                        font-weight: bold;
-                    """)
-                    tags_layout.addWidget(tag)
-            tags_layout.addStretch()
-
-            dev_layout.addSpacing(20)
-            
-            #layout untuk nampung bar dan button
-            match_btn_layout = QHBoxLayout()
-            match_btn_layout.setSpacing(15)
-
-            match_btn_layout.addWidget(SkillProgress("Kecocokan skill", match_val), 4)
-
-            #button lihat gap skill
-            btn_gap = QPushButton("Lihat Gap Skill")
-            btn_gap.setCursor(Qt.PointingHandCursor)
-            btn_gap.setStyleSheet("""
-                QPushButton {
-                    background-color: #D1D5DB; 
-                    color: #374151;
-                    border-radius: 8px; 
-                    padding: 8px 15px;
-                    font-weight: bold; 
-                    font-size: 12px; 
-                    border: 1px solid #9CA3AF;
-                }
-                QPushButton:hover { background-color: #BEC3CC; }
-            """)
-
-            btn_gap.clicked.connect(self.buka_gap_skill)
-
-            match_btn_layout.addWidget(btn_gap, 1)
-
-            dev_layout.addLayout(match_btn_layout)
-        
-        left_col.addWidget(dev_card)
-
-        # 2. TREN SKILL MINGGU INI
-        trend_card = Card(border_color="transparent")
-        trend_layout = QVBoxLayout(trend_card)
-        trend_layout.setContentsMargins(25, 25, 25, 25)
+        # 2. Populating Tren Skill
         trend_title = QLabel("TREN SKILL MINGGU INI")
         trend_title.setStyleSheet("font-weight: bold; color: #555; margin-bottom: 10px;")
-        trend_layout.addWidget(trend_title)
-
-        #pembersihan data lama
-        while trend_layout.count() > 1:
-            item = trend_layout.takeAt(1)
-            if item.widget():
-                item.widget.deleteLater()
+        self.trend_layout.addWidget(trend_title)
         
         try:
-            #logika scanning folder archive
-            job_title = job_data.get("Judul_Pekerjaan", "").lower().replace(" ", "_")
-            file_target = f"{job_title}.json"
-            folder_archive = os.path.join(current_dir,"..","..","database", "Database Permanen", "Job Archive", file_target)
-            # List semua file json di folder Job Archive
-            if os.path.exists(folder_archive):
-                hasil_stats = hitung_persentase_skill(folder_archive)
-
-                if isinstance(hasil_stats, dict) and hasil_stats:
-                    count = 0
-                    for persentase in sorted(hasil_stats.keys(), reverse=True, key=float):
-                        for skill_name in hasil_stats[persentase]:
-                            if count < 5:
-                                trend_layout.addWidget(SkillProgress(skill_name, int(float(persentase))))
-                                count += 1
+            if archive_json and os.path.exists(archive_json):
+                top_skills = ambil_top_skills(archive_json, limit=5)
+                
+                if top_skills:
+                    for skill_name, persentase in top_skills:
+                        self.trend_layout.addWidget(SkillProgress(skill_name, persentase))
                 else:
-                    trend_layout.addWidget(QLabel("Belum ada statistik untuk kategori ini."))
-
+                    self.trend_layout.addWidget(QLabel("Belum ada data skill di arsip terpilih."))
             else:
-                trend_layout.addWidget(QLabel(f"File {file_target} belum tersedia di Archive."))
+                self.trend_layout.addWidget(QLabel("Silakan cari pekerjaan di Live Discovery terlebih dahulu."))
         except Exception as e:
             print(f"Error Tren Skill: {e}")
-            trend_layout.addWidget(QLabel("Gagal memuat tren skill."))
-        left_col.addWidget(trend_card)
-        body_layout.addLayout(left_col,2)
+            self.trend_layout.addWidget(QLabel("Gagal memuat tren skill."))
 
-        # --- KOLOM KANAN (Insight & Aktivitas) ---
-        right_col = QVBoxLayout()
-        right_col.setSpacing(20)
-
-        insight_card = Card(border_color="transparent") # Gunakan transparent agar senada dengan Tren Skill
-        ins_card_layout = QVBoxLayout(insight_card)
-        ins_card_layout.setContentsMargins(20, 20, 20, 20)
-        ins_card_layout.setSpacing(15)
-        
-        # Insight Pasar
+        # 3. Populating Insight Pasar
         ins_title = QLabel("INSIGHT PASAR")
         ins_title.setStyleSheet("font-weight: bold; color: #555; margin-top: 5px;")
-        ins_card_layout.addWidget(ins_title)
-
-        #bersihkan data sebelumnya
-        while ins_card_layout.count() > 1:
-            item = ins_card_layout.takeAt(1)
-            if item.widget():
-                item.widget().deleteLater()
+        self.ins_card_layout.addWidget(ins_title)
 
         try:
-            job_title = job_data.get("Judul_Pekerjaan", "").lower().replace(" ", "_")
-            file_target = f"{job_title}.json"
-            archive_json = os.path.join(current_dir,"..","..","database", "Database Permanen", "Job Archive", file_target)
-
-            # Default teks jika data tidak lengkap
-            teks_insight = "Belum ada tren skill yang terdeteksi."
-            teks_kontrak = "Data status pekerjaan belum tersedia."
-            teks_gaji = "Informasi gaji belum tersedia."
-            
-            if os.path.exists(archive_json):
-                with open(archive_json, 'r', encoding='utf-8') as f:
-                    all_jobs = json.load(f)
-
-                if all_jobs:
-                    hasil_stats = hitung_persentase_skill(archive_json)
-                    if hasil_stats:
-                        persentase_top = list(hasil_stats.keys()) [0]
-                        skill_top = " & ".join(hasil_stats[persentase_top][:2])
-                        teks_insight = f"fokus kuasai {skill_top}."
-
-                    status_list = [j.get("Jenis_Pekerjaan", "Full-time") for j in all_jobs]
-                    from collections import Counter
-                    most_common_status = Counter(status_list).most_common(1)[0][0]
-                    teks_kontrak = f"Didominasi posisi {most_common_status}."
-
-                    import re
-                    gaji_list = []
-                    for j in all_jobs:
-                        gaji_str = j.get("Rentang_Gaji", "")
-                        angka = re.findall(r'\d+', gaji_str.replace('.', ''))
-                        if angka:
-                            # Ambil rata-rata dari batas bawah dan atas jika ada
-                            rata_rata_job = sum(map(int, angka)) / len(angka)
-                            gaji_list.append(rata_rata_job)
-                    
-                    if gaji_list:
-                        avg_gaji = sum(gaji_list) / len(gaji_list)
-                        teks_gaji = f"Gaji rata-rata sekitar Rp {avg_gaji/1_000_000:.1f} jt/bulan"
-                    
-                    ins_card_layout.addWidget(InsightBox(teks_insight, "#D8F3DC", "#52B788", "#1B4332"))
-                    ins_card_layout.addWidget(InsightBox(teks_kontrak, "#FFE5D9", "#FB8B24", "#5F0F40"))
-                    ins_card_layout.addWidget(InsightBox(teks_gaji, "#CAF0F8", "#00B4D8", "#03045E"))
+            if archive_json and os.path.exists(archive_json):
+                insight_data = ambil_insight_pasar(archive_json)
+                
+                if insight_data:
+                    self.ins_card_layout.addWidget(InsightBox(insight_data["skill"], "#D8F3DC", "#52B788", "#1B4332"))
+                    self.ins_card_layout.addWidget(InsightBox(insight_data["kontrak"], "#FFE5D9", "#FB8B24", "#5F0F40"))
+                    self.ins_card_layout.addWidget(InsightBox(insight_data["gaji"], "#CAF0F8", "#00B4D8", "#03045E"))
+                else:
+                    self.ins_card_layout.addWidget(QLabel("Belum ada data untuk insight."))
             else:
-                ins_card_layout.addWidget(QLabel(f"File {file_target} belum ada di archive."))
+                self.ins_card_layout.addWidget(QLabel("Insight akan muncul setelah Anda mencari pekerjaan."))
         except Exception as e:
-            ins_card_layout.addWidget(QLabel(f"Gagal memuat insight: {e}"))
+            self.ins_card_layout.addWidget(QLabel(f"Gagal memuat insight: {e}"))
 
-        right_col.addWidget(insight_card)
-
-        # Aktivitas Terkini
-        act_card = Card(border_color="transparent")
-        act_lay = QVBoxLayout(act_card)
-        act_lay.setContentsMargins(25, 25, 25, 25)
+        # 4. Populating Aktivitas Terkini
         act_lbl = QLabel("AKTIVITAS TERKINI")
         act_lbl.setStyleSheet("font-weight: bold; color: #555; margin-bottom: 10px;")
-        act_lay.addWidget(act_lbl)
-        act_lay.addWidget(QLabel("• <b>Live Discovery Selesai</b><br>ios developer · 12 hasil"))
-        act_lay.addWidget(QLabel("• <b>Lowongan disimpan</b><br>PT Sigma Global Teknologi"))
-        act_lay.addWidget(QLabel("• <b>Live Discovery Selesai</b><br>mobile developer · 5 hasil"))
-        right_col.addWidget(act_card)
-
-        body_layout.addLayout(right_col, 1)
-        body_outer_layout.addStretch()
-
-        #gap_skill
-    def buka_gap_skill(self):
-        # 1. Tambahkan Efek Blur pada area konten
-        self.blur_effect = QGraphicsBlurEffect()
-        self.blur_effect.setBlurRadius(15)
-        self.content_area.setGraphicsEffect(self.blur_effect)
-
-        # 2. Ambil data skill dari JSON (Logika Gap Skill)
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        path_json = os.path.join(current_dir, "..", "..", "database", "Database Permanen", "Favorit", "favorit.json")
-        job_data = load_favorite_job(path_json)
+        self.act_lay.addWidget(act_lbl)
         
-        gap_list = []
-        if job_data:
-            #ambil semua skill yang ada di lowongan favorit
-            semua_skill = [s.strip().lower() for s in job_data.get("Skills", "").split("|") if s.strip()]
+        list_aktivitas = get_aktivitas()
+        if list_aktivitas:
+            for act in list_aktivitas:
+                msg_lbl = QLabel(f"• {act.get('pesan')}")
+                msg_lbl.setWordWrap(True)
+                msg_lbl.setStyleSheet("font-size: 13px; color: #333; margin-bottom: 5px;")
+                self.act_lay.addWidget(msg_lbl)
+        else:
+            self.act_lay.addWidget(QLabel("Belum ada aktivitas tercatat."))
 
-            #ambil matched skill
-            skill_dimiliki = [s.strip().lower() for s in job_data.get("matched_skills", [])]
 
-            #filter : agar yang masuk tidak ada di skill_dimiliki
-            gap_list = [s.title() for s in semua_skill if s not in skill_dimiliki]
-
-        # 3. Tampilkan Modal
-        self.modal = ModalGapSkill(self, gap_list)
-        self.modal.show()

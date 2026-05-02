@@ -147,8 +147,8 @@ if process_dir not in sys.path:
     sys.path.insert(0, process_dir)
 
 from modul_visualisasi_data import PieChartWidget
-from modul_pengolahan_data import hitung_persentase_skill, cari_pekerjaan_cocok
-from modul_database import get_database_permanen_dir, set_favorit, get_favorit
+from modul_pengolahan_data import hitung_persentase_skill, cari_pekerjaan_cocok, ambil_jenis_pekerjaan_unik
+from modul_database import get_database_permanen_dir, set_favorit, get_favorit, catat_aktivitas
 from modul_antarmuka_pengguna import JobMatchResultContainer, JobDetailPanel, JobDashboardWidget
 
 # ─────────────────────────────────────────────────────────────
@@ -221,6 +221,8 @@ QPushButton:hover {
 """.replace("__ICON_PATH__", icon_path)
 
 class JobArchivePage(QWidget):
+    favorite_changed = pyqtSignal()
+
     def __init__(self):
         super().__init__()
         self.setObjectName("JobArchivePage")
@@ -234,9 +236,9 @@ class JobArchivePage(QWidget):
         self.main_layout.setSpacing(18)
 
         # ── Panel Atas (Pemilihan Data) ──
-        box = QFrame()
-        box.setObjectName("PanelCard")
-        box_layout = QVBoxLayout(box)
+        self.file_selection_panel = QFrame()
+        self.file_selection_panel.setObjectName("PanelCard")
+        box_layout = QVBoxLayout(self.file_selection_panel)
         box_layout.setContentsMargins(16, 16, 16, 16)
 
         # Judul dengan Icon
@@ -282,7 +284,7 @@ class JobArchivePage(QWidget):
         box_layout.addSpacing(10)
         box_layout.addLayout(ctrl_layout)
 
-        self.main_layout.addWidget(box)
+        self.main_layout.addWidget(self.file_selection_panel)
 
         self.main_stack = QStackedWidget()
         self.main_layout.addWidget(self.main_stack, stretch=1)
@@ -339,6 +341,10 @@ class JobArchivePage(QWidget):
         self.main_stack.addWidget(self.dashboard_view)
         self.main_stack.addWidget(self.table_view)
         self.main_stack.addWidget(self.detail_view)
+
+        # Hubungkan perubahan halaman untuk mengatur visibilitas panel file
+        self.main_stack.currentChanged.connect(self._update_panel_visibility)
+        self.dashboard_view.right_stack.currentChanged.connect(self._update_panel_visibility)
         
         # Load daftar file pertama kali (tanpa auto-check link agar tidak mengganggu start-up)
         self.load_file_list(auto_check=True)
@@ -422,6 +428,7 @@ class JobArchivePage(QWidget):
                         json.dump(new_data, f, ensure_ascii=False, indent=4)
             
             QMessageBox.information(self, "Berhasil", f"Berhasil menghapus {total_deleted} lowongan kadaluarsa.")
+            self.favorite_changed.emit()
             self.load_file_list(auto_check=True)
 
     def _on_file_selected(self, index):
@@ -447,6 +454,9 @@ class JobArchivePage(QWidget):
                 
                 total_jobs = len(data_json)
                 total_skills = sum(len(s) for s in hasil_olah.values())
+                
+                unique_types = ambil_jenis_pekerjaan_unik(file_path)
+                        
                 max_p = max(hasil_olah.keys())
                 dominant_skill = hasil_olah[max_p][0]
                 
@@ -463,6 +473,13 @@ class JobArchivePage(QWidget):
                     item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
                     item.setCheckState(Qt.Unchecked)
                     self.skill_list.addItem(item)
+                    
+                self.dashboard_view.job_type_list.clear()
+                for jt in unique_types:
+                    item = QListWidgetItem(jt)
+                    item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
+                    item.setCheckState(Qt.Unchecked)
+                    self.dashboard_view.job_type_list.addItem(item)
             else:
                 self.chart.set_data({})
         except Exception as e:
@@ -479,8 +496,14 @@ class JobArchivePage(QWidget):
             QMessageBox.warning(self, "Peringatan", "Pilih minimal satu skill.")
             return
 
+        selected_job_types = []
+        for i in range(self.dashboard_view.job_type_list.count()):
+            item = self.dashboard_view.job_type_list.item(i)
+            if item.checkState() == Qt.Checked:
+                selected_job_types.append(item.text())
+
         self.user_skills = [s.lower() for s in selected]
-        hasil = cari_pekerjaan_cocok(self.current_file, selected)
+        hasil = cari_pekerjaan_cocok(self.current_file, selected, selected_job_types)
         
         if not hasil:
             QMessageBox.information(self, "Info", "Tidak ada kecocokan.")
@@ -511,9 +534,18 @@ class JobArchivePage(QWidget):
             if res == QMessageBox.No:
                 return
 
+        # Tambahkan informasi file asal agar Dashboard tahu arsip mana yang harus dibaca
+        job_data["source_file"] = self.current_file
+
         if set_favorit(job_data):
             QMessageBox.information(self, "Berhasil", f"'{job_data.get('Judul_Pekerjaan')}' sekarang menjadi favorit utama Anda!")
             
+            # Catat aktivitas
+            catat_aktivitas(f"<b>Pekerjaan Favorit Diganti</b><br>{job_data.get('Judul_Pekerjaan')}")
+
+            # Emit signal agar dashboard bisa refresh
+            self.favorite_changed.emit()
+
             # Refresh tabel
             self.match_results.set_data(
                 self.current_matches, 
@@ -556,6 +588,7 @@ class JobArchivePage(QWidget):
             if not new_data:
                 os.remove(self.current_file)
                 QMessageBox.information(self, "Berhasil", "Data terakhir dihapus, file arsip dibersihkan.")
+                catat_aktivitas(f"<b>Arsip Dihapus</b><br>{os.path.basename(self.current_file)}")
                 self.load_file_list(auto_check=True)
                 self.main_stack.setCurrentWidget(self.dashboard_view)
             else:
@@ -563,7 +596,11 @@ class JobArchivePage(QWidget):
                     json.dump(new_data, f, ensure_ascii=False, indent=4)
                 
                 QMessageBox.information(self, "Berhasil", "Pekerjaan berhasil dihapus dari arsip.")
+                catat_aktivitas(f"<b>Lowongan Dihapus</b><br>{job_data.get('Judul_Pekerjaan')}")
                 
+                # Emit signal agar dashboard bisa refresh (tren skill mungkin berubah)
+                self.favorite_changed.emit()
+
                 # 4. Refresh tampilan tabel
                 # Update current_matches list
                 self.current_matches = [m for m in self.current_matches if m.get("Link_Lowongan") != target_link]
@@ -582,4 +619,15 @@ class JobArchivePage(QWidget):
                         fav_link=fav_link
                     )
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Gagal menghapus data: {e}")
+            QMessageBox.critical(self, "Error", f"Gagal menghapus data: {e}")
+    def _update_panel_visibility(self):
+        """Mengatur visibilitas panel pemilihan file berdasarkan halaman yang aktif."""
+        # Panel hanya terlihat jika main_stack ada di dashboard_view 
+        # DAN right_stack (di dalam dashboard_view) ada di halaman 0 (Pilih Skill)
+        if self.main_stack.currentWidget() == self.dashboard_view:
+            if self.dashboard_view.right_stack.currentIndex() == 0:
+                self.file_selection_panel.setVisible(True)
+            else:
+                self.file_selection_panel.setVisible(False)
+        else:
+            self.file_selection_panel.setVisible(False)
