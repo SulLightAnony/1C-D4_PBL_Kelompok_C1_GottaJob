@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
+from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, QScrollArea, QPushButton, QGraphicsBlurEffect, 
                              QFrame, QProgressBar, QGraphicsDropShadowEffect, QSpacerItem, QSizePolicy)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor
@@ -68,10 +68,83 @@ class InsightBox(QLabel):
             border-left: 5px solid {border};
             border-top: none; border-right: none; border-bottom: none;
             border-radius: 10px;
-            font-size: 13px;
+            font-size: 17px;
             font-weight: 500;
         """)
 
+class ModalGapSkill(QFrame):
+    def __init__(self, parent, gap_skills):
+        super().__init__(parent)
+        # Overlay gelap transparan menutupi seluruh dashboard
+        self.setGeometry(0, 0, parent.width(), parent.height())
+        self.setStyleSheet("background-color: rgba(0, 0, 0, 0.4); border: none;")
+        
+        # Kontainer Modal (Kotak Putih di Tengah)
+        self.modal_content = Card(self, border_color="#2C687B")
+        self.modal_content.setFixedSize(500, 400)
+        
+        # Posisikan ke tengah
+        self.posisi_tengah()
+
+        layout = QVBoxLayout(self.modal_content)
+        layout.setContentsMargins(30, 30, 30, 30)
+        layout.setSpacing(15)
+
+        # Judul Modal
+        title = QLabel("Gap Skill Terdeteksi")
+        title.setStyleSheet("font-size: 22px; font-weight: bold; color: #2C687B;")
+        layout.addWidget(title)
+
+        desc = QLabel("Berikut adalah skill yang perlu kamu pelajari untuk meningkatkan kecocokan:")
+        desc.setWordWrap(True)
+        desc.setStyleSheet("color: #666; font-size: 14px;")
+        layout.addWidget(desc)
+
+        # Scroll Area untuk Skill yang Belum Dikuasai
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.NoFrame)
+        scroll.setStyleSheet("background: transparent;")
+        
+        container = QWidget()
+        container_layout = QVBoxLayout(container)
+        container_layout.setAlignment(Qt.AlignTop)
+
+        if gap_skills:
+            for skill in gap_skills:
+                item = QLabel(f"• {skill}")
+                item.setStyleSheet("font-size: 16px; color: #333; padding: 5px;")
+                container_layout.addWidget(item)
+        else:
+            container_layout.addWidget(QLabel("Selamat! Semua skill sudah kamu kuasai."))
+
+        scroll.setWidget(container)
+        layout.addWidget(scroll)
+
+        # Tombol Exit / Kembali
+        btn_exit = QPushButton("Kembali ke Dashboard")
+        btn_exit.setCursor(Qt.PointingHandCursor)
+        btn_exit.setStyleSheet("""
+            QPushButton {
+                background-color: #2C687B; color: white;
+                border-radius: 10px; padding: 12px;
+                font-weight: bold; font-size: 14px;
+            }
+            QPushButton:hover { background-color: #3d8ba5; }
+        """)
+        btn_exit.clicked.connect(self.tutup_modal)
+        layout.addWidget(btn_exit)
+
+    def posisi_tengah(self):
+        qr = self.modal_content.frameGeometry()
+        cp = self.parent().rect().center()
+        qr.moveCenter(cp)
+        self.modal_content.move(qr.topLeft())
+
+    def tutup_modal(self):
+        # Hapus efek blur pada dashboard
+        self.parent().content_area.setGraphicsEffect(None)
+        self.deleteLater()
 class DashboardPage(QWidget):
     def __init__(self):
         super().__init__()
@@ -91,11 +164,11 @@ class DashboardPage(QWidget):
         self.main_layout.addWidget(header_widget)
 
         # --- CONTENT AREA ---
-        content_area = QWidget()
-        content_area.setStyleSheet("background-color: #E2E4E4;")
-        self.main_layout.addWidget(content_area)
+        self.content_area = QWidget()
+        self.content_area.setStyleSheet("background-color: #E2E4E4;")
+        self.main_layout.addWidget(self.content_area)
 
-        body_outer_layout = QVBoxLayout(content_area)
+        body_outer_layout = QVBoxLayout(self.content_area)
         body_outer_layout.setContentsMargins(40, 20, 40, 40)
         
         body_layout = QHBoxLayout()

@@ -1,6 +1,20 @@
 [
     {
         "Judul_Pekerjaan": "Web Developer",
+        "Jenis_Pekerjaan": "Penuh Waktu",
+        "Nama_Perusahaan": "Jogja Tama",
+        "Lokasi": "Jl. Arimbi No.1, Kragilan, Sinduadi, Kec. Mlati, Kabupaten Sleman, Daerah Istimewa Yogyakarta 55284",
+        "Rentang_Gaji": "Rp2.624.387 - 3.000.000/Bulan",
+        "Skills": "Laravel | PHP | MySQL",
+        "Benefit_Pekerjaan": "Work Insurance | Health Insurance",
+        "Kualifikasi_Persyaratan": "Pendidikan minimal S1 Ilmu komputer/ Sistem Informasi/ Informasi teknologi | Pengalaman minimal 1 tahun di bidang yang sama | Menguasai PHP, javascript, MySQL, bootstrap | Mampu menggunakan framework Laravel | Menguasai wordpress dan elementor | Komunikatif dan mampu bekerja dalam tim | Memiliki laptop pribadi",
+        "Deskripsi_Pekerjaan": "Membangun perangkat lunak yang kuat dan dapat ditingkatkan dengan membuat fitur baru, melakukan debugging, dan mengoptimalkan aplikasi\nMengembangkan dan mengusulkan produk atau fitur baru dengan memantau industri\nMembuat kode untuk mengembangkan aplikasi web fungsional di perangkat mobile dan desktop\nImplementasi keamanan dan perlindungan data\nDesain dan implementasi solusi penyimpanan data\nBekerja sama dengan desainer, manajer produk, dan administrator sistem untuk mengidentifikasi dan membangun fitur baru",
+        "Link_Lowongan": "https://glints.com/id/opportunities/jobs/web-developer/2e0ef5ab-4d8a-4e1f-ae21-f471b0478339",
+        "match_percentage": 100.0,
+        "matched_skills": [
+            "laravel",
+            "php",
+            "mysql"
         "Jenis_Pekerjaan": "tetap",
         "Nama_Perusahaan": "PT. Partnership Procurement Solution",
         "Lokasi": "Jl. Golf Barat III No.1, Sukamiskin, Kec. Arcamanik, Kota Bandung, Jawa Barat 40293",
@@ -61,6 +75,15 @@
         "Lokasi": "Jl. Ambengan 85 Surabaya",
         "Rentang_Gaji": "Rp4.500.000 - 5.000.000/Bulan",
         "Skills": "MySQL | JavaScript | PHP",
+        "Benefit_Pekerjaan": "Career Path | Work Insurance | Health Insurance",
+        "Kualifikasi_Persyaratan": "Laki-laki / Perempuan | Usia Maksimal 35 Tahun | Minimal memiliki pengalaman 2 tahun di bidang yang sama | Pendidikan Minimal D3 Sistem Informasi / Teknik Informatika | Mahir dalam PHP 8.x | Terampil dalam membangun dan mengonsumsi RESTful APIs | Menguasai MySQL | Menguasai JavaScript | Memahami celah keamanan web | Mampu mendiagnosis masalah teknis yang kompleks dan memberikan solusi yang efektif secara biaya dan waktu. | Cepat belajar teknologi baru di tengah perkembangan industri teknologi finansial yang dinamis.",
+        "Deskripsi_Pekerjaan": "-",
+        "Link_Lowongan": "https://glints.com/id/opportunities/jobs/web-developer/84fba5da-6397-42bd-b879-d30f44e5797e",
+        "match_percentage": 100.0,
+        "matched_skills": [
+            "mysql",
+            "javascript",
+            "php"
         "Benefit_Pekerjaan": "Career Path | BPJS Tenaga Kerja | BPJS Kesehatan",
         "Kualifikasi_Persyaratan": "Laki-laki / Perempuan | Usia Maksimal 35 Tahun | Minimal memiliki pengalaman 2 tahun di bidang yang sama | Pendidikan Minimal D3 Sistem Informasi / Teknik Informatika | Mahir dalam PHP 8.x | Terampil dalam membangun dan mengonsumsi RESTful APIs | Menguasai MySQL | Menguasai JavaScript | Memahami celah keamanan web | Mampu mendiagnosis masalah teknis yang kompleks dan memberikan solusi yang efektif secara biaya dan waktu. | Cepat belajar teknologi baru di tengah perkembangan industri teknologi finansial yang dinamis.",
         "Deskripsi_Pekerjaan": "-",
@@ -73,6 +96,38 @@
     },
     {
         "Judul_Pekerjaan": "Web Developer",
+        "Jenis_Pekerjaan": "Kontrak",
+        "Nama_Perusahaan": "PT. Enigma Cipta Humanika (Enigma Camp)",
+        "Lokasi": "Gedung Menara 165 Lt. 4, Jl. TB Simatupang Kav. 1, RT 009 RW 003, Kel Cilandak Timur, Kec. Pasar Minggu, Jakarta Selatan 12560",
+        "Rentang_Gaji": "-",
+        "Skills": "PHP | JavaScript | HTML | CSS | TypeScript",
+        "Benefit_Pekerjaan": "Health Insurance | Annual Leave",
+        "Kualifikasi_Persyaratan": "Kerja di lokasi | 3 - 5 tahun pengalaman | Minimal Sarjana (S1)",
+        "Deskripsi_Pekerjaan": "Deskripsi pekerjaan Web Developer PT. Enigma Cipta Humanika (Enigma Camp)\nMengembangkan dan memelihara aplikasi berbasis web\nMenganalisis kebutuhan sistem dari user atau stakeholder\nMenulis kode yang rapi, efisien, dan mudah di-maintain\nMelakukan testing, debugging, dan troubleshooting aplikasi\nMengintegrasikan aplikasi dengan database, API, dan layanan pihak ketiga\nBerkolaborasi dengan UI/UX Designer untuk implementasi desain\nBerkoordinasi dengan QA untuk memastikan kualitas aplikasi\nMelakukan dokumentasi teknis terkait sistem atau aplikasi\nMenjaga keamanan dan performa aplikasi\nMengikuti perkembangan teknologi dan best practices terbaru",
+        "Link_Lowongan": "https://glints.com/id/opportunities/jobs/web-developer/f0a02f1b-82ad-4a0a-a721-feeba4faeb68",
+        "match_percentage": 80.0,
+        "matched_skills": [
+            "php",
+            "javascript",
+            "html",
+            "css"
+        ]
+    },
+    {
+        "Judul_Pekerjaan": "Web Developer Intern",
+        "Jenis_Pekerjaan": "Magang",
+        "Nama_Perusahaan": "The Originote",
+        "Lokasi": "South Jakarta",
+        "Rentang_Gaji": "-",
+        "Skills": "PHP | Laravel | MySQL",
+        "Benefit_Pekerjaan": "Sales Commission | Health Insurance | Work Insurance",
+        "Kualifikasi_Persyaratan": ") Familiarity with PHP programming language | ) Familiarity with MySQL or other Database Management System | ) Basic understanding of web development concepts (HTML, CSS, JavaScript) | ) Familiarity with Laravel framework is an advantage | ) Strong willingness to learn and grow in a fast-paced environment",
+        "Deskripsi_Pekerjaan": ") Assist in developing and maintaining company websites and web applications\n) Support the Commercial team in implementing digital campaigns, landing pages, and promotional features\n) Write clean, efficient, and well-documented code\nTroubleshoot, debug, and optimize website performance\n) Collaborate with cross-functional teams to improve user experience",
+        "Link_Lowongan": "https://glints.com/id/opportunities/jobs/web-developer-intern/c114c5d0-616b-49c0-97ae-58f9f7700c82",
+        "match_percentage": 100.0,
+        "matched_skills": [
+            "php",
+            "laravel",
         "Jenis_Pekerjaan": "Freelance",
         "Nama_Perusahaan": "PT. Sinar Multi Kehidupan",
         "Lokasi": "Jln. Alam Raya Komplek Perum. Citra Garden 1 Blok F7 No. 1, RT.5/RW.9, Kalideres, Kec. Kalideres, Kota Jakarta Barat, Daerah Khusus Ibukota Jakarta 11840",
