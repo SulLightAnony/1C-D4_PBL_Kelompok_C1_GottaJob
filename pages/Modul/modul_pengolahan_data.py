@@ -203,7 +203,7 @@ def ambil_insight_pasar(file_path):
         if hasil_stats:
             persentase_top = list(hasil_stats.keys())[0]
             skill_top = " & ".join(hasil_stats[persentase_top][:2])
-            teks_insight = f"{skill_top} mendominasi {persentase_top}% lowongan — Skill ini paling banyak dicari perusahaan."
+            teks_insight = f"Pelajari {skill_top}."
 
         # 2. Insight Kontrak
         teks_kontrak = "Data status pekerjaan belum tersedia."
@@ -227,7 +227,7 @@ def ambil_insight_pasar(file_path):
         
         if gaji_list:
             avg_gaji = sum(gaji_list) / len(gaji_list)
-            teks_gaji = f"Gaji rata-rata sekitar Rp {avg_gaji/1_000_000:.1f} jt/bulan berdasarkan data lowongan yang tersedia."
+            teks_gaji = f"Gaji rata-rata sekitar Rp {avg_gaji/1_000_000:.1f} jt/bulan."
 
         return {
             "skill": teks_insight,
