@@ -152,8 +152,43 @@ def pindahkan_ke_database_permanen(nama_file):
     src = os.path.join(root, "database", "Database Sementara", nama_file)
     dst = os.path.join(root, "database", "Database Permanen", nama_file)
     
-    if os.path.exists(src):
-        os.makedirs(os.path.dirname(dst), exist_ok=True)
-        os.rename(src, dst)
-        return dst
-    return None
+def catat_aktivitas(pesan):
+    """Mencatat aktivitas user ke database/Database Permanen/aktivitas.json."""
+    root = get_root_dir()
+    path = os.path.join(root, "database", "Database Permanen", "aktivitas.json")
+    
+    aktivitas = []
+    if os.path.exists(path):
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                aktivitas = json.load(f)
+        except:
+            aktivitas = []
+            
+    # Tambahkan di awal agar yang terbaru muncul pertama
+    aktivitas.insert(0, {
+        "pesan": pesan,
+        "waktu": "" # Bisa ditambah timestamp jika perlu, tapi pesan sudah cukup untuk saat ini
+    })
+    
+    # Batasi maksimal 6 aktivitas
+    aktivitas = aktivitas[:6]
+    
+    try:
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(aktivitas, f, ensure_ascii=False, indent=4)
+        return True
+    except:
+        return False
+
+def get_aktivitas():
+    """Mengambil daftar aktivitas terbaru."""
+    root = get_root_dir()
+    path = os.path.join(root, "database", "Database Permanen", "aktivitas.json")
+    if os.path.exists(path):
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except:
+            return []
+    return []
