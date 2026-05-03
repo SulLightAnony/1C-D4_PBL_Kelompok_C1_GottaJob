@@ -1,5 +1,13 @@
 [
     {
+        "pesan": "<b>Pekerjaan Favorit Diganti</b><br>Penetration Tester",
+        "waktu": ""
+    },
+    {
+        "pesan": "<b>Pekerjaan Favorit Diganti</b><br>Web Developer",
+        "waktu": ""
+    },
+    {
         "pesan": "<b>Pekerjaan Favorit Diganti</b><br>Mobile Developer (Flutter)",
         "waktu": ""
     },
@@ -13,14 +21,6 @@
     },
     {
         "pesan": "<b>Pekerjaan Favorit Diganti</b><br>Programmer",
-        "waktu": ""
-    },
-    {
-        "pesan": "<b>Pekerjaan Favorit Diganti</b><br>Mobile developer (Flutter) Freelance",
-        "waktu": ""
-    },
-    {
-        "pesan": "<b>Pekerjaan Favorit Diganti</b><br>Mobile developer",
         "waktu": ""
     }
 ]
