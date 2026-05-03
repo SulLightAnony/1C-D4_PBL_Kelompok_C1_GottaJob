@@ -18,12 +18,9 @@ if _pages_dir not in sys.path:
     sys.path.insert(0, _pages_dir)
 
 from CRUD.Shared import muat_data, simpan_data, FIELDS
-from CRUD.Create import gui_tambah_data
 from CRUD.Read import gui_muat_data
-from CRUD.Update import gui_perbarui_data
 from CRUD.Delete import gui_hapus_data_single, gui_hapus_data_massal
 
-from CRUD.Create import JobDialog
 from CRUD.Read import JobCardWidget, JobDetailDialog
 
 # Path assets
@@ -148,6 +145,7 @@ class JobPostingPage(QWidget):
         super().__init__()
         self.selected_ids = set()
         self.data = []
+        self.editing_job_id = None
         self._init_stack()
         self.load_data()
 
@@ -429,13 +427,13 @@ class JobPostingPage(QWidget):
         """)
         btn_back.clicked.connect(lambda: self.page_stack.setCurrentIndex(0))
 
-        lbl_title = QLabel("Tambah Lowongan Baru")
-        lbl_title.setFont(QFont("Segoe UI", 20, QFont.Bold))
-        lbl_title.setStyleSheet("color: #222;")
+        self.lbl_form_title = QLabel("Tambah Lowongan Baru")
+        self.lbl_form_title.setFont(QFont("Segoe UI", 20, QFont.Bold))
+        self.lbl_form_title.setStyleSheet("color: #222;")
 
         header.addWidget(btn_back)
         header.addSpacing(16)
-        header.addWidget(lbl_title)
+        header.addWidget(self.lbl_form_title)
         header.addStretch()
         layout.addLayout(header)
 
@@ -527,6 +525,10 @@ class JobPostingPage(QWidget):
         btn_save.clicked.connect(self._save_new_job)
         card_layout.addWidget(btn_save)
 
+        # Bisa disubmit menggunakan Enter (hardclick/enter)
+        for field in [self.f_judul, self.f_perusahaan, self.f_lokasi, self.f_gaji, self.f_skills, self.f_link]:
+            field.returnPressed.connect(self._save_new_job)
+
         layout.addWidget(card)
         layout.addStretch()
         return page
@@ -548,7 +550,7 @@ class JobPostingPage(QWidget):
             return
 
         new_data = {
-            "id": dt_mod.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "id": self.editing_job_id if self.editing_job_id else dt_mod.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "Judul_Pekerjaan": self.f_judul.text().strip(),
             "Nama_Perusahaan": self.f_perusahaan.text().strip(),
             "Jenis_Pekerjaan": self.f_jenis.currentText(),
@@ -562,8 +564,18 @@ class JobPostingPage(QWidget):
             "Tanggal_Kadaluarsa": f"{selected_qdate.day():02d}/{selected_qdate.month():02d}/{selected_qdate.year()}",
         }
 
-        self.data.append(new_data)
+        if self.editing_job_id:
+            for i, job in enumerate(self.data):
+                if job.get("id") == self.editing_job_id:
+                    self.data[i] = new_data
+                    break
+        else:
+            self.data.append(new_data)
+
         simpan_data(self.data)
+
+        msg = "Lowongan berhasil diedit!" if self.editing_job_id else "Lowongan berhasil ditambahkan!"
+        self.editing_job_id = None
 
         # Reset form
         for w in [self.f_judul, self.f_perusahaan, self.f_lokasi, self.f_gaji, self.f_skills, self.f_link]:
@@ -573,14 +585,47 @@ class JobPostingPage(QWidget):
 
         self.page_stack.setCurrentIndex(0)
         self.load_data()
-        QMessageBox.information(self, "Berhasil", "Lowongan berhasil ditambahkan!")
+        QMessageBox.information(self, "Berhasil", msg)
 
     def add_data(self):
         """Beralih ke halaman form tambah."""
+        self.editing_job_id = None
+        self.lbl_form_title.setText("Tambah Lowongan Baru")
+        for w in [self.f_judul, self.f_perusahaan, self.f_lokasi, self.f_gaji, self.f_skills, self.f_link]:
+            w.clear()
+        self.f_desc.clear()
+        self.f_jenis.setCurrentIndex(0)
+        self.f_date.setDate(QDate.currentDate().addDays(30))
         self.page_stack.setCurrentIndex(1)
 
     def edit_data(self, job_data):
-        gui_perbarui_data(self, JobDialog, job_data)
+        """Beralih ke halaman form untuk mengedit data yang sudah ada."""
+        self.editing_job_id = job_data.get("id")
+        self.lbl_form_title.setText("Edit Lowongan")
+        
+        self.f_judul.setText(job_data.get("Judul_Pekerjaan", ""))
+        self.f_perusahaan.setText(job_data.get("Nama_Perusahaan", ""))
+        
+        jenis = job_data.get("Jenis_Pekerjaan", "")
+        idx = self.f_jenis.findText(jenis)
+        if idx >= 0:
+            self.f_jenis.setCurrentIndex(idx)
+            
+        self.f_lokasi.setText(job_data.get("Lokasi", ""))
+        self.f_gaji.setText(job_data.get("Rentang_Gaji", ""))
+        self.f_skills.setText(job_data.get("Skills", ""))
+        self.f_link.setText(job_data.get("Link_Lowongan", ""))
+        self.f_desc.setPlainText(job_data.get("Deskripsi_Pekerjaan", ""))
+        
+        date_str = job_data.get("Tanggal_Kadaluarsa", "")
+        try:
+            import datetime as dt_mod
+            d = dt_mod.datetime.strptime(date_str, "%d/%m/%Y").date()
+            self.f_date.setDate(QDate(d.year, d.month, d.day))
+        except:
+            self.f_date.setDate(QDate.currentDate().addDays(30))
+            
+        self.page_stack.setCurrentIndex(1)
 
     def delete_single_data(self, job_data):
         gui_hapus_data_single(self, job_data)

@@ -164,12 +164,18 @@ class JobCardWidget(QFrame):
         self.setFixedHeight(240)
         self.setMinimumWidth(320)
         self.setCursor(Qt.PointingHandCursor)
+        self.setFocusPolicy(Qt.StrongFocus)
         self.setup_ui()
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.card_clicked.emit(self.job_data)
         super().mousePressEvent(event)
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
+            self.card_clicked.emit(self.job_data)
+        super().keyPressEvent(event)
 
     def setup_ui(self):
         self.setObjectName("JobCard")
@@ -179,7 +185,7 @@ class JobCardWidget(QFrame):
                 border: 1px solid #e8e8e8;
                 border-radius: 10px;
             }
-            QFrame#JobCard:hover {
+            QFrame#JobCard:hover, QFrame#JobCard:focus {
                 border: 1px solid #2C687B;
             }
         """)
