@@ -149,6 +149,11 @@ class JobPostingPage(QWidget):
         self._init_stack()
         self.load_data()
 
+    def showEvent(self, event):
+        if hasattr(self, 'page_stack'):
+            self.page_stack.setCurrentIndex(0)
+        super().showEvent(event)
+
     def _init_stack(self):
         """Membungkus halaman daftar dan halaman form ke dalam QStackedWidget."""
         outer_layout = QVBoxLayout(self)
