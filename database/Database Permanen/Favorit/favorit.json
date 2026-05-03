@@ -1,18 +1,21 @@
 {
-    "Judul_Pekerjaan": "Web Developer Intern",
-    "Jenis_Pekerjaan": "magang",
-    "Nama_Perusahaan": "MarviO",
-    "Lokasi": "Jl. Danau Beratan VI, No. 2A, Jimbaran, Kuta Selatan",
-    "Rentang_Gaji": "Rp700.000 - 750.000/Bulan",
-    "Skills": "Network Troubleshooting | Java | Node.js | Python | Technical Support | Teamwork | C++ | PHP | PostgreSQL | Laravel | Microsoft SQL Server | Help Desk | IT Support | Time Management | MongoDB | MySQL | Troubleshooting",
+    "Judul_Pekerjaan": "Mobile Developer (Flutter)",
+    "Jenis_Pekerjaan": "Penuh Waktu",
+    "Nama_Perusahaan": "PT Widya Intelektual Bangsa",
+    "Lokasi": "Jl. Sukoharjo No.KM 12,5, Klidon, Sukoharjo, Kec. Ngaglik, Yogyakarta, Daerah Istimewa Yogyakarta 55581",
+    "Rentang_Gaji": "Rp4.500.000 - 5.000.000/Bulan",
+    "Skills": "React Native | Java | iOS Development | Mobile Development | Restful API | Flutter | Mobile UI Design | Kotlin | Android Development",
     "Benefit_Pekerjaan": "Career Path | Training/Certification",
-    "Kualifikasi_Persyaratan": "Mahasiswa / siswa jurusan RPL / Informatika / TI / Sistem Informasi | Paham dasar pemrograman (HTML, CSS, JS / PHP / Python menjadi nilai plus) | Mau belajar & cepat beradaptasi",
-    "Deskripsi_Pekerjaan": "Note : Nominal uang saku yang tercantum merupakan estimasi dan bersifat tentatif. Besaran yang diterima dapat menyesuaikan kebijakan perusahaan serta ketentuan yang berlaku.\nMembantu pengembangan website & aplikasi\nMaintenance sistem dan testing aplikasi\nUpdate konten website / landing page\nMembantu proses debugging & troubleshooting\nSupport tim IT / developer\nDokumentasi pekerjaan teknis sederhana\nBelajar implementasi project real\nBersedia kerja onsite (di utamakan wilayah Bali)\nMemiliki laptop pribadi\nSiap magang minimal 3 bulan",
-    "Link_Lowongan": "https://glints.com/id/opportunities/jobs/web-developer-intern/0d2a78e0-115b-4118-b78b-afe94de10dff",
-    "match_percentage": 11.8,
+    "Kualifikasi_Persyaratan": "Hybrid | 1 - 3 tahun pengalaman | Minimal Sarjana (S1)",
+    "Deskripsi_Pekerjaan": "Deskripsi pekerjaan Mobile Developer (Flutter) PT Widya Intelektual Bangsa\nPT Widya Intelektual Bangsa (Widya Analytic), sebuah perusahaan yang berfokus pada solusi di bidang big data analytics dan artificial intelligence, terus berupaya memperkuat keterlibatannya dengan berbagai sektor, termasuk pemerintah, swasta, perguruan tinggi, serta UKM. Dengan visi untuk membantu bisnis bertumbuh melalui transformasi digital berbasis data-driven, kami mencari individu yang memiliki kemampuan teknis serta dedikasi tinggi untuk bekerja bersama kami dalam menghadirkan solusi yang tepat. Kami percaya bahwa karyawan yang unggul akan menjadi kunci kesuksesan di masa depan. Oleh karena itu, kami menawarkan kesempatan yang luar biasa untuk Anda yang ingin berkembang di lingkungan kerja yang dinamis dan mendukung.\nSebagai Mobile Developer (Flutter), Anda akan menjadi bagian dari tim yang bertanggung jawab atas pengembangan aplikasi seluler yang mendorong transformasi digital berbasis data. Anda akan bekerja sama dengan tim teknis lainnya untuk memastikan bahwa produk-produk kami dapat memberikan nilai tambah kepada pelanggan kami. Tugas utama Anda akan mencakup desain antarmuka pengguna mobile, pengembangan aplikasi menggunakan Flutter, dan pemeliharaan aplikasi yang ada. Anda juga akan bekerja dengan tim backend untuk mengembangkan Restful API yang kompatibel. Dengan kerja sama yang baik dengan tim, Anda akan membantu memastikan bahwa setiap proyek yang Anda tangani dapat diselesaikan tepat waktu dan sesuai dengan standar kualitas yang tinggi.\nUntuk mengisi posisi ini, kami mencari kandidat yang memiliki pendidikan minimal S1 dan pengalaman kerja antara 1 hingga 3 tahun di bidang pengembangan aplikasi seluler. Kandidat ideal akan memiliki keahlian dalam Mobile Development, React Native, Flutter, Java, iOS Development, Mobile UI Design, Kotlin, Android Development, dan Restful API. Selain itu, posisi ini tersedia dalam format hybrid, sehingga Anda dapat mengatur waktu kerja Anda dengan fleksibilitas. Kami menantikan Anda untuk bergabung dalam tim yang dinamis dan berdedikasi tinggi ini.",
+    "Link_Lowongan": "https://glints.com/id/opportunities/jobs/mobile-developer-flutter/700dbf6f-9bd7-4a6a-9e15-0c1e44d593cf",
+    "match_percentage": 44.4,
     "matched_skills": [
-        "postgresql",
-        "mongodb"
+        "react native",
+        "java",
+        "flutter",
+        "kotlin"
     ],
-    "source_file": "C:\\Users\\farre\\OneDrive\\Dokumen\\GitHub\\1C-D4_PBL_Kelompok_C1_GottaJob\\database\\Database Permanen\\Job Archive\\web_developer.json"
+    "is_type_match": true,
+    "source_file": "c:\\Users\\sahla\\Documents\\1C-D4_PBL_Kelompok_C1_GottaJob\\database\\Database Permanen\\Job Archive\\mobile_developer.json"
 }
