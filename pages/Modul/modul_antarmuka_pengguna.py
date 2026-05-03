@@ -7,6 +7,45 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from PyQt5.QtGui import QColor, QPixmap, QIcon
 
+class KeyboardScrollArea(QScrollArea):
+    """
+    QScrollArea yang diperluas dengan dukungan navigasi keyboard.
+    Tombol ↑ ↓ ← → menggerakkan scroll satu langkah kecil.
+    Page Up / Page Down menggerakkan satu halaman.
+    Home / End melompat ke awal atau akhir konten.
+    """
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        # Izinkan widget ini menerima fokus keyboard
+        self.setFocusPolicy(Qt.StrongFocus)
+
+    def keyPressEvent(self, event):
+        vbar = self.verticalScrollBar()
+        hbar = self.horizontalScrollBar()
+        step = 30          # piksel per satu tekanan panah
+        page = 200         # piksel per Page Up/Down
+
+        key = event.key()
+        if key == Qt.Key_Up:
+            vbar.setValue(vbar.value() - step)
+        elif key == Qt.Key_Down:
+            vbar.setValue(vbar.value() + step)
+        elif key == Qt.Key_Left:
+            hbar.setValue(hbar.value() - step)
+        elif key == Qt.Key_Right:
+            hbar.setValue(hbar.value() + step)
+        elif key == Qt.Key_PageUp:
+            vbar.setValue(vbar.value() - page)
+        elif key == Qt.Key_PageDown:
+            vbar.setValue(vbar.value() + page)
+        elif key == Qt.Key_Home:
+            vbar.setValue(vbar.minimum())
+        elif key == Qt.Key_End:
+            vbar.setValue(vbar.maximum())
+        else:
+            # Teruskan event lain ke parent agar tidak terblokir
+            super().keyPressEvent(event)
+
 class StatCard(QFrame):
     """Card statistik kecil (Scorecard style) yang terstandarisasi."""
     def __init__(self, title, val="0", parent=None):
@@ -214,8 +253,8 @@ class BestMatchCard(QFrame):
     def _init_ui(self):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(25, 25, 25, 25)
-        # Scroll Area for the entire card content
-        self.scroll = QScrollArea()
+        # Scroll Area for the entire card content (mendukung navigasi keyboard)
+        self.scroll = KeyboardScrollArea()
         self.scroll.setWidgetResizable(True)
         self.scroll.setStyleSheet("""
             QScrollArea { border: none; background: transparent; }
@@ -613,8 +652,8 @@ class JobDetailPanel(QFrame):
         layout.addLayout(header)
         layout.addSpacing(15)
 
-        # Scroll Area
-        scroll = QScrollArea()
+        # Scroll Area (mendukung navigasi keyboard)
+        scroll = KeyboardScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setStyleSheet("""
             QScrollArea { border: none; background-color: transparent; }
