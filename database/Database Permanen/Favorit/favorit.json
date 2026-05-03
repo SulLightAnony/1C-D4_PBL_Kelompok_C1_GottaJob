@@ -1,21 +1,20 @@
 {
-    "Judul_Pekerjaan": "Mobile Developer (Flutter)",
-    "Jenis_Pekerjaan": "Penuh Waktu",
-    "Nama_Perusahaan": "PT Widya Intelektual Bangsa",
-    "Lokasi": "Jl. Sukoharjo No.KM 12,5, Klidon, Sukoharjo, Kec. Ngaglik, Yogyakarta, Daerah Istimewa Yogyakarta 55581",
-    "Rentang_Gaji": "Rp4.500.000 - 5.000.000/Bulan",
-    "Skills": "React Native | Java | iOS Development | Mobile Development | Restful API | Flutter | Mobile UI Design | Kotlin | Android Development",
-    "Benefit_Pekerjaan": "Career Path | Training/Certification",
-    "Kualifikasi_Persyaratan": "Hybrid | 1 - 3 tahun pengalaman | Minimal Sarjana (S1)",
-    "Deskripsi_Pekerjaan": "Deskripsi pekerjaan Mobile Developer (Flutter) PT Widya Intelektual Bangsa\nPT Widya Intelektual Bangsa (Widya Analytic), sebuah perusahaan yang berfokus pada solusi di bidang big data analytics dan artificial intelligence, terus berupaya memperkuat keterlibatannya dengan berbagai sektor, termasuk pemerintah, swasta, perguruan tinggi, serta UKM. Dengan visi untuk membantu bisnis bertumbuh melalui transformasi digital berbasis data-driven, kami mencari individu yang memiliki kemampuan teknis serta dedikasi tinggi untuk bekerja bersama kami dalam menghadirkan solusi yang tepat. Kami percaya bahwa karyawan yang unggul akan menjadi kunci kesuksesan di masa depan. Oleh karena itu, kami menawarkan kesempatan yang luar biasa untuk Anda yang ingin berkembang di lingkungan kerja yang dinamis dan mendukung.\nSebagai Mobile Developer (Flutter), Anda akan menjadi bagian dari tim yang bertanggung jawab atas pengembangan aplikasi seluler yang mendorong transformasi digital berbasis data. Anda akan bekerja sama dengan tim teknis lainnya untuk memastikan bahwa produk-produk kami dapat memberikan nilai tambah kepada pelanggan kami. Tugas utama Anda akan mencakup desain antarmuka pengguna mobile, pengembangan aplikasi menggunakan Flutter, dan pemeliharaan aplikasi yang ada. Anda juga akan bekerja dengan tim backend untuk mengembangkan Restful API yang kompatibel. Dengan kerja sama yang baik dengan tim, Anda akan membantu memastikan bahwa setiap proyek yang Anda tangani dapat diselesaikan tepat waktu dan sesuai dengan standar kualitas yang tinggi.\nUntuk mengisi posisi ini, kami mencari kandidat yang memiliki pendidikan minimal S1 dan pengalaman kerja antara 1 hingga 3 tahun di bidang pengembangan aplikasi seluler. Kandidat ideal akan memiliki keahlian dalam Mobile Development, React Native, Flutter, Java, iOS Development, Mobile UI Design, Kotlin, Android Development, dan Restful API. Selain itu, posisi ini tersedia dalam format hybrid, sehingga Anda dapat mengatur waktu kerja Anda dengan fleksibilitas. Kami menantikan Anda untuk bergabung dalam tim yang dinamis dan berdedikasi tinggi ini.",
-    "Link_Lowongan": "https://glints.com/id/opportunities/jobs/mobile-developer-flutter/700dbf6f-9bd7-4a6a-9e15-0c1e44d593cf",
-    "match_percentage": 44.4,
+    "Judul_Pekerjaan": "Mobile developer",
+    "Jenis_Pekerjaan": "Kontrak",
+    "Nama_Perusahaan": "IDE Asia",
+    "Lokasi": "Mekar Sejati, Bandung",
+    "Rentang_Gaji": "Rp10.000.000 - 15.000.000/Bulan",
+    "Skills": "Java | Restful API | Mobile Development | Kotlin | Android Development",
+    "Benefit_Pekerjaan": "THR",
+    "Kualifikasi_Persyaratan": "Bachelor’s degree in Computer Science, Software Engineering, or equivalent experience | 3–5 years of experience as an Android Developer | Strong proficiency in Kotlin | Solid experience with Android SDK, Android Studio, and Gradle | Strong understanding of MVVM architecture and clean architecture principles | Experience with RESTful APIs, JSON, and third-party integrations | Proficient in Git version control | Experience with Room Database / SQLite | Strong knowledge of Android lifecycle, UI components, and performance optimization | Familiarity with unit testing and debugging techniques | Nice to Have | Experience with Jetpack Compose | Familiarity with Dependency Injection (Hilt / Dagger) | Experience with CI/CD pipelines | Knowledge of Firebase (Crashlytics, Analytics, FCM) | Experience publishing and maintaining apps on the Google Play Store | Soft Skills | Strong analytical and problem-solving skills | Effective communication and collaboration | Ability to work independently and in agile teams | High attention to detail and code quality",
+    "Deskripsi_Pekerjaan": "We are looking for an experienced Android Developer with 3–5 years of hands-on experience in Kotlin to develop and maintain high-quality mobile applications. The candidate will play a key role in building scalable, robust, and user-centric Android solutions while collaborating closely with cross-functional teams.\nResponsibililties\nDesign, develop, and maintain Android applications using Kotlin\nArchitect and implement scalable, maintainable, and high-performance mobile solutions\nCollaborate with product managers, designers, and backend teams to deliver new features\nEnsure code quality through best practices, code reviews, and testing\nOptimize application performance, responsiveness, and memory usage\nIntegrate RESTful APIs and manage data efficiently\nTroubleshoot, debug, and resolve production issues\nContribute to technical decisions, architecture design, and improvements\nWrite and maintain technical documentation\nStay updated with the latest Android development trends and technologies",
+    "Link_Lowongan": "https://glints.com/id/opportunities/jobs/mobile-developer/a4c4937e-b5c7-4fcb-ab61-346c7735e96a",
+    "match_percentage": 60.0,
     "matched_skills": [
-        "react native",
         "java",
-        "flutter",
-        "kotlin"
+        "restful api",
+        "android development"
     ],
     "is_type_match": true,
-    "source_file": "c:\\Users\\sahla\\Documents\\1C-D4_PBL_Kelompok_C1_GottaJob\\database\\Database Permanen\\Job Archive\\mobile_developer.json"
+    "source_file": "C:\\Users\\farre\\OneDrive\\Dokumen\\GitHub\\1C-D4_PBL_Kelompok_C1_GottaJob\\database\\Database Permanen\\Job Archive\\mobile_developer.json"
 }

@@ -8,7 +8,8 @@ import json
 import os
 
 #import modul pengolahan data
-from Modul.modul_pengolahan_data import hitung_persentase_skill, ambil_insight_pasar, ambil_top_skills
+from Modul.modul_pengolahan_data import hitung_persentase_skill, ambil_insight_pasar, ambil_top_skills, hitung_gap_skill, cari_archive_terdekat
+from Modul.modul_kategorisasi import pisahkan_skill
 from Modul.modul_database import get_database_permanen_dir, get_favorit, get_aktivitas
 
 class Card(QFrame):
@@ -72,7 +73,7 @@ class InsightBox(QLabel):
             border-left: 5px solid {border};
             border-top: none; border-right: none; border-bottom: none;
             border-radius: 10px;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 500;
             line-height:1.2;
         """)
@@ -194,6 +195,12 @@ class DashboardPage(QWidget):
         # --- KOLOM KIRI ---
         left_col = QVBoxLayout()
         left_col.setSpacing(20)
+        
+        # Container untuk kolom kiri agar bisa dibatasi lebarnya
+        left_col_widget = QWidget()
+        left_col_widget.setLayout(left_col)
+        left_col_widget.setMinimumWidth(600)
+        left_col.setContentsMargins(0, 0, 0, 0)
 
         # 1. KARTU LOWONGAN FAVORIT
         self.dev_card = Card(border_color="#AAD9B7")
@@ -208,7 +215,8 @@ class DashboardPage(QWidget):
         self.trend_layout.setContentsMargins(25, 25, 25, 25)
         
         left_col.addWidget(self.trend_card)
-        body_layout.addLayout(left_col, 3)
+        left_col.addStretch()
+        body_layout.addWidget(left_col_widget, 3)
 
         # --- KOLOM KANAN (Insight & Aktivitas) ---
         right_col_widget = QWidget()
@@ -217,6 +225,7 @@ class DashboardPage(QWidget):
         right_col_layout.setSpacing(20)
 
         # Set lebar minimum di sini (misal 350 atau 400 pixel)
+        # Set lebar minimum dan maksimum di sini
         right_col_widget.setMinimumWidth(380)
 
         self.insight_card = Card(border_color="transparent")
@@ -230,11 +239,13 @@ class DashboardPage(QWidget):
         
         right_col_layout.addWidget(self.insight_card)
         right_col_layout.addWidget(self.act_card)
+        right_col_layout.addStretch()
 
         # Aktivitas Terkini
         
 
         body_layout.addWidget(right_col_widget, 2)
+        body_outer_layout.addStretch()
 
         # Load data pertama kali
         self.load_data()
@@ -279,36 +290,34 @@ class DashboardPage(QWidget):
             top_info = QHBoxLayout()
             name_info = QLabel(f"<b>{judul.upper()}</b><br><font color='#777'>{perusahaan} | {jenis}</font>")
             salary = QLabel(gaji)
-            salary.setStyleSheet("font-weight: bold; color: #333; font-size: 15px;")
+            salary.setStyleSheet("font-weight: bold; color: #333; font-size: 16px;")
             top_info.addWidget(name_info)
             top_info.addStretch()
             top_info.addWidget(salary)
             self.dev_layout.addLayout(top_info)
 
-            # --- LOGIKA FUZZY SEARCH UNTUK MENCARI FILE ARCHIVE ---
-            import glob
-            if os.path.exists(folder_archive):
-                semua_file = glob.glob(os.path.join(folder_archive, "*.json"))
-                # Ambil keywords dari judul (minimal 3 karakter agar tidak ambigu)
-                keywords = [k.lower() for k in judul.split() if len(k) > 2]
-                
-                for file_path in semua_file:
-                    nama_file_kecil = os.path.basename(file_path).lower()
-                    # Jika ada keyword yang cocok di nama file, pilih file ini
-                    if any(key in nama_file_kecil for key in keywords):
-                        archive_json = file_path
-                        break
+            # --- CARI FILE ARCHIVE TERDEKAT ---
+            archive_json = cari_archive_terdekat(judul, folder_archive)
             
-            # Debugging (Opsional: Hapus jika sudah jalan)
+            # Debugging
             print(f"File Archive yang ditemukan: {archive_json}")
 
             # Render Matched Skills Tags
+            # --- RENDER TAG SKILL (Dikelompokkan) ---
             tags_layout = QHBoxLayout()
-            owned_skills = job_data.get("matched_skills", [])
-            for s in owned_skills:
-                tag = QLabel(str(s).strip().title())
-                tag.setStyleSheet("background-color: #1A1A1A; color: white; padding: 6px 15px; border-radius: 10px; font-size: 13px; font-weight: bold;")
-                tags_layout.addWidget(tag)
+            owned_cat = job_data.get("matched_categorized")
+            if not owned_cat:
+                owned_skills = job_data.get("matched_skills", [])
+                owned_cat = pisahkan_skill(owned_skills)
+            
+            # Gabungkan semua untuk ditampilkan (atau bisa dipisah per baris jika mau)
+            # Untuk dashboard, kita tampilkan dalam satu baris tapi teratur
+            from modul_antarmuka_pengguna import SkillTag
+            for category in ["hard_skills", "soft_skills", "positions"]:
+                for s in owned_cat.get(category, []):
+                    tag = SkillTag(s, category, font_size=16)
+                    tags_layout.addWidget(tag)
+            
             tags_layout.addStretch()
             self.dev_layout.addLayout(tags_layout)
 
@@ -316,7 +325,7 @@ class DashboardPage(QWidget):
             match_btn_layout = QHBoxLayout()
             match_btn_layout.addWidget(SkillProgress("Kecocokan skill", match_val), 4)
             btn_gap = QPushButton("Lihat Gap Skill")
-            btn_gap.setStyleSheet("background-color: #52B788; color: white; border-radius: 8px; padding: 8px 15px; font-weight: bold;")
+            btn_gap.setStyleSheet("background-color: #2C687B; color: white; border-radius: 8px; padding: 8px 15px; font-weight: bold;")
             btn_gap.clicked.connect(self.buka_gap_skill)
             match_btn_layout.addWidget(btn_gap, 1)
             self.dev_layout.addLayout(match_btn_layout)
@@ -351,56 +360,50 @@ class DashboardPage(QWidget):
         act_lbl.setStyleSheet("font-weight: bold; color: #555; margin-bottom: 15px; font-size: 13px; letter-spacing: 1px;")
         self.act_lay.addWidget(act_lbl)
 
-        path_log = os.path.normpath(os.path.join(current_dir, "..", "..", "database", "Database Permanen", "aktivitas.json"))
-        
-        if os.path.exists(path_log):
+        logs = get_aktivitas()
+        if logs:
             try:
-                with open(path_log, 'r', encoding='utf-8') as f:
-                    logs = json.load(f)
-                
-                if isinstance(logs, list) and logs:
-                    for log in logs[::-1][:4]:
-                        pesan_teks = log.get("pesan", "")
-                        parts = pesan_teks.split("\n")
-                        header = parts[0] if len(parts) > 0 else "Aktivitas"
-                        body = parts[1] if len(parts) > 1 else ""
-                        
-                        # Container Utama per Item
-                        item_widget = QWidget()
-                        # Hilangkan background abu-abu dengan setStyleSheet transparan
-                        item_widget.setStyleSheet("background: transparent; border: none;")
-                        
-                        item_layout = QVBoxLayout(item_widget)
-                        item_layout.setContentsMargins(0, 5, 0, 12) # Jarak atas-bawah diperlebar
-                        item_layout.setSpacing(3) # Jarak antara judul dan detail
+                for log in logs[:4]:
+                    pesan_teks = log.get("pesan", "")
+                    parts = pesan_teks.split("\n")
+                    header = parts[0] if len(parts) > 0 else "Aktivitas"
+                    body = parts[1] if len(parts) > 1 else ""
+                    
+                    # Container Utama per Item
+                    item_widget = QWidget()
+                    item_widget.setStyleSheet("background: transparent; border: none;")
+                    
+                    item_layout = QVBoxLayout(item_widget)
+                    item_layout.setContentsMargins(0, 5, 0, 12)
+                    item_layout.setSpacing(3)
 
-                        # Label Judul (Hitam Pekat, Sedikit Bold)
-                        header_label = QLabel(header)
-                        header_label.setStyleSheet("""
+                    # Label Judul
+                    header_label = QLabel(header)
+                    header_label.setStyleSheet("""
                             font-weight: 700; 
                             color: #2D3436; 
-                            font-size: 13px; 
+                            font-size: 16px; 
                             background: transparent;
-                        """)
-                        header_label.setWordWrap(True)
-                        
-                        # Label Detail (Abu-abu, Lebih Kecil)
-                        detail_label = QLabel(body if body else pesan_teks)
-                        detail_label.setStyleSheet("""
+                    """)
+                    header_label.setWordWrap(True)
+                    
+                    # Label Detail
+                    detail_label = QLabel(body if body else pesan_teks)
+                    detail_label.setStyleSheet("""
                             color: #636E72; 
-                            font-size: 12px; 
+                            font-size: 14px; 
                             background: transparent;
                             margin-top: 2px;
-                        """)
-                        detail_label.setWordWrap(True)
+                    """)
+                    detail_label.setWordWrap(True)
 
-                        if not body:
-                            item_layout.addWidget(header_label)
-                        else:
-                            item_layout.addWidget(header_label)
-                            item_layout.addWidget(detail_label)
+                    if not body:
+                        item_layout.addWidget(header_label)
+                    else:
+                        item_layout.addWidget(header_label)
+                        item_layout.addWidget(detail_label)
 
-                        self.act_lay.addWidget(item_widget)
+                    self.act_lay.addWidget(item_widget)
             except Exception as e:
                 self.act_lay.addWidget(QLabel("Gagal memuat riwayat."))
         else:
@@ -413,21 +416,9 @@ class DashboardPage(QWidget):
         self.blur_effect.setBlurRadius(15)
         self.content_area.setGraphicsEffect(self.blur_effect)
         
-        # 2. Ambil data skill dari JSON (Logika Gap Skill)
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        path_json = os.path.join(current_dir, "..", "..", "database", "Database Permanen", "Favorit", "favorit.json")
+        # 2. Ambil data skill dari JSON lewat Modul Pengolahan Data
         job_data = get_favorit()
-        
-        gap_list = []
-        if job_data:
-            #ambil semua skill yang ada di lowongan favorit
-            semua_skill = [s.strip().lower() for s in job_data.get("Skills", "").split("|") if s.strip()]
-
-            #ambil matched skill
-            skill_dimiliki = [s.strip().lower() for s in job_data.get("matched_skills", [])]
-
-            #filter : agar yang masuk tidak ada di skill_dimiliki
-            gap_list = [s.title() for s in semua_skill if s not in skill_dimiliki]
+        gap_list = hitung_gap_skill(job_data)
 
         # 3. Tampilkan Modal
         self.modal = ModalGapSkill(self, gap_list)

@@ -2,10 +2,196 @@ import os
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
     QFrame, QTableWidget, QTableWidgetItem, QHeaderView, QScrollArea,
-    QPushButton, QListWidget, QStackedWidget
+    QPushButton, QListWidget, QStackedWidget, QDialog, QMessageBox
 )
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
-from PyQt5.QtGui import QColor, QPixmap, QIcon
+from PyQt5.QtGui import QColor, QPixmap, QIcon, QFont
+
+class SkillTag(QLabel):
+    """Tag skill yang terstandarisasi dengan kategori warna dan ukuran font yang fleksibel."""
+    def __init__(self, text, color_or_category="#2C687B", font_size=13, parent=None):
+        super().__init__(str(text).strip().title(), parent)
+        
+        # Mapping kategori ke warna hex
+        categories = {
+            "hard_skills": "#27AE60",   # Hijau
+            "soft_skills": "#8E44AD",   # Ungu
+            "positions": "#2980B9",     # Biru
+            "matched": "#27AE60",       # Hijau (untuk kecocokan)
+            "missing": "#C0392B",       # Merah (untuk gap)
+            "salary": "#F39C12",        # Orange
+            "benefit": "#2C687B"        # Teal
+        }
+        
+        color = categories.get(color_or_category, color_or_category)
+        
+        self.setStyleSheet(f"""
+            QLabel {{
+                background-color: transparent;
+                color: {color};
+                border: 1px solid {color};
+                padding: 4px 12px;
+                border-radius: 15px;
+                font-size: {font_size}px;
+                font-weight: bold;
+            }}
+        """)
+
+# --- CENTRALIZED STYLESHEETS ---
+MODERN_SCROLLBAR_STYLE = """
+QScrollBar:vertical {
+    border: none;
+    background: #F3F4F6;
+    width: 10px;
+    margin: 0px;
+}
+QScrollBar::handle:vertical {
+    background: #B2D2D9;
+    min-height: 30px;
+    border-radius: 5px;
+    margin: 2px;
+}
+QScrollBar::handle:vertical:hover {
+    background: #7A9EB0;
+}
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+QScrollBar:horizontal {
+    border: none;
+    background: #F3F4F6;
+    height: 10px;
+    margin: 0px;
+}
+QScrollBar::handle:horizontal {
+    background: #B2D2D9;
+    min-width: 30px;
+    border-radius: 5px;
+    margin: 2px;
+}
+QScrollBar::handle:horizontal:hover {
+    background: #7A9EB0;
+}
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+    width: 0px;
+}
+"""
+
+MODERN_BUTTON_STYLE = """
+QPushButton {
+    background-color: #2C687B;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-weight: bold;
+    font-size: 14px;
+    min-height: 32px;
+}
+QPushButton:hover {
+    background-color: #408699;
+}
+QPushButton:pressed {
+    background-color: #1E3A4A;
+}
+"""
+
+# --- MODERN DIALOGS ---
+class ModernMessageBox(QDialog):
+    """Kotak pesan kustom dengan desain modern dan tombol terstandarisasi."""
+    def __init__(self, title, text, buttons=QMessageBox.Ok, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle(title)
+        self.setMinimumWidth(400)
+        self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint | Qt.Dialog)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        
+        # Main Container (untuk shadow/border radius)
+        self.container = QFrame(self)
+        self.container.setObjectName("MsgBoxContainer")
+        self.container.setStyleSheet("""
+            QFrame#MsgBoxContainer {
+                background-color: white;
+                border: 2px solid #2C687B;
+                border-radius: 15px;
+            }
+        """)
+        
+        main_lay = QVBoxLayout(self)
+        main_lay.setContentsMargins(10, 10, 10, 10)
+        main_lay.addWidget(self.container)
+        
+        inner_lay = QVBoxLayout(self.container)
+        inner_lay.setContentsMargins(25, 25, 25, 20)
+        inner_lay.setSpacing(20)
+        
+        # Header/Title
+        title_lbl = QLabel(title)
+        title_lbl.setStyleSheet("font-size: 18px; font-weight: bold; color: #2C687B; border: none; background-color: transparent;")
+        inner_lay.addWidget(title_lbl)
+        
+        # Message Content
+        self.msg_lbl = QLabel(text)
+        self.msg_lbl.setWordWrap(True)
+        self.msg_lbl.setStyleSheet("font-size: 15px; color: #1E3A4A; border: none; line-height: 1.4; background-color: transparent;")
+        inner_lay.addWidget(self.msg_lbl)
+        
+        # Buttons Row
+        btn_lay = QHBoxLayout()
+        btn_lay.setSpacing(12)
+        btn_lay.addStretch()
+        
+        self.result = QMessageBox.No # Default
+        
+        if buttons & QMessageBox.Yes:
+            btn_yes = QPushButton("Ya")
+            btn_yes.setCursor(Qt.PointingHandCursor)
+            btn_yes.setStyleSheet(MODERN_BUTTON_STYLE)
+            btn_yes.clicked.connect(self._on_yes)
+            btn_lay.addWidget(btn_yes)
+            
+        if buttons & QMessageBox.No:
+            btn_no = QPushButton("Tidak")
+            btn_no.setCursor(Qt.PointingHandCursor)
+            # Style berbeda untuk tombol 'Tidak' agar lebih subtle
+            btn_no.setStyleSheet("""
+                QPushButton {
+                    background-color: #F3F4F6; color: #4A5568;
+                    border: 1px solid #D1D5DB; border-radius: 8px;
+                    padding: 8px 18px; font-weight: bold; font-size: 14px; min-height: 32px;
+                }
+                QPushButton:hover { background-color: #E5E7EB; }
+            """)
+            btn_no.clicked.connect(self._on_no)
+            btn_lay.addWidget(btn_no)
+            
+        if buttons & QMessageBox.Ok and not (buttons & QMessageBox.Yes):
+            btn_ok = QPushButton("Selesai")
+            btn_ok.setCursor(Qt.PointingHandCursor)
+            btn_ok.setStyleSheet(MODERN_BUTTON_STYLE)
+            btn_ok.clicked.connect(self._on_ok)
+            btn_lay.addWidget(btn_ok)
+            
+        inner_lay.addLayout(btn_lay)
+
+    def _on_yes(self): self.result = QMessageBox.Yes; self.accept()
+    def _on_no(self): self.result = QMessageBox.No; self.reject()
+    def _on_ok(self): self.result = QMessageBox.Ok; self.accept()
+
+def show_message(parent, title, text):
+    """Menampilkan pesan informasi modern (OK)."""
+    dialog = ModernMessageBox(title, text, QMessageBox.Ok, parent)
+    return dialog.exec_()
+
+def show_question(parent, title, text):
+    """Menampilkan pertanyaan konfirmasi modern (Yes/No)."""
+    dialog = ModernMessageBox(title, text, QMessageBox.Yes | QMessageBox.No, parent)
+    dialog.exec_()
+    return dialog.result
+
+GLOBAL_DIALOG_STYLE = MODERN_SCROLLBAR_STYLE + """
+QDialog { background-color: white; }
+"""
 
 class KeyboardScrollArea(QScrollArea):
     """
@@ -16,14 +202,15 @@ class KeyboardScrollArea(QScrollArea):
     """
     def __init__(self, parent=None):
         super().__init__(parent)
-        # Izinkan widget ini menerima fokus keyboard
+        # Fokus keyboard untuk menggunakan scroller
         self.setFocusPolicy(Qt.StrongFocus)
+        self.setStyleSheet(MODERN_SCROLLBAR_STYLE)
 
     def keyPressEvent(self, event):
         vbar = self.verticalScrollBar()
         hbar = self.horizontalScrollBar()
-        step = 30          # piksel per satu tekanan panah
-        page = 200         # piksel per Page Up/Down
+        step = 25          # px per menekan tombol arrow
+        page = 150         # px per menekan tombol Page Up/Down
 
         key = event.key()
         if key == Qt.Key_Up:
@@ -56,7 +243,7 @@ class StatCard(QFrame):
         lay.setSpacing(5)
         
         self.lbl_title = QLabel(title)
-        self.lbl_title.setStyleSheet("font-size: 13px; font-weight: normal; color: #4A5568; background-color: transparent;")
+        self.lbl_title.setStyleSheet("font-size: 16px; font-weight: normal; color: #4A5568; background-color: transparent;")
         
         self.lbl_val = QLabel(val)
         self.lbl_val.setStyleSheet("font-size: 24px; font-weight: bold; color: #1E3A4A; background-color: transparent;")
@@ -137,16 +324,16 @@ class JobDashboardWidget(QWidget):
         self.skill_list = QListWidget()
         list_style = """
             QListWidget { 
-                border: none; background-color: #F7FBFC; border-radius: 8px; font-size: 14px; color: #1E3A4A;
+                border: none; background-color: #F7FBFC; border-radius: 8px; font-size: 16px; color: #1E3A4A;
             }
-            QListWidget::item { padding: 10px; border-bottom: 1px solid #E0E7EF; color: #1E3A4A; }
+            QListWidget::item { padding: 12px; border-bottom: 1px solid #E0E7EF; color: #1E3A4A; }
             QListWidget::item:hover { background-color: #EBF4F6; }
             QListWidget::item:selected { background-color: #E2EFF1; color: #2C687B; border-left: 4px solid #2C687B; }
             QScrollBar:vertical { border: none; background: #F3F4F6; width: 8px; border-radius: 4px; }
             QScrollBar::handle:vertical { background: #B2D2D9; border-radius: 4px; }
             QScrollBar:horizontal { border: none; background: #F3F4F6; height: 8px; border-radius: 4px; }
             QScrollBar::handle:horizontal { background: #B2D2D9; border-radius: 4px; }
-            QListWidget::indicator { width: 18px; height: 18px; border: 2px solid #B2D2D9; border-radius: 4px; background-color: white; }
+            QListWidget::indicator { width: 22px; height: 22px; border: 2px solid #B2D2D9; border-radius: 4px; background-color: white; }
             QListWidget::indicator:checked { background-color: #2C687B; border: 2px solid #2C687B; }
         """
         self.skill_list.setStyleSheet(list_style)
@@ -294,108 +481,83 @@ class BestMatchCard(QFrame):
         # 2. Judul Pekerjaan
         self.lbl_title = QLabel("Nama Pekerjaan")
         self.lbl_title.setWordWrap(True)
-        self.lbl_title.setStyleSheet("font-size: 24px; font-weight: bold; color: #1E3A4A; background-color: transparent;")
+        self.lbl_title.setStyleSheet("font-size: 20px; font-weight: bold; color: #1E3A4A; background-color: transparent;")
         self.content_lay.addWidget(self.lbl_title)
 
         # 3. Nama Perusahaan & Lokasi
         self.lbl_company = QLabel("Nama Perusahaan")
-        self.lbl_company.setStyleSheet("font-size: 18px; color: #2C687B; font-weight: bold; background-color: transparent;")
+        self.lbl_company.setStyleSheet("font-size: 16px; color: #2C687B; font-weight: bold; background-color: transparent;")
         self.content_lay.addWidget(self.lbl_company)
 
         self.lbl_location = QLabel("📍 Lokasi")
         self.lbl_location.setWordWrap(True)
-        self.lbl_location.setStyleSheet("font-size: 17px; color: #1E3A4A; background-color: transparent;")
+        self.lbl_location.setStyleSheet("font-size: 16px; color: #1E3A4A; background-color: transparent;")
         self.content_lay.addWidget(self.lbl_location)
 
-        self.content_lay.addSpacing(10)
+        # 4. SKILL SECTIONS (Hard, Soft, Position)
+        self.hard_skill_container = self._setup_skill_section("TECHNICAL / HARD SKILLS", "#2C3E50")
+        self.soft_skill_container = self._setup_skill_section("SOFT SKILLS", "#8E44AD")
+        self.pos_skill_container = self._setup_skill_section("POSISI / PERAN TERKAIT", "#2980B9")
         
-        # 4. Skill Tags
-        # Skill yang Kamu Punya
-        lbl_owned = QLabel("Skill yang kamu punya:")
-        lbl_owned.setStyleSheet("font-size: 13px; font-weight: bold; color: #27AE60; background-color: transparent;")
-        self.content_lay.addWidget(lbl_owned)
-        
-        self.owned_flow = QWidget()
-        self.owned_flow.setStyleSheet("background-color: transparent;")
-        self.owned_lay = QVBoxLayout(self.owned_flow)
-        self.owned_lay.setContentsMargins(0, 0, 0, 0)
-        self.owned_lay.setSpacing(6)
-        self.owned_lay.setAlignment(Qt.AlignTop)
-        self.content_lay.addWidget(self.owned_flow)
-
-        # Skill yang Dibutuhkan
-        lbl_req = QLabel("Skill yang dibutuhkan:")
-        lbl_req.setStyleSheet("font-size: 13px; font-weight: bold; color: #C0392B; background-color: transparent;")
-        self.content_lay.addWidget(lbl_req)
-        
-        self.req_flow = QWidget()
-        self.req_flow.setStyleSheet("background-color: transparent;")
-        self.req_lay = QVBoxLayout(self.req_flow)
-        self.req_lay.setContentsMargins(0, 0, 0, 0)
-        self.req_lay.setSpacing(6)
-        self.req_lay.setAlignment(Qt.AlignTop)
-        self.content_lay.addWidget(self.req_flow)
-
         self.content_lay.addStretch()
         
         self.scroll.setWidget(self.scroll_content)
         layout.addWidget(self.scroll)
 
+    def _setup_skill_section(self, title, color):
+        """Helper untuk membuat kontainer section skill."""
+        lbl = QLabel(title)
+        lbl.setStyleSheet(f"font-size: 11px; font-weight: bold; color: {color}; margin-top: 10px; letter-spacing: 1px;")
+        self.content_lay.addWidget(lbl)
+        
+        container = QWidget()
+        layout = QVBoxLayout(container)
+        layout.setContentsMargins(0, 5, 0, 5)
+        layout.setSpacing(6)
+        self.content_lay.addWidget(container)
+        return layout
+
     def update_data(self, data, user_skills):
         perc = data.get('match_percentage', 0)
         self.lbl_perc.setText(f"{perc}%")
         
-        # Tentukan warna berdasarkan persentase
-        if perc >= 70:
-            color = "#27AE60" # Hijau
-        elif perc >= 40:
-            color = "#F39C12" # Oranye
-        else:
-            color = "#C0392B" # Merah
+        # Tentukan warna tema kartu
+        color = "#27AE60" if perc >= 70 else ("#F39C12" if perc >= 40 else "#C0392B")
             
-        # Update warna badge
-        self.lbl_perc.setStyleSheet(f"""
-            font-size: 36px;
-            font-weight: bold;
-            color: white;
-            background-color: {color};
-            border-radius: 12px;
-            padding: 10px;
-        """)
-        
-        # Update warna border card
-        self.setStyleSheet(f"""
-            QFrame#PanelCard {{
-                background-color: white;
-                border: 2px solid {color};
-                border-radius: 16px;
-            }}
-        """)
+        self.lbl_perc.setStyleSheet(f"font-size: 36px; font-weight: bold; color: white; background-color: {color}; border-radius: 12px; padding: 10px;")
+        self.setStyleSheet(f"QFrame#PanelCard {{ background-color: white; border: 2px solid {color}; border-radius: 16px; }}")
 
         self.lbl_title.setText(data.get("Judul_Pekerjaan", "-"))
         self.lbl_company.setText(data.get("Nama_Perusahaan", "-"))
         self.lbl_location.setText(f"📍 {data.get('Lokasi', '-')}")
 
-        # Clear tags
-        self._clear_layout(self.owned_lay)
-        self._clear_layout(self.req_lay)
+        # Clear all sections
+        for lay in [self.hard_skill_container, self.soft_skill_container, self.pos_skill_container]:
+            self._clear_layout(lay)
 
-        raw_skills = data.get("Skills", "-")
-        if raw_skills != "-":
-            job_skills = [s.strip() for s in raw_skills.split("|")]
-            user_set = {s.lower() for s in user_skills}
-            matched = [s for s in job_skills if s.lower() in user_set]
-            missing = [s for s in job_skills if s.lower() not in user_set]
+        # Ambil data kategori (sudah dikategorikan di modul_pengolahan_data)
+        all_cat = data.get("all_categorized", {"hard_skills": [], "soft_skills": [], "positions": []})
+        matched_cat = data.get("matched_categorized", {"hard_skills": [], "soft_skills": [], "positions": []})
 
-            for s in matched:
-                self.owned_lay.addWidget(self._create_tag(s, "#27AE60"))
-            for s in missing:
-                self.req_lay.addWidget(self._create_tag(s, "#C0392B"))
+        # Render masing-masing kategori
+        self._render_category_items(self.hard_skill_container, all_cat["hard_skills"], matched_cat["hard_skills"])
+        self._render_category_items(self.soft_skill_container, all_cat["soft_skills"], matched_cat["soft_skills"])
+        self._render_category_items(self.pos_skill_container, all_cat["positions"], matched_cat["positions"])
 
-    def _create_tag(self, text, color):
-        lbl = QLabel(text)
-        lbl.setStyleSheet(f"color: {color}; border: 1px solid {color}; border-radius: 8px; padding: 6px 16px; font-size: 18px; font-weight: bold; background-color: transparent;")
-        return lbl
+    def _render_category_items(self, layout, all_items, matched_items):
+        """Merender item dalam satu kategori dengan warna hijau (punya) atau merah (tidak)."""
+        if not all_items:
+            layout.addWidget(QLabel("-"), alignment=Qt.AlignLeft)
+            return
+
+        matched_set = {s.lower() for s in matched_items}
+        for s in all_items:
+            is_owned = s.lower() in matched_set
+            tag_cat = "matched" if is_owned else "missing"
+            layout.addWidget(self._create_tag(s, tag_cat), alignment=Qt.AlignLeft)
+
+    def _create_tag(self, text, color_or_category):
+        return SkillTag(text, color_or_category, font_size=16)
 
     def _clear_layout(self, layout):
         while layout.count():
@@ -466,7 +628,7 @@ class JobMatchTable(QTableWidget):
             QTableWidget {
                 border: none;
                 background-color: white;
-                font-size: 14px;
+                font-size: 16px;
                 color: #1E3A4A;
             }
             QTableWidget::item {
@@ -483,6 +645,7 @@ class JobMatchTable(QTableWidget):
                 border: none;
                 border-bottom: 2px solid #E0E7EF;
                 font-weight: bold;
+                font-size: 16px;
                 color: #2C687B;
                 text-align: left;
             }
@@ -682,11 +845,11 @@ class JobDetailPanel(QFrame):
         # Labels
         self.det_title = QLabel("Judul Pekerjaan")
         self.det_title.setWordWrap(True)
-        self.det_title.setStyleSheet("font-size: 28px; font-weight: bold; color: #1E3A4A; background-color: transparent;")
+        self.det_title.setStyleSheet("font-size: 24px; font-weight: bold; color: #1E3A4A; background-color: transparent;")
         self.content_lay.addWidget(self.det_title)
         
         self.det_company = QLabel("Nama Perusahaan")
-        self.det_company.setStyleSheet("font-size: 18px; color: #2C687B; font-weight: bold; background-color: transparent;")
+        self.det_company.setStyleSheet("font-size: 16px; color: #2C687B; font-weight: bold; background-color: transparent;")
         self.content_lay.addWidget(self.det_company)
 
         # Sections
@@ -737,7 +900,7 @@ class JobDetailPanel(QFrame):
         lay = QVBoxLayout(container)
         lay.setContentsMargins(0, 5, 0, 15)
         lbl_t = QLabel(title)
-        lbl_t.setStyleSheet("font-size: 18px; font-weight: bold; color: #2C687B; background-color: transparent;")
+        lbl_t.setStyleSheet("font-size: 16px; font-weight: bold; color: #2C687B; background-color: transparent;")
         lay.addWidget(lbl_t)
         lbl_c = QLabel("-")
         lbl_c.setWordWrap(True)
@@ -753,7 +916,7 @@ class JobDetailPanel(QFrame):
         section_lay.setContentsMargins(0, 5, 0, 15)
         
         lbl_t = QLabel(title)
-        lbl_t.setStyleSheet("font-size: 18px; font-weight: bold; color: #2C687B; background-color: transparent;")
+        lbl_t.setStyleSheet("font-size: 16px; font-weight: bold; color: #2C687B; background-color: transparent;")
         section_lay.addWidget(lbl_t)
         
         # Widget khusus untuk menampung tag secara horizontal
@@ -788,7 +951,7 @@ class JobDetailPanel(QFrame):
         # Salary
         self._clear_layout(self.salary_lay)
         sal = data.get("Rentang_Gaji", "-")
-        self.salary_lay.addWidget(self._create_tag(sal, "#F39C12"))
+        self.salary_lay.addWidget(self._create_tag(sal, "salary"))
         self.salary_lay.addStretch()
 
         # Skills
@@ -802,11 +965,11 @@ class JobDetailPanel(QFrame):
             missing = [s for s in job_skills if s.lower() not in user_set]
             
             self.lbl_match_title.setVisible(len(matched) > 0)
-            for s in matched: self.match_tags_lay.addWidget(self._create_tag(s, "#27AE60"))
+            for s in matched: self.match_tags_lay.addWidget(self._create_tag(s, "matched"))
             self.match_tags_lay.addStretch()
 
             self.lbl_missing_title.setVisible(len(missing) > 0)
-            for s in missing: self.missing_tags_lay.addWidget(self._create_tag(s, "#C0392B"))
+            for s in missing: self.missing_tags_lay.addWidget(self._create_tag(s, "missing"))
             self.missing_tags_lay.addStretch()
 
         # Benefits
@@ -814,7 +977,7 @@ class JobDetailPanel(QFrame):
         raw_ben = data.get("Benefit_Pekerjaan", "-")
         if raw_ben != "-":
             for b in [x.strip() for x in raw_ben.split("|")]:
-                self.benefit_tags_lay.addWidget(self._create_tag(b, "#2C687B"))
+                self.benefit_tags_lay.addWidget(self._create_tag(b, "benefit"))
             self.benefit_tags_lay.addStretch()
 
         # Requirements & Description
@@ -825,10 +988,8 @@ class JobDetailPanel(QFrame):
         link = data.get("Link_Lowongan", "#")
         self.det_link.setText(f'<a href="{link}" style="color: #2C687B; text-decoration: none;">Buka di browser ↗</a>')
 
-    def _create_tag(self, text, color):
-        lbl = QLabel(text)
-        lbl.setStyleSheet(f"color: {color}; border: 1px solid {color}; border-radius: 6px; padding: 4px 12px; font-size: 14px; font-weight: bold;")
-        return lbl
+    def _create_tag(self, text, color_or_category):
+        return SkillTag(text, color_or_category, font_size=16)
 
     def _clear_layout(self, layout):
         while layout.count():

@@ -146,5 +146,20 @@
             "mobile development"
         ],
         "is_type_match": true
+    },
+    {
+        "id": "2026-05-03 23:05:03",
+        "Judul_Pekerjaan": "Mobile Developer",
+        "Nama_Perusahaan": "Punya gweh",
+        "Jenis_Pekerjaan": "Full-time",
+        "Lokasi": "",
+        "Rentang_Gaji": "9.000.000-12.000.000",
+        "Skills": "Java",
+        "Link_Lowongan": "",
+        "Deskripsi_Pekerjaan": "",
+        "Benefit_Pekerjaan": "",
+        "Kualifikasi_Persyaratan": "",
+        "Tanggal_Kadaluarsa": "02/06/2026",
+        "source": "job_posting"
     }
 ]

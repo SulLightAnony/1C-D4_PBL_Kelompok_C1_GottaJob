@@ -1,5 +1,9 @@
 [
     {
+        "pesan": "<b>Pekerjaan Favorit Diganti</b><br>Mobile developer",
+        "waktu": ""
+    },
+    {
         "pesan": "<b>Pekerjaan Favorit Diganti</b><br>Mobile Developer (Flutter)",
         "waktu": ""
     },
@@ -17,10 +21,6 @@
     },
     {
         "pesan": "<b>Pekerjaan Favorit Diganti</b><br>Mobile developer (Flutter) Freelance",
-        "waktu": ""
-    },
-    {
-        "pesan": "<b>Pekerjaan Favorit Diganti</b><br>Mobile developer",
         "waktu": ""
     }
 ]

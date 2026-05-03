@@ -153,9 +153,12 @@ def pindahkan_ke_database_permanen(nama_file):
     dst = os.path.join(root, "database", "Database Permanen", nama_file)
     
 def catat_aktivitas(pesan):
-    """Mencatat aktivitas user ke database/Database Permanen/aktivitas.json."""
+    """Mencatat aktivitas user ke database/Database Permanen/Dashboard/aktivitas.json."""
     root = get_root_dir()
-    path = os.path.join(root, "database", "Database Permanen", "aktivitas.json")
+    dir_path = os.path.join(root, "database", "Database Permanen", "Dashboard")
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+    path = os.path.join(dir_path, "aktivitas.json")
     
     aktivitas = []
     if os.path.exists(path):
@@ -184,7 +187,7 @@ def catat_aktivitas(pesan):
 def get_aktivitas():
     """Mengambil daftar aktivitas terbaru."""
     root = get_root_dir()
-    path = os.path.join(root, "database", "Database Permanen", "aktivitas.json")
+    path = os.path.join(root, "database", "Database Permanen", "Dashboard", "aktivitas.json")
     if os.path.exists(path):
         try:
             with open(path, "r", encoding="utf-8") as f:
