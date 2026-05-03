@@ -464,12 +464,12 @@ class JobPostingPage(QWidget):
             return container
 
         field_style = """
-            QLineEdit, QTextEdit, QComboBox, QSpinBox {
+            QLineEdit, QTextEdit, QComboBox, QSpinBox, QDateEdit {
                 border: 1px solid #dcdcdc; border-radius: 8px;
                 padding: 10px 14px; font-size: 14px;
                 background-color: #fafafa; color: #333;
             }
-            QLineEdit:focus, QTextEdit:focus, QComboBox:focus, QSpinBox:focus {
+            QLineEdit:focus, QTextEdit:focus, QComboBox:focus, QSpinBox:focus, QDateEdit:focus {
                 border: 1px solid #2C687B; background-color: #fff;
             }
         """
@@ -487,6 +487,14 @@ class JobPostingPage(QWidget):
         # Baris 1: Jenis & Lokasi
         self.f_jenis = QComboBox()
         self.f_jenis.addItems(["Full-time", "Part-time", "Freelance", "Internship", "Contract"])
+        self.f_jenis.setStyleSheet("""
+            QComboBox QAbstractItemView {
+                background-color: white;
+                color: black;
+                selection-background-color: #2C687B;
+                selection-color: white;
+            }
+        """)
         self.f_lokasi = QLineEdit(); self.f_lokasi.setPlaceholderText("cth. Jakarta, Indonesia")
         grid.addWidget(make_field("Jenis Pekerjaan", self.f_jenis), 1, 0)
         grid.addWidget(make_field("Lokasi", self.f_lokasi), 1, 1)
@@ -499,6 +507,26 @@ class JobPostingPage(QWidget):
         self.f_date.setDisplayFormat("dd/MM/yyyy")
         self.f_date.setDate(QDate.currentDate().addDays(30))
         self.f_date.setMinimumDate(QDate.currentDate().addDays(1))
+        self.f_date.calendarWidget().setStyleSheet("""
+            QCalendarWidget QWidget {
+                alternate-background-color: #f3f4f6;
+                background-color: white;
+            }
+            QCalendarWidget QAbstractItemView:enabled {
+                background-color: white;
+                color: black;
+                selection-background-color: #2C687B;
+                selection-color: white;
+            }
+            QCalendarWidget QToolButton {
+                color: black;
+                background-color: white;
+            }
+            QCalendarWidget QMenu {
+                background-color: white;
+                color: black;
+            }
+        """)
 
         grid.addWidget(make_field("Rentang Gaji", self.f_gaji), 2, 0)
         grid.addWidget(make_field("Tanggal Kadaluarsa", self.f_date), 2, 1)

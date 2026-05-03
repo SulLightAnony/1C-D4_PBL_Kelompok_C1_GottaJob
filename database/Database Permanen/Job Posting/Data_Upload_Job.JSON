@@ -1,33 +1,5 @@
 [
   {
-    "id": "2026-05-04 10:00:00",
-    "Judul_Pekerjaan": "Frontend Developer (React)",
-    "Nama_Perusahaan": "PT Teknologi Maju",
-    "Jenis_Pekerjaan": "Full-time",
-    "Lokasi": "Jakarta Pusat, Indonesia",
-    "Rentang_Gaji": "Rp 10.000.000 - Rp 15.000.000",
-    "Skills": "React, JavaScript, CSS, HTML",
-    "Link_Lowongan": "https://example.com/job1",
-    "Deskripsi_Pekerjaan": "Membangun antarmuka pengguna web yang interaktif.",
-    "Benefit_Pekerjaan": "Asuransi kesehatan, BPJS Ketenagakerjaan",
-    "Kualifikasi_Persyaratan": "Pengalaman 2 tahun",
-    "Tanggal_Kadaluarsa": "30/05/2026"
-  },
-  {
-    "id": "2026-05-04 10:05:00",
-    "Judul_Pekerjaan": "Backend Engineer yahahha",
-    "Nama_Perusahaan": "Gojek",
-    "Jenis_Pekerjaan": "Full-time",
-    "Lokasi": "Jakarta Selatan, Indonesia",
-    "Rentang_Gaji": "Rp 15.000.000 - Rp 25.000.000",
-    "Skills": "Golang, PostgreSQL, Docker",
-    "Link_Lowongan": "https://example.com/job2",
-    "Deskripsi_Pekerjaan": "Mengelola server dan merancang API yang efisien.",
-    "Benefit_Pekerjaan": "WFA, Asuransi",
-    "Kualifikasi_Persyaratan": "Pengalaman 3 tahun",
-    "Tanggal_Kadaluarsa": "15/06/2026"
-  },
-  {
     "id": "2026-05-04 10:10:00",
     "Judul_Pekerjaan": "UI/UX Designer bang",
     "Nama_Perusahaan": "Tokopedia sigma",
