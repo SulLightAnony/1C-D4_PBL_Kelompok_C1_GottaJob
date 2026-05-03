@@ -1,115 +1,277 @@
-import uuid
+import os
 import datetime
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QScrollArea, QWidget, QGridLayout, QFrame, QLineEdit, QTextEdit, QComboBox, QDateEdit, QMessageBox
+from PyQt5.QtCore import Qt, QDate
 import calendar
-from CRUD.Shared import muat_data, simpan_data, cetak_header, FIELDS
+from PyQt5.QtGui import QFont
 
-NAMA_BULAN = {
-    1:"Januari", 2:"Februari", 3:"Maret",    4:"April",
-    5:"Mei",     6:"Juni",     7:"Juli",      8:"Agustus",
-    9:"September",10:"Oktober",11:"November",12:"Desember"
-}
+from CRUD.Shared import simpan_data
 
-# ─────────────────────────────────────────────
-# HELPER: Input tanggal kadaluarsa dengan validasi
-# ─────────────────────────────────────────────
-def _input_tanggal_kadaluarsa() -> str:
-    """Meminta user memasukkan tanggal kadaluarsa: Hari → Bulan → Tahun.
-    Validasi dilakukan setelah ketiga nilai diisi."""
+_pages_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_root_dir = os.path.dirname(_pages_dir)
+down_icon_path = os.path.join(_root_dir, "assets", "Job Archive", "down.png").replace("\\", "/")
 
-    print("\n  ── Tanggal Kadaluarsa Lowongan ──")
-    hari_ini = datetime.date.today()
-    tahun_sekarang = hari_ini.year
+# --- Job Dialog (Tampilan 2 Kolom) ---
+class JobDialog(QDialog):
+    def __init__(self, parent=None, job_data=None):
+        super().__init__(parent)
+        self.setWindowTitle("Tambah Lowongan Baru" if not job_data else "Edit Lowongan")
+        self.resize(700, 600)
+        self.setStyleSheet("background-color: white;")
+        self.job_data = job_data
+        self.inputs = {}
+        self.setup_ui()
+        if self.job_data:
+            self.load_data()
 
-    while True:
-        # --- Hari ---
+    def setup_ui(self):
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
+
+        # Header
+        header_frame = QFrame()
+        header_layout = QHBoxLayout(header_frame)
+        header_layout.setContentsMargins(20, 15, 20, 15)
+        title_label = QLabel(self.windowTitle())
+        title_label.setFont(QFont("Segoe UI", 16, QFont.Bold))
+        title_label.setStyleSheet("color: #333;")
+        
+        btn_close = QPushButton("×")
+        btn_close.setFixedSize(30, 30)
+        btn_close.setStyleSheet("QPushButton { border: 1px solid #ddd; border-radius: 4px; font-size: 18px; color: #666; background-color: white;} QPushButton:hover { background-color: #f0f0f0; }")
+        btn_close.clicked.connect(self.reject)
+        
+        header_layout.addWidget(title_label)
+        header_layout.addStretch()
+        header_layout.addWidget(btn_close)
+        
+        line = QFrame()
+        line.setFrameShape(QFrame.HLine)
+        line.setStyleSheet("background-color: #eee;")
+        
+        main_layout.addWidget(header_frame)
+        main_layout.addWidget(line)
+
+        # Form Content
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setStyleSheet("QScrollArea { border: none; }")
+        
+        content_widget = QWidget()
+        form_layout = QGridLayout(content_widget)
+        form_layout.setContentsMargins(20, 20, 20, 20)
+        form_layout.setSpacing(15)
+
+        # Helper untuk styling label dan input
+        def create_field(label_text, widget, row, col, rowspan=1, colspan=1):
+            container = QWidget()
+            lay = QVBoxLayout(container)
+            lay.setContentsMargins(0, 0, 0, 0)
+            lay.setSpacing(6) # Jarak rapat antara label dan input
+            
+            lbl = QLabel(label_text)
+            lbl.setFont(QFont("Segoe UI", 10))
+            lbl.setStyleSheet("color: #111; font-weight: 500;")
+            
+            lay.addWidget(lbl)
+            lay.addWidget(widget)
+            form_layout.addWidget(container, row, col, rowspan, colspan)
+
+        input_style = f"""
+            QLineEdit, QTextEdit, QDateEdit, QComboBox {{
+                border: 1px solid #dcdcdc;
+                border-radius: 6px;
+                padding: 10px 12px;
+                font-size: 14px;
+                background-color: #fff;
+                color: #333;
+            }}
+            QLineEdit:focus, QTextEdit:focus, QDateEdit:focus, QComboBox:focus {{
+                border: 1px solid #2C687B;
+            }}
+            QComboBox::drop-down {{
+                subcontrol-origin: padding;
+                subcontrol-position: top right;
+                width: 30px;
+                border: none;
+            }}
+            QComboBox::down-arrow {{
+                image: url({down_icon_path});
+                width: 16px;
+                height: 16px;
+            }}
+            QDateEdit::drop-down {{
+                subcontrol-origin: padding;
+                subcontrol-position: top right;
+                width: 30px;
+                border: none;
+            }}
+        """
+
+        # Baris 1: Judul & Perusahaan
+        self.inputs['Judul_Pekerjaan'] = QLineEdit()
+        self.inputs['Judul_Pekerjaan'].setPlaceholderText("cth. Frontend Developer")
+        create_field("Judul Pekerjaan *", self.inputs['Judul_Pekerjaan'], 0, 0)
+
+        self.inputs['Nama_Perusahaan'] = QLineEdit()
+        self.inputs['Nama_Perusahaan'].setPlaceholderText("cth. PT Teknologi Maju")
+        create_field("Nama Perusahaan *", self.inputs['Nama_Perusahaan'], 0, 1)
+
+        # Baris 2: Jenis Pekerjaan & Lokasi
+        self.inputs['Jenis_Pekerjaan'] = QComboBox()
+        self.inputs['Jenis_Pekerjaan'].addItems(["Full-time", "Part-time", "Freelance", "Internship", "Contract"])
+        create_field("Jenis Pekerjaan", self.inputs['Jenis_Pekerjaan'], 1, 0)
+
+        self.inputs['Lokasi'] = QLineEdit()
+        self.inputs['Lokasi'].setPlaceholderText("cth. Jakarta, Indonesia")
+        create_field("Lokasi", self.inputs['Lokasi'], 1, 1)
+
+        # Baris 3: Rentang Gaji & Tanggal Kadaluarsa
+        self.inputs['Rentang_Gaji'] = QLineEdit()
+        self.inputs['Rentang_Gaji'].setPlaceholderText("cth. Rp 8jt - 15jt")
+        create_field("Rentang Gaji", self.inputs['Rentang_Gaji'], 2, 0)
+
+        # Input Tanggal: Kalender
+        self.date_edit = QDateEdit()
+        self.date_edit.setCalendarPopup(True)
+        self.date_edit.setDisplayFormat("dd/MM/yyyy")
+        self.date_edit.setDate(QDate.currentDate().addDays(30))
+        # Validasi Preventif: Minimal besok
+        self.date_edit.setMinimumDate(QDate.currentDate().addDays(1))
+        
+        create_field("Tanggal Kadaluarsa", self.date_edit, 2, 1)
+
+        # Baris 4: Skills (Full Width)
+        self.inputs['Skills'] = QLineEdit()
+        self.inputs['Skills'].setPlaceholderText("cth. React, Node.js, SQL")
+        create_field("Skills (pisah koma)", self.inputs['Skills'], 3, 0, 1, 2)
+
+        # Baris 5: Link Lowongan (Full Width)
+        self.inputs['Link_Lowongan'] = QLineEdit()
+        self.inputs['Link_Lowongan'].setPlaceholderText("https://...")
+        create_field("Link Lowongan", self.inputs['Link_Lowongan'], 4, 0, 1, 2)
+
+        # Baris 6: Deskripsi Pekerjaan (Full Width)
+        self.inputs['Deskripsi_Pekerjaan'] = QTextEdit()
+        self.inputs['Deskripsi_Pekerjaan'].setPlaceholderText("Deskripsi singkat...")
+        self.inputs['Deskripsi_Pekerjaan'].setFixedHeight(100)
+        create_field("Deskripsi Pekerjaan", self.inputs['Deskripsi_Pekerjaan'], 5, 0, 1, 2)
+
+        # (Hidden Fields untuk kesesuaian dengan backend)
+        self.inputs['Benefit_Pekerjaan'] = QLineEdit()
+        self.inputs['Kualifikasi_Persyaratan'] = QLineEdit()
+        self.inputs['Benefit_Pekerjaan'].hide()
+        self.inputs['Kualifikasi_Persyaratan'].hide()
+
+        content_widget.setStyleSheet(input_style)
+        scroll.setWidget(content_widget)
+        main_layout.addWidget(scroll)
+
+        # Footer Actions
+        footer_line = QFrame()
+        footer_line.setFrameShape(QFrame.HLine)
+        footer_line.setStyleSheet("background-color: #eee;")
+        main_layout.addWidget(footer_line)
+
+        footer_frame = QFrame()
+        footer_layout = QHBoxLayout(footer_frame)
+        footer_layout.setContentsMargins(20, 15, 20, 15)
+        
+        btn_cancel = QPushButton("Batal")
+        btn_cancel.setCursor(Qt.PointingHandCursor)
+        btn_cancel.setStyleSheet("""
+            QPushButton { border: 1px solid #dcdcdc; border-radius: 6px; padding: 10px 25px; font-size: 15px; background-color: white; color: #555; }
+            QPushButton:hover { background-color: #f8f8f8; }
+        """)
+        btn_cancel.clicked.connect(self.reject)
+
+        btn_save = QPushButton("Simpan")
+        btn_save.setCursor(Qt.PointingHandCursor)
+        btn_save.setStyleSheet("""
+            QPushButton { background-color: #2C687B; border-radius: 6px; padding: 10px 25px; font-size: 15px; color: white; font-weight: 500; border: none; }
+            QPushButton:hover { background-color: #408699; }
+        """)
+        btn_save.clicked.connect(self.validate_and_accept)
+
+        footer_layout.addStretch()
+        footer_layout.addWidget(btn_cancel)
+        footer_layout.addWidget(btn_save)
+        main_layout.addWidget(footer_frame)
+
+    def load_data(self):
+        for key, widget in self.inputs.items():
+            val = self.job_data.get(key, "")
+            if isinstance(widget, QLineEdit):
+                widget.setText(val)
+            elif isinstance(widget, QTextEdit):
+                widget.setPlainText(val)
+            elif isinstance(widget, QComboBox):
+                idx = widget.findText(val)
+                if idx >= 0:
+                    widget.setCurrentIndex(idx)
+                    
+        date_str = self.job_data.get("Tanggal_Kadaluarsa", "")
         try:
-            hari = int(input("  Hari   (1–31) : ").strip())
-            if not (1 <= hari <= 31):
-                print("  [!] Hari harus antara 1 – 31.")
-                continue
-        except ValueError:
-            print("  [!] Masukkan angka yang valid untuk hari.")
-            continue
+            date_obj = datetime.datetime.strptime(date_str, "%d/%m/%Y").date()
+            target_date = QDate(date_obj.year, date_obj.month, date_obj.day)
+            
+            # Jika tanggal lama sudah expired, turunkan minimum date sementara agar bisa dimuat
+            if target_date <= QDate.currentDate():
+                self.date_edit.setMinimumDate(target_date)
+                QMessageBox.warning(
+                    self,
+                    "Tanggal Kadaluarsa Sudah Lewat",
+                    f"Peringatan: Tanggal kadaluarsa data ini ({date_str}) sudah lewat!\n"
+                    "Silakan pilih tanggal baru di kalender sebelum menyimpan."
+                )
+            
+            self.date_edit.setDate(target_date)
+        except (ValueError, TypeError):
+            pass
 
-        # --- Bulan ---
-        try:
-            bulan = int(input("  Bulan  (1–12) : ").strip())
-            if not (1 <= bulan <= 12):
-                print("  [!] Bulan harus antara 1 – 12.")
-                continue
-        except ValueError:
-            print("  [!] Masukkan angka yang valid untuk bulan.")
-            continue
+    def validate_and_accept(self):
+        if not self.inputs['Judul_Pekerjaan'].text().strip():
+            QMessageBox.warning(self, "Validasi Gagal", "Judul Pekerjaan wajib diisi!")
+            return
+        if not self.inputs['Nama_Perusahaan'].text().strip():
+            QMessageBox.warning(self, "Validasi Gagal", "Nama Perusahaan wajib diisi!")
+            return
+            
+        # Validasi Tanggal Kadaluarsa (Preventif)
+        selected_date = self.date_edit.date()
+        if selected_date <= QDate.currentDate():
+            QMessageBox.warning(self, "Validasi Gagal", "Tanggal Kadaluarsa tidak boleh hari ini atau di masa lalu!")
+            return
+            
+        self.accept()
 
-        # --- Tahun ---
-        try:
-            tahun = int(input(f"  Tahun  (contoh: {tahun_sekarang}) : ").strip())
-            if not (tahun_sekarang <= tahun <= tahun_sekarang + 10):
-                print(f"  [!] Tahun harus antara {tahun_sekarang} – {tahun_sekarang + 10}.")
-                continue
-        except ValueError:
-            print("  [!] Masukkan angka yang valid untuk tahun.")
-            continue
-
-        # --- Validasi gabungan ---
-        max_hari = calendar.monthrange(tahun, bulan)[1]
-        if hari > max_hari:
-            print(f"  [!] Bulan {NAMA_BULAN[bulan]} {tahun} hanya punya {max_hari} hari. Silakan ulangi.")
-            continue
-
-        tgl = datetime.date(tahun, bulan, hari)
-        if tgl < hari_ini:
-            print(f"  [!] Tanggal kadaluarsa tidak boleh di masa lalu (hari ini: {hari_ini.strftime('%d/%m/%Y')}). Silakan ulangi.")
-            continue
-
-        break
-
-    tanggal_str = f"{hari:02d}/{bulan:02d}/{tahun}"
-    print(f"  ✓ Kadaluarsa: {hari} {NAMA_BULAN[bulan]} {tahun}")
-    return tanggal_str
+    def get_data(self):
+        data = {}
+        if self.job_data and "id" in self.job_data:
+            data["id"] = self.job_data["id"]
+        else:
+            data["id"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            
+        for key, widget in self.inputs.items():
+            if isinstance(widget, QLineEdit):
+                data[key] = widget.text().strip()
+            elif isinstance(widget, QTextEdit):
+                data[key] = widget.toPlainText().strip()
+            elif isinstance(widget, QComboBox):
+                data[key] = widget.currentText()
+                
+        dt = self.date_edit.date()
+        data["Tanggal_Kadaluarsa"] = f"{dt.day():02d}/{dt.month():02d}/{dt.year()}"
+        return data
 
 
 
-# ─────────────────────────────────────────────
-# FUNGSI UTAMA
-# ─────────────────────────────────────────────
-def tambah_data() -> None:
-    cetak_header("TAMBAH DATA PEKERJAAN BARU")
-    print("  Isi setiap field berikut (tekan Enter untuk melanjutkan).\n")
 
-    job_baru = {"id": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
-
-    # === Input Field-Field Lainnya ===
-    for key, label in FIELDS:
-        nama_tampil = label.split("(")[0].strip()
-        hint = ""
-        if "(" in label:
-            hint = "  » " + label[label.index("("):]
-        while True:
-            if hint:
-                print(f"  {nama_tampil}")
-                print(f"{hint}")
-                nilai = input("  Jawaban : ").strip()
-            else:
-                nilai = input(f"  {nama_tampil}: ").strip()
-            if nilai:
-                job_baru[key] = nilai
-                break
-            else:
-                print("  [!] Field ini wajib diisi. Silakan coba lagi.")
-
-    # === Input Tanggal Kadaluarsa (di akhir) ===
-    job_baru["Tanggal_Kadaluarsa"] = _input_tanggal_kadaluarsa()
-    print()
-
-    data = muat_data()
-    data.append(job_baru)
-    simpan_data(data)
-
-    print(f"\n  Sukses! Data berhasil ditambahkan.")
-    print(f"     ID             : {job_baru['id']}")
-    print(f"     Kadaluarsa     : {job_baru['Tanggal_Kadaluarsa']}")
-    print(f"     Judul          : {job_baru['Judul_Pekerjaan']} @ {job_baru['Nama_Perusahaan']}")
-
-if __name__ == "__main__":
-    tambah_data()
+def gui_tambah_data(page, dialog_class):
+    dialog = dialog_class(page)
+    if dialog.exec_() == QDialog.Accepted:
+        new_data = dialog.get_data()
+        page.data.append(new_data)
+        simpan_data(page.data)
+        page.load_data()
