@@ -189,6 +189,11 @@ class Dashboard(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    
+    # Terapkan Tema Global (Tombol Dialog & Scrollbar)
+    from modul_antarmuka_pengguna import GLOBAL_DIALOG_STYLE
+    app.setStyleSheet(GLOBAL_DIALOG_STYLE)
+    
     app.setFont(QFont("Segoe UI", 10))
     window = Dashboard()
     window.show()
