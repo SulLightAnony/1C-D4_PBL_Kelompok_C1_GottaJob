@@ -2,6 +2,9 @@ import json
 import os
 import glob
 import datetime
+import threading
+
+_SIMPAN_LOCK = threading.Lock()
 
 # ─────────────────────────────────────────────
 # KONFIGURASI
@@ -57,8 +60,9 @@ def muat_data() -> list:
 
 def simpan_data(data: list) -> None:
     """Menyimpan data job posting ke dalam file-file di Job Archive dengan penanda source='job_posting'."""
-    if not os.path.exists(JOB_ARCHIVE_DIR):
-        os.makedirs(JOB_ARCHIVE_DIR)
+    with _SIMPAN_LOCK:
+        if not os.path.exists(JOB_ARCHIVE_DIR):
+            os.makedirs(JOB_ARCHIVE_DIR)
 
     # 1. Baca semua file di Job Archive, hapus yang source == 'job_posting'
     archive_data = {}

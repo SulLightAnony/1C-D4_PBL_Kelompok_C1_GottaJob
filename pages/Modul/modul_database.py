@@ -1,6 +1,7 @@
 import os
 import json
 import glob
+import threading
 
 def get_root_dir():
     """Mendapatkan path root proyek."""
@@ -153,36 +154,38 @@ def pindahkan_ke_database_permanen(nama_file):
     dst = os.path.join(root, "database", "Database Permanen", nama_file)
     
 def catat_aktivitas(pesan):
-    """Mencatat aktivitas user ke database/Database Permanen/Dashboard/aktivitas.json."""
-    root = get_root_dir()
-    dir_path = os.path.join(root, "database", "Database Permanen", "Dashboard")
-    if not os.path.exists(dir_path):
-        os.makedirs(dir_path)
-    path = os.path.join(dir_path, "aktivitas.json")
-    
-    aktivitas = []
-    if os.path.exists(path):
+    """Mencatat aktivitas user ke database/Database Permanen/Dashboard/aktivitas.json tanpa memblokir UI."""
+    def _catat():
+        root = get_root_dir()
+        dir_path = os.path.join(root, "database", "Database Permanen", "Dashboard")
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
+        path = os.path.join(dir_path, "aktivitas.json")
+        
+        aktivitas = []
+        if os.path.exists(path):
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    aktivitas = json.load(f)
+            except:
+                aktivitas = []
+                
+        # Tambahkan di awal agar yang terbaru muncul pertama
+        aktivitas.insert(0, {
+            "pesan": pesan,
+            "waktu": "" # Bisa ditambah timestamp jika perlu, tapi pesan sudah cukup untuk saat ini
+        })
+        
+        # Batasi maksimal 6 aktivitas
+        aktivitas = aktivitas[:6]
+        
         try:
-            with open(path, "r", encoding="utf-8") as f:
-                aktivitas = json.load(f)
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(aktivitas, f, ensure_ascii=False, indent=4)
         except:
-            aktivitas = []
-            
-    # Tambahkan di awal agar yang terbaru muncul pertama
-    aktivitas.insert(0, {
-        "pesan": pesan,
-        "waktu": "" # Bisa ditambah timestamp jika perlu, tapi pesan sudah cukup untuk saat ini
-    })
-    
-    # Batasi maksimal 6 aktivitas
-    aktivitas = aktivitas[:6]
-    
-    try:
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(aktivitas, f, ensure_ascii=False, indent=4)
-        return True
-    except:
-        return False
+            pass
+
+    threading.Thread(target=_catat, daemon=True).start()
 
 def get_aktivitas():
     """Mengambil daftar aktivitas terbaru."""

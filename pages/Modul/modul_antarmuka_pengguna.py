@@ -338,7 +338,6 @@ class JobDashboardWidget(QWidget):
         """
         self.skill_list.setStyleSheet(list_style)
         self.skill_list.itemClicked.connect(self._toggle_item_check)
-        self.skill_list.itemDoubleClicked.connect(self._toggle_item_check)
         page_skill_lay.addWidget(self.skill_list, stretch=1)
         page_skill_lay.addSpacing(15)
         
@@ -386,7 +385,6 @@ class JobDashboardWidget(QWidget):
         self.job_type_list = QListWidget()
         self.job_type_list.setStyleSheet(list_style)
         self.job_type_list.itemClicked.connect(self._toggle_item_check)
-        self.job_type_list.itemDoubleClicked.connect(self._toggle_item_check)
         page_type_lay.addWidget(self.job_type_list, stretch=1)
         page_type_lay.addSpacing(15)
         
@@ -416,10 +414,21 @@ class JobDashboardWidget(QWidget):
         self.card_dominant.update_value(dominant_skill, color="#2C687B")
 
     def _toggle_item_check(self, item):
-        if item.checkState() == Qt.Checked:
-            item.setCheckState(Qt.Unchecked)
+        last_state = item.data(Qt.UserRole)
+        current_state = item.checkState()
+        
+        if last_state is None:
+            # Default state when item is created is usually Unchecked
+            last_state = Qt.Unchecked
+            
+        if current_state != last_state:
+            # Checkbox clicked directly (Qt already toggled it)
+            item.setData(Qt.UserRole, current_state)
         else:
-            item.setCheckState(Qt.Checked)
+            # Text clicked (Qt did not toggle it, so we toggle manually)
+            new_state = Qt.Checked if current_state == Qt.Unchecked else Qt.Unchecked
+            item.setCheckState(new_state)
+            item.setData(Qt.UserRole, new_state)
 
 
 class BestMatchCard(QFrame):

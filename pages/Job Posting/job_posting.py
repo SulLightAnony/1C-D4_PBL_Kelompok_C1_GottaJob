@@ -19,6 +19,7 @@ if _pages_dir not in sys.path:
 
 from CRUD.Shared import muat_data, simpan_data, FIELDS
 from modul_antarmuka_pengguna import KeyboardScrollArea, show_message, show_question
+from Modul.modul_database import catat_aktivitas
 
 # Path assets
 down_icon_path = os.path.join(_root_dir, "assets", "Job Archive", "down.png").replace("\\", "/")
@@ -630,7 +631,9 @@ class JobCardWidget(QFrame):
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            self.card_clicked.emit(self.job_data)
+            child = self.childAt(event.pos())
+            if not isinstance(child, (QPushButton, QCheckBox)):
+                self.card_clicked.emit(self.job_data)
         super().mousePressEvent(event)
 
     def setup_ui(self):
@@ -1029,10 +1032,19 @@ class JobPostingPage(QWidget):
 
     def load_data(self):
         self.data = muat_data()
+        self.refresh_ui_only()
+
+    def refresh_ui_only(self):
         self.selected_ids.clear()
         self.btn_delete_multi.hide()
-        self.render_cards()
+        self.render_cards(self.search_bar.text(), self.combo_filter.currentText())
         self.update_statistics()
+
+    def simpan_data_async(self):
+        import copy
+        import threading
+        data_copy = copy.deepcopy(self.data)
+        threading.Thread(target=simpan_data, args=(data_copy,), daemon=True).start()
 
     def update_statistics(self):
         total = len(self.data)
@@ -1104,8 +1116,9 @@ class JobPostingPage(QWidget):
         if dialog.exec_() == QDialog.Accepted:
             new_data = dialog.get_data()
             self.data.append(new_data)
-            simpan_data(self.data)
-            self.load_data()
+            self.simpan_data_async()
+            catat_aktivitas(f"<b>Lowongan Ditambah</b><br>{new_data.get('Judul_Pekerjaan')}")
+            self.refresh_ui_only()
 
     def edit_data(self, job_data):
         dialog = JobDialog(self, job_data=job_data)
@@ -1115,22 +1128,26 @@ class JobPostingPage(QWidget):
                 if j.get("id") == job_data.get("id"):
                     self.data[i] = updated_data
                     break
-            simpan_data(self.data)
-            self.load_data()
+            self.simpan_data_async()
+            catat_aktivitas(f"<b>Lowongan Diperbarui</b><br>{updated_data.get('Judul_Pekerjaan')}")
+            self.refresh_ui_only()
 
     def delete_single_data(self, job_data):
         reply = show_question(self, 'Konfirmasi Hapus', "Yakin ingin menghapus lowongan ini?")
         if reply == QMessageBox.Yes:
             self.data = [j for j in self.data if j.get("id") != job_data.get("id")]
-            simpan_data(self.data)
-            self.load_data()
+            self.simpan_data_async()
+            catat_aktivitas(f"<b>Lowongan Dihapus</b><br>{job_data.get('Judul_Pekerjaan')}")
+            self.refresh_ui_only()
 
     def delete_selected(self):
         reply = show_question(self, 'Konfirmasi Hapus Massal', f"Yakin ingin menghapus {len(self.selected_ids)} lowongan terpilih?")
         if reply == QMessageBox.Yes:
+            jumlah = len(self.selected_ids)
             self.data = [j for j in self.data if j.get("id") not in self.selected_ids]
-            simpan_data(self.data)
-            self.load_data()
+            self.simpan_data_async()
+            catat_aktivitas(f"<b>Lowongan Dihapus</b><br>{jumlah} data lowongan")
+            self.refresh_ui_only()
 
     def show_job_details(self, job_data):
         dialog = JobDetailDialog(job_data, self)

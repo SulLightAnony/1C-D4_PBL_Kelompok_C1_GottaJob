@@ -1,20 +1,39 @@
 {
-    "Judul_Pekerjaan": "Mobile developer",
-    "Jenis_Pekerjaan": "Kontrak",
-    "Nama_Perusahaan": "IDE Asia",
-    "Lokasi": "Mekar Sejati, Bandung",
-    "Rentang_Gaji": "Rp10.000.000 - 15.000.000/Bulan",
-    "Skills": "Java | Restful API | Mobile Development | Kotlin | Android Development",
-    "Benefit_Pekerjaan": "THR",
-    "Kualifikasi_Persyaratan": "Bachelor’s degree in Computer Science, Software Engineering, or equivalent experience | 3–5 years of experience as an Android Developer | Strong proficiency in Kotlin | Solid experience with Android SDK, Android Studio, and Gradle | Strong understanding of MVVM architecture and clean architecture principles | Experience with RESTful APIs, JSON, and third-party integrations | Proficient in Git version control | Experience with Room Database / SQLite | Strong knowledge of Android lifecycle, UI components, and performance optimization | Familiarity with unit testing and debugging techniques | Nice to Have | Experience with Jetpack Compose | Familiarity with Dependency Injection (Hilt / Dagger) | Experience with CI/CD pipelines | Knowledge of Firebase (Crashlytics, Analytics, FCM) | Experience publishing and maintaining apps on the Google Play Store | Soft Skills | Strong analytical and problem-solving skills | Effective communication and collaboration | Ability to work independently and in agile teams | High attention to detail and code quality",
-    "Deskripsi_Pekerjaan": "We are looking for an experienced Android Developer with 3–5 years of hands-on experience in Kotlin to develop and maintain high-quality mobile applications. The candidate will play a key role in building scalable, robust, and user-centric Android solutions while collaborating closely with cross-functional teams.\nResponsibililties\nDesign, develop, and maintain Android applications using Kotlin\nArchitect and implement scalable, maintainable, and high-performance mobile solutions\nCollaborate with product managers, designers, and backend teams to deliver new features\nEnsure code quality through best practices, code reviews, and testing\nOptimize application performance, responsiveness, and memory usage\nIntegrate RESTful APIs and manage data efficiently\nTroubleshoot, debug, and resolve production issues\nContribute to technical decisions, architecture design, and improvements\nWrite and maintain technical documentation\nStay updated with the latest Android development trends and technologies",
-    "Link_Lowongan": "https://glints.com/id/opportunities/jobs/mobile-developer/a4c4937e-b5c7-4fcb-ab61-346c7735e96a",
-    "match_percentage": 60.0,
+    "Judul_Pekerjaan": "Web Developer",
+    "Jenis_Pekerjaan": "Penuh Waktu",
+    "Nama_Perusahaan": "PT. CITRA WARNA ABADI",
+    "Lokasi": "Jl. Bayu No.9 Rt.03 / Rw.10 Sudimoro, Parangjoro, Sukoharjo, Jawa Tengah 57552 - Indonesia",
+    "Rentang_Gaji": "Rp2.500.000 - 3.500.000/Bulan",
+    "Skills": "PostgreSQL | jQuery | MySQL | Microsoft SQL Server | JavaScript | Laravel",
+    "Benefit_Pekerjaan": "Career Path | THR | Annual Leave | Team-building events | Laptop Provided | BPJS Tenaga Kerja | Perform Bonus | BPJS Kesehatan | Training/Certification",
+    "Kualifikasi_Persyaratan": "Kerja di lokasi | 1 - 3 tahun pengalaman | Minimal Diploma (D1 - D4) | Laki-laki saja",
+    "Deskripsi_Pekerjaan": "PT. Citra Warna Abadi (CWA), sebuah perusahaan nasional yang berbasis di Sukoharjo, Kabupaten Sukoharjo, Jawa Tengah, telah beroperasi sejak tahun 2010. Dengan lokasi strategis di Jl. Bayu No.9, RT.03/10 Sudimoro Parangjoro, CWA terus berusaha memenuhi kebutuhan pasar akan cat tembok berkualitas tinggi dan bahan pelapis lainnya. Kami berkomitmen untuk memberikan layanan pelanggan yang memuaskan serta menjalin hubungan bisnis yang saling menguntungkan. Dalam rangka mendukung pertumbuhan perusahaan, kami membuka kesempatan bagi individu yang memiliki keterampilan dan pengalaman yang sesuai untuk bergabung dalam tim kami.\nSebagai Web Developer atau Full Stack Developer, Anda akan menjadi bagian dari tim yang bertanggung jawab atas pengembangan dan pemeliharaan platform web yang mendukung operasional perusahaan. Beberapa tanggung jawab utama Anda termasuk merancang, mengembangkan, dan memelihara aplikasi web yang efisien dan andal, menerapkan desain antarmuka pengguna yang intuitif, serta memastikan integrasi sistem yang lancar. Selain itu, Anda juga akan bekerja sama dengan tim teknis lainnya untuk memastikan semua elemen teknologi berjalan dengan baik dan memenuhi kebutuhan bisnis perusahaan.\nKami mencari kandidat yang memenuhi persyaratan berikut ini: Anda harus laki-laki, memiliki pendidikan sederajat diploma, dan memiliki pengalaman kerja minimal 1 hingga 3 tahun. Keterampilan yang dibutuhkan termasuk pemahaman mendalam tentang JavaScript, jQuery, MySQL, PostgreSQL, Microsoft SQL Server, serta pengalaman dengan framework Laravel. PT. Citra Warna Abadi menawarkan kesempatan kerja yang dinamis dan penuh tantangan di lingkungan profesional yang mendukung perkembangan karier Anda. Bergabunglah dengan tim kami dan berkontribusi pada pencapaian tujuan bisnis perusahaan.",
+    "Link_Lowongan": "https://glints.com/id/opportunities/jobs/web-developer/0758b9bc-e476-4398-94cb-6577baf0f388",
+    "match_percentage": 33.3,
     "matched_skills": [
-        "java",
-        "restful api",
-        "android development"
+        "microsoft sql server",
+        "javascript"
     ],
-    "is_type_match": true,
-    "source_file": "C:\\Users\\farre\\OneDrive\\Dokumen\\GitHub\\1C-D4_PBL_Kelompok_C1_GottaJob\\database\\Database Permanen\\Job Archive\\mobile_developer.json"
+    "matched_categorized": {
+        "hard_skills": [
+            "microsoft sql server",
+            "javascript"
+        ],
+        "soft_skills": [],
+        "positions": []
+    },
+    "all_categorized": {
+        "hard_skills": [
+            "PostgreSQL",
+            "jQuery",
+            "MySQL",
+            "Microsoft SQL Server",
+            "JavaScript",
+            "Laravel"
+        ],
+        "soft_skills": [],
+        "positions": []
+    },
+    "is_type_match": false,
+    "source_file": "C:\\Users\\farre\\OneDrive\\Dokumen\\GitHub\\1C-D4_PBL_Kelompok_C1_GottaJob\\database\\Database Permanen\\Job Archive\\web_developer.json"
 }
