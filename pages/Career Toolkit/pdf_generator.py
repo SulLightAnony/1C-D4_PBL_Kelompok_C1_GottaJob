@@ -69,8 +69,12 @@ class CVRenderer:
             self._render_certification()
 
         if self.data.get("skills"):
-            self._render_section_title("KEAHLIAN & TEKNOLOGI")
+            self._render_section_title("KEAHLIAN / ALAT")
             self._render_skills()
+
+        if self.data.get("languages"):
+            self._render_section_title("BAHASA")
+            self._render_languages()
 
         # Pastikan folder penyimpanan tersedia
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -87,21 +91,21 @@ class CVRenderer:
         photo_path = photo_data.get("path", "")
         photo_ratio = photo_data.get("ratio", "3x4")
         
-        img_w = 0 # Lebar foto yang memakan ruang X
+        img_w = 0 # Ruang toleransi lebar jika ada foto
         
         # Render Foto jika path valid
         if photo_path and os.path.exists(photo_path):
             try:
-                # Kalkulasi rasio fisik (dalam mm)
+                # Kalkulasi rasio fisik (dalam mm absolut)
                 img_width_mm = 30 # Base lebar = 3cm
-                img_height_mm = 45 if photo_ratio == "2x3" else 40 # 3x4 = 4cm, 2x3 = 4.5cm
+                img_height_mm = 45 if photo_ratio == "2x3" else 40 # Tinggi 4.5cm atau 4.0cm
                 
                 # Posisi di pojok kanan atas (Kertas A4 lebar 210mm, margin kanan 15mm)
                 img_x = 210 - 15 - img_width_mm
                 img_y = 15 # Sama dengan top margin
                 
                 self.pdf.image(photo_path, x=img_x, y=img_y, w=img_width_mm, h=img_height_mm)
-                img_w = img_width_mm + 5 # Tambahan 5mm untuk jarak spasi teks ke foto
+                img_w = img_width_mm + 10 # Jarak ekstra 10mm agar teks tidak menabrak pinggiran foto
             except Exception as e:
                 print(f"Error merender foto: {e}")
 
@@ -109,7 +113,7 @@ class CVRenderer:
         text_width = 180 - img_w 
 
         # Nama Lengkap
-        self.pdf.set_font(self.font_main, "B", 20 if img_w else 24) # Sedikit kecilkan font jika ada foto
+        self.pdf.set_font(self.font_main, "B", 20 if img_w else 24) # Sedikit kecilkan font jika terdesak foto
         self.pdf.set_text_color(*self.color_black)
         nama = self.data.get("full_name", "NAMA LENGKAP").upper()
         self.pdf.cell(text_width, 10, nama, align=self.header_align, ln=True)
@@ -119,14 +123,13 @@ class CVRenderer:
         self.pdf.set_text_color(*self.color_gray)
         info = [self.data.get(k) for k in ["email", "phone", "linkedin"] if self.data.get(k)]
         
-        # Jika Minimalis (Rata Kiri), pisahkan kontak dengan baris baru. Jika lain, sebaris dipisah " | "
         if self.header_align == "L":
             for item in info:
                 self.pdf.cell(text_width, 5, item, align="L", ln=True)
         else:
             self.pdf.cell(text_width, 6, "  |  ".join(info), align="C", ln=True)
         
-        # Geser Y ke bawah agar aman dari gambar (minimal setara dengan tinggi gambar)
+        # Cek kursor Y. Jika kita menggunakan foto, pastikan teks di bawahnya tidak menabrak!
         current_y = self.pdf.get_y()
         min_y = 15 + (45 if photo_ratio == "2x3" else 40) + 5
         if img_w and current_y < min_y:
@@ -212,6 +215,11 @@ class CVRenderer:
             self.pdf.set_font(self.font_main, "I", 10)
             self.pdf.set_text_color(*self.color_gray)
             self.pdf.cell(0, 5, f"Penerbit: {cert.get('issuer', '')}", ln=1)
+            
+            if cert.get("description"):
+                self.pdf.set_font(self.font_main, "", 10)
+                self.pdf.multi_cell(0, 5, cert.get("description", ""))
+                
             self.pdf.ln(1)
 
     def _render_skills(self):
@@ -219,3 +227,9 @@ class CVRenderer:
         self.pdf.set_text_color(*self.color_gray)
         skills_text = ", ".join(self.data.get("skills", []))
         self.pdf.multi_cell(0, 5, skills_text)
+
+    def _render_languages(self):
+        self.pdf.set_font(self.font_main, "", 10)
+        self.pdf.set_text_color(*self.color_gray)
+        lang_text = ", ".join(self.data.get("languages", []))
+        self.pdf.multi_cell(0, 5, lang_text)

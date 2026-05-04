@@ -1,1 +1,44 @@
-{}
+{
+    "cv_id": "84f33696",
+    "cv_name": "CV 123",
+    "photo": {
+        "path": "",
+        "ratio": "3x4"
+    },
+    "full_name": "123",
+    "email": "123",
+    "phone": "123",
+    "linkedin": "123",
+    "summary": "123",
+    "skills": [
+        "123"
+    ],
+    "languages": [],
+    "education": [
+        {
+            "institution": "123",
+            "degree": "123",
+            "year": "123",
+            "gpa": "123"
+        },
+        {
+            "institution": "123",
+            "degree": "123",
+            "year": "123",
+            "gpa": "123"
+        }
+    ],
+    "experience": [
+        {
+            "company": "123",
+            "role": "123",
+            "start_date": "05/2026",
+            "end_date": "05/2026",
+            "description": [
+                "123"
+            ]
+        }
+    ],
+    "organizations": [],
+    "certifications": []
+}
