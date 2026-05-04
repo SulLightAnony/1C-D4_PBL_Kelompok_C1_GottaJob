@@ -149,7 +149,7 @@ if process_dir not in sys.path:
 from modul_visualisasi_data import PieChartWidget
 from modul_pengolahan_data import hitung_persentase_skill, cari_pekerjaan_cocok, ambil_jenis_pekerjaan_unik
 from modul_database import get_database_permanen_dir, set_favorit, get_favorit, catat_aktivitas
-from modul_antarmuka_pengguna import JobMatchResultContainer, JobDetailPanel, JobDashboardWidget
+from modul_antarmuka_pengguna import JobMatchResultContainer, JobDetailPanel, JobDashboardWidget, show_message, show_question
 
 # ─────────────────────────────────────────────────────────────
 # Style Sheet
@@ -506,7 +506,7 @@ class JobArchivePage(QWidget):
         hasil = cari_pekerjaan_cocok(self.current_file, selected, selected_job_types)
         
         if not hasil:
-            QMessageBox.information(self, "Info", "Tidak ada kecocokan.")
+            show_message(self, "Info", "Tidak ada kecocokan.")
             return
             
         self.current_matches = hasil
@@ -526,10 +526,9 @@ class JobArchivePage(QWidget):
         """Menangani klik tombol favorit di Archive."""
         existing_fav = get_favorit()
         if existing_fav:
-            res = QMessageBox.question(
+            res = show_question(
                 self, "Konfirmasi Favorit",
-                "Pekerjaan sebelumnya yang ditandai favorit akan hilang dari dashboard, apakah kamu yakin?",
-                QMessageBox.Yes | QMessageBox.No
+                "Pekerjaan sebelumnya yang ditandai favorit akan hilang dari dashboard, apakah kamu yakin?"
             )
             if res == QMessageBox.No:
                 return
@@ -538,7 +537,7 @@ class JobArchivePage(QWidget):
         job_data["source_file"] = self.current_file
 
         if set_favorit(job_data):
-            QMessageBox.information(self, "Berhasil", f"'{job_data.get('Judul_Pekerjaan')}' sekarang menjadi favorit utama Anda!")
+            show_message(self, "Berhasil", f"'{job_data.get('Judul_Pekerjaan')}' sekarang menjadi favorit utama Anda!")
             
             # Catat aktivitas
             catat_aktivitas(f"<b>Pekerjaan Favorit Diganti</b><br>{job_data.get('Judul_Pekerjaan')}")
@@ -556,14 +555,13 @@ class JobArchivePage(QWidget):
                 fav_link=job_data.get("Link_Lowongan")
             )
         else:
-            QMessageBox.warning(self, "Gagal", "Gagal menetapkan favorit.")
+            show_message(self, "Gagal", "Gagal menetapkan favorit.")
 
     def _on_delete_clicked(self, job_data):
         """Menangani penghapusan item pekerjaan dari arsip."""
-        res = QMessageBox.question(
+        res = show_question(
             self, "Konfirmasi Hapus",
-            f"Apakah Anda yakin ingin menghapus '{job_data.get('Judul_Pekerjaan')}' dari arsip ini?",
-            QMessageBox.Yes | QMessageBox.No
+            f"Apakah Anda yakin ingin menghapus '{job_data.get('Judul_Pekerjaan')}' dari arsip ini?"
         )
         
         if res == QMessageBox.No:
@@ -581,13 +579,13 @@ class JobArchivePage(QWidget):
             new_data = [j for j in data if j.get("Link_Lowongan") != target_link]
             
             if len(new_data) == len(data):
-                QMessageBox.warning(self, "Gagal", "Data tidak ditemukan di file asli.")
+                show_message(self, "Gagal", "Data tidak ditemukan di file asli.")
                 return
 
             # 3. Tulis kembali atau hapus file jika kosong
             if not new_data:
                 os.remove(self.current_file)
-                QMessageBox.information(self, "Berhasil", "Data terakhir dihapus, file arsip dibersihkan.")
+                show_message(self, "Berhasil", "Data terakhir dihapus, file arsip dibersihkan.")
                 catat_aktivitas(f"<b>Arsip Dihapus</b><br>{os.path.basename(self.current_file)}")
                 self.load_file_list(auto_check=True)
                 self.main_stack.setCurrentWidget(self.dashboard_view)
@@ -595,7 +593,7 @@ class JobArchivePage(QWidget):
                 with open(self.current_file, "w", encoding="utf-8") as f:
                     json.dump(new_data, f, ensure_ascii=False, indent=4)
                 
-                QMessageBox.information(self, "Berhasil", "Pekerjaan berhasil dihapus dari arsip.")
+                show_message(self, "Berhasil", "Pekerjaan berhasil dihapus dari arsip.")
                 catat_aktivitas(f"<b>Lowongan Dihapus</b><br>{job_data.get('Judul_Pekerjaan')}")
                 
                 # Emit signal agar dashboard bisa refresh (tren skill mungkin berubah)

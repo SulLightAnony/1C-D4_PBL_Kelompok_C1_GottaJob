@@ -1,22 +1,39 @@
 {
-    "Judul_Pekerjaan": "Penetration Tester",
+    "Judul_Pekerjaan": "Web Developer",
     "Jenis_Pekerjaan": "Penuh Waktu",
-    "Nama_Perusahaan": "PT Computrade Technology International",
-    "Lokasi": "-",
-    "Rentang_Gaji": "-",
-    "Skills": "Security Testing | Burpsuite | Information Security | Nmap | Tenable Nessus | Penetration Testing | IT Security | SQLMap | Wireshark | Cybersecurity",
-    "Benefit_Pekerjaan": "-",
-    "Kualifikasi_Persyaratan": "Have experiences in leading and performing penetration testing, including web and mobile pentest. | Familiar with security frameworks (e.g. OWASP, NIST, etc) and risk assessment & management methodologies. | Familiar with Kali linux and security testing tools such as Nessus, Burpsuite, Metasploit, etc.",
-    "Deskripsi_Pekerjaan": "Deskripsi pekerjaan Penetration Tester PT Computrade Technology International\nPerform penetration tests on computer systems, networks, wireless access points, web / mobile applications, and product appliances.\nPerform vulnerability assessment and host configuration review for Windows and Linux systems, databases, network equipment, and product appliances.\nCollaborate with the team on the improvement and problem solving.",
-    "Link_Lowongan": "https://glints.com/id/opportunities/jobs/penetration-tester/22bc2c20-c4ec-411a-88b7-e5587ae13969",
-    "match_percentage": 50.0,
+    "Nama_Perusahaan": "PT. CITRA WARNA ABADI",
+    "Lokasi": "Jl. Bayu No.9 Rt.03 / Rw.10 Sudimoro, Parangjoro, Sukoharjo, Jawa Tengah 57552 - Indonesia",
+    "Rentang_Gaji": "Rp2.500.000 - 3.500.000/Bulan",
+    "Skills": "PostgreSQL | jQuery | MySQL | Microsoft SQL Server | JavaScript | Laravel",
+    "Benefit_Pekerjaan": "Career Path | THR | Annual Leave | Team-building events | Laptop Provided | BPJS Tenaga Kerja | Perform Bonus | BPJS Kesehatan | Training/Certification",
+    "Kualifikasi_Persyaratan": "Kerja di lokasi | 1 - 3 tahun pengalaman | Minimal Diploma (D1 - D4) | Laki-laki saja",
+    "Deskripsi_Pekerjaan": "PT. Citra Warna Abadi (CWA), sebuah perusahaan nasional yang berbasis di Sukoharjo, Kabupaten Sukoharjo, Jawa Tengah, telah beroperasi sejak tahun 2010. Dengan lokasi strategis di Jl. Bayu No.9, RT.03/10 Sudimoro Parangjoro, CWA terus berusaha memenuhi kebutuhan pasar akan cat tembok berkualitas tinggi dan bahan pelapis lainnya. Kami berkomitmen untuk memberikan layanan pelanggan yang memuaskan serta menjalin hubungan bisnis yang saling menguntungkan. Dalam rangka mendukung pertumbuhan perusahaan, kami membuka kesempatan bagi individu yang memiliki keterampilan dan pengalaman yang sesuai untuk bergabung dalam tim kami.\nSebagai Web Developer atau Full Stack Developer, Anda akan menjadi bagian dari tim yang bertanggung jawab atas pengembangan dan pemeliharaan platform web yang mendukung operasional perusahaan. Beberapa tanggung jawab utama Anda termasuk merancang, mengembangkan, dan memelihara aplikasi web yang efisien dan andal, menerapkan desain antarmuka pengguna yang intuitif, serta memastikan integrasi sistem yang lancar. Selain itu, Anda juga akan bekerja sama dengan tim teknis lainnya untuk memastikan semua elemen teknologi berjalan dengan baik dan memenuhi kebutuhan bisnis perusahaan.\nKami mencari kandidat yang memenuhi persyaratan berikut ini: Anda harus laki-laki, memiliki pendidikan sederajat diploma, dan memiliki pengalaman kerja minimal 1 hingga 3 tahun. Keterampilan yang dibutuhkan termasuk pemahaman mendalam tentang JavaScript, jQuery, MySQL, PostgreSQL, Microsoft SQL Server, serta pengalaman dengan framework Laravel. PT. Citra Warna Abadi menawarkan kesempatan kerja yang dinamis dan penuh tantangan di lingkungan profesional yang mendukung perkembangan karier Anda. Bergabunglah dengan tim kami dan berkontribusi pada pencapaian tujuan bisnis perusahaan.",
+    "Link_Lowongan": "https://glints.com/id/opportunities/jobs/web-developer/0758b9bc-e476-4398-94cb-6577baf0f388",
+    "match_percentage": 33.3,
     "matched_skills": [
-        "security testing",
-        "burpsuite",
-        "information security",
-        "penetration testing",
-        "cybersecurity"
+        "microsoft sql server",
+        "javascript"
     ],
-    "is_type_match": true,
-    "source_file": "c:\\Users\\sahla\\Documents\\1C-D4_PBL_Kelompok_C1_GottaJob\\database\\Database Permanen\\Job Archive\\penetration_tester.json"
+    "matched_categorized": {
+        "hard_skills": [
+            "microsoft sql server",
+            "javascript"
+        ],
+        "soft_skills": [],
+        "positions": []
+    },
+    "all_categorized": {
+        "hard_skills": [
+            "PostgreSQL",
+            "jQuery",
+            "MySQL",
+            "Microsoft SQL Server",
+            "JavaScript",
+            "Laravel"
+        ],
+        "soft_skills": [],
+        "positions": []
+    },
+    "is_type_match": false,
+    "source_file": "C:\\Users\\farre\\OneDrive\\Dokumen\\GitHub\\1C-D4_PBL_Kelompok_C1_GottaJob\\database\\Database Permanen\\Job Archive\\web_developer.json"
 }

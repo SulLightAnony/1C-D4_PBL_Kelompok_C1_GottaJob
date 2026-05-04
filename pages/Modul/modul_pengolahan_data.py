@@ -3,6 +3,7 @@ import os
 from collections import Counter
 import urllib.request
 import urllib.error
+from Modul.modul_kategorisasi import pisahkan_skill
 
 def validasi_link_pekerjaan(job_list):
     """
@@ -83,7 +84,9 @@ def hitung_persentase_skill(file_path):
                     all_skills.append(cleaned)
         
         unique_skills = set(all_skills)
-        freq.update(unique_skills)
+        # Filter: Hanya masukkan Hard Skills ke dalam hitung_persentase_skill
+        categorized = pisahkan_skill(list(unique_skills))
+        freq.update(categorized["hard_skills"])
 
     # Hitung persentase dan kelompokkan berdasarkan persentase yang sama
     # Format: { persentase: [list_skill] }
@@ -174,7 +177,16 @@ def cari_pekerjaan_cocok(file_path, selected_skills, selected_job_types=None):
         # Tambahkan data pekerjaan ke hasil pencarian
         job_data = item.copy()
         job_data["match_percentage"] = round(persentase, 1)
-        job_data["matched_skills"] = [s for s in job_skills if s.lower() in user_skills_set]
+        
+        # Kategorisasi matched skills (yang dimiliki user)
+        matched_list = [s for s in job_skills if s.lower() in user_skills_set]
+        job_data["matched_categorized"] = pisahkan_skill(matched_list)
+        
+        # Kategorisasi ALL skills (yang dibutuhkan lowongan)
+        all_skills_list = [s.strip() for s in raw_skills.replace("\n", "|").split("|") if s.strip()]
+        job_data["all_categorized"] = pisahkan_skill(all_skills_list)
+        
+        job_data["matched_skills"] = matched_list # Tetap simpan format lama untuk kompatibilitas
         job_data["is_type_match"] = is_type_match
         hasil_pencarian.append(job_data)
 
@@ -261,3 +273,49 @@ def ambil_top_skills(file_path, limit=5):
             break
             
     return top_skills
+
+def hitung_gap_skill(job_data):
+    """
+    Menghitung skill yang belum dikuasai berdasarkan data pekerjaan favorit.
+    Mengembalikan list skill yang perlu dipelajari.
+    """
+    if not job_data:
+        return []
+        
+    # Ambil semua skill yang ada di lowongan favorit
+    raw_skills = job_data.get("Skills", "")
+    semua_skill = [s.strip().lower() for s in raw_skills.split("|") if s.strip() and s.strip() != "-"]
+
+    # Ambil matched skill yang sudah dimiliki
+    skill_dimiliki = [s.strip().lower() for s in job_data.get("matched_skills", [])]
+
+    # Filter: ambil skill yang dibutuhkan tapi belum dimiliki
+    gap_list = [s.title() for s in semua_skill if s not in skill_dimiliki]
+    
+    # Hilangkan duplikat dan urutkan
+    return sorted(list(set(gap_list)))
+
+def cari_archive_terdekat(judul_pekerjaan, folder_archive):
+    """
+    Mencari file JSON di folder archive yang paling cocok dengan judul pekerjaan.
+    Menggunakan logika hitung kecocokan kata kunci.
+    """
+    import glob
+    if not os.path.exists(folder_archive):
+        return None
+        
+    semua_file = glob.glob(os.path.join(folder_archive, "*.json"))
+    keywords = [k.lower() for k in judul_pekerjaan.split() if len(k) > 2]
+    
+    best_match_count = 0
+    archive_json = None
+    
+    for file_path in semua_file:
+        nama_file_kecil = os.path.basename(file_path).lower()
+        match_count = sum(1 for key in keywords if key in nama_file_kecil)
+        
+        if match_count > best_match_count:
+            best_match_count = match_count
+            archive_json = file_path
+            
+    return archive_json if best_match_count > 0 else None
