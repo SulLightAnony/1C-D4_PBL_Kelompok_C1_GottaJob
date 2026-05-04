@@ -1,39 +1,37 @@
 {
-    "Judul_Pekerjaan": "Web Developer",
+    "Judul_Pekerjaan": "Head Chef",
     "Jenis_Pekerjaan": "Penuh Waktu",
-    "Nama_Perusahaan": "PT. CITRA WARNA ABADI",
-    "Lokasi": "Jl. Bayu No.9 Rt.03 / Rw.10 Sudimoro, Parangjoro, Sukoharjo, Jawa Tengah 57552 - Indonesia",
-    "Rentang_Gaji": "Rp2.500.000 - 3.500.000/Bulan",
-    "Skills": "PostgreSQL | jQuery | MySQL | Microsoft SQL Server | JavaScript | Laravel",
-    "Benefit_Pekerjaan": "Career Path | THR | Annual Leave | Team-building events | Laptop Provided | BPJS Tenaga Kerja | Perform Bonus | BPJS Kesehatan | Training/Certification",
+    "Nama_Perusahaan": "Lionz Coffee - Annisa M***",
+    "Lokasi": "Jl. Vila Dago Raya A/55",
+    "Rentang_Gaji": "Rp7.000.000 - 9.000.000/Bulan",
+    "Bonus": "Bonus Rp500.000 - 1.000.000/month",
+    "Skills": "Cook | Baking | Food Decoration",
+    "Benefit_Pekerjaan": "Work Insurance | Meal Allowance | Training/Certification",
     "Kualifikasi_Persyaratan": "Kerja di lokasi | 1 - 3 tahun pengalaman | Minimal Diploma (D1 - D4) | Laki-laki saja",
-    "Deskripsi_Pekerjaan": "PT. Citra Warna Abadi (CWA), sebuah perusahaan nasional yang berbasis di Sukoharjo, Kabupaten Sukoharjo, Jawa Tengah, telah beroperasi sejak tahun 2010. Dengan lokasi strategis di Jl. Bayu No.9, RT.03/10 Sudimoro Parangjoro, CWA terus berusaha memenuhi kebutuhan pasar akan cat tembok berkualitas tinggi dan bahan pelapis lainnya. Kami berkomitmen untuk memberikan layanan pelanggan yang memuaskan serta menjalin hubungan bisnis yang saling menguntungkan. Dalam rangka mendukung pertumbuhan perusahaan, kami membuka kesempatan bagi individu yang memiliki keterampilan dan pengalaman yang sesuai untuk bergabung dalam tim kami.\nSebagai Web Developer atau Full Stack Developer, Anda akan menjadi bagian dari tim yang bertanggung jawab atas pengembangan dan pemeliharaan platform web yang mendukung operasional perusahaan. Beberapa tanggung jawab utama Anda termasuk merancang, mengembangkan, dan memelihara aplikasi web yang efisien dan andal, menerapkan desain antarmuka pengguna yang intuitif, serta memastikan integrasi sistem yang lancar. Selain itu, Anda juga akan bekerja sama dengan tim teknis lainnya untuk memastikan semua elemen teknologi berjalan dengan baik dan memenuhi kebutuhan bisnis perusahaan.\nKami mencari kandidat yang memenuhi persyaratan berikut ini: Anda harus laki-laki, memiliki pendidikan sederajat diploma, dan memiliki pengalaman kerja minimal 1 hingga 3 tahun. Keterampilan yang dibutuhkan termasuk pemahaman mendalam tentang JavaScript, jQuery, MySQL, PostgreSQL, Microsoft SQL Server, serta pengalaman dengan framework Laravel. PT. Citra Warna Abadi menawarkan kesempatan kerja yang dinamis dan penuh tantangan di lingkungan profesional yang mendukung perkembangan karier Anda. Bergabunglah dengan tim kami dan berkontribusi pada pencapaian tujuan bisnis perusahaan.",
-    "Link_Lowongan": "https://glints.com/id/opportunities/jobs/web-developer/0758b9bc-e476-4398-94cb-6577baf0f388",
-    "match_percentage": 33.3,
-    "matched_skills": [
-        "microsoft sql server",
-        "javascript"
-    ],
+    "Deskripsi_Pekerjaan": "Head Chef untuk Dapur MBG\nMin. D3/S1 Tata Boga atau setara\nPengalaman minimal 3 tahun sebagai Head Chef/Sous Chef di Hotel atau Dapur Besar\nMemahami sistem food safety (HACCP/ISO 22000)\nMampu bekerja dalam tekanan\nKreatif, disiplin dan manajemen waktu\nBenefit\nGaji Kompetitif\nBPJS TK\nLokasi Dapur : Jakarta",
+    "Link_Lowongan": "https://glints.com/id/opportunities/jobs/head-chef/a8c0354e-044e-4024-9b6d-19d69fb4978f",
+    "match_percentage": 66.7,
     "matched_categorized": {
         "hard_skills": [
-            "microsoft sql server",
-            "javascript"
+            "cook",
+            "food decoration"
         ],
         "soft_skills": [],
         "positions": []
     },
     "all_categorized": {
         "hard_skills": [
-            "PostgreSQL",
-            "jQuery",
-            "MySQL",
-            "Microsoft SQL Server",
-            "JavaScript",
-            "Laravel"
+            "Cook",
+            "Baking",
+            "Food Decoration"
         ],
         "soft_skills": [],
         "positions": []
     },
-    "is_type_match": false,
-    "source_file": "C:\\Users\\farre\\OneDrive\\Dokumen\\GitHub\\1C-D4_PBL_Kelompok_C1_GottaJob\\database\\Database Permanen\\Job Archive\\web_developer.json"
+    "matched_skills": [
+        "cook",
+        "food decoration"
+    ],
+    "is_type_match": true,
+    "source_file": null
 }

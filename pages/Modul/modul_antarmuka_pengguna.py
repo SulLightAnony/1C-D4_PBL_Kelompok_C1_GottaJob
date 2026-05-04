@@ -957,10 +957,15 @@ class JobDetailPanel(QFrame):
         self.det_loc.setText(data.get("Lokasi", "-"))
         self.det_type.setText(data.get("Jenis_Pekerjaan", "-"))
         
-        # Salary
+        # Salary & Bonus
         self._clear_layout(self.salary_lay)
         sal = data.get("Rentang_Gaji", "-")
         self.salary_lay.addWidget(self._create_tag(sal, "salary"))
+        
+        bonus = data.get("Bonus", "-")
+        if bonus != "-" and bonus.lower() != "bonus":
+            self.salary_lay.addWidget(self._create_tag(f"Bonus: {bonus}", "salary"))
+            
         self.salary_lay.addStretch()
 
         # Skills
