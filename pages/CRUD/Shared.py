@@ -12,6 +12,7 @@ _SIMPAN_LOCK = threading.Lock()
 # Root project = 2 level di atas file ini (pages/CRUD/Shared.py → root)
 _ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 JOB_ARCHIVE_DIR = os.path.join(_ROOT, "database", "Database Permanen", "Job Archive")
+JOB_POSTING_FILE = os.path.join(_ROOT, "database", "Database Permanen", "Job Posting", "Data_Upload_Job.JSON")
 
 FIELDS = [
     ("Judul_Pekerjaan",         "Judul Pekerjaan         "),
@@ -34,7 +35,7 @@ def _get_category_file(judul: str) -> str:
     if "game" in j: return "game_developer.json"
     if "python" in j: return "python_developer.json"
     if "penetration" in j or "pentest" in j or "security" in j or "cyber" in j: return "penetration_tester.json"
-    return "it_programmer.json"
+    return None # Tidak ada kategori khusus
 
 # ─────────────────────────────────────────────
 # UTILITAS FILE
@@ -45,17 +46,28 @@ def muat_data() -> list:
         os.makedirs(JOB_ARCHIVE_DIR)
         
     hasil = []
+    # 1. Baca dari Job Archive
     for file_path in glob.glob(os.path.join(JOB_ARCHIVE_DIR, "*.json")):
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
                 if isinstance(data, list):
                     for job in data:
-                        # Hanya memuat data yang berasal dari Job Posting
                         if job.get("source") == "job_posting":
                             hasil.append(job)
-        except Exception:
-            pass
+        except Exception: pass
+
+    # 2. Baca dari Data_Upload_Job.JSON (Default/Uncategorized)
+    if os.path.exists(JOB_POSTING_FILE):
+        try:
+            with open(JOB_POSTING_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, list):
+                    for job in data:
+                        job["source"] = "job_posting" # Pastikan source ada
+                        hasil.append(job)
+        except Exception: pass
+        
     return hasil
 
 def simpan_data(data: list) -> None:
@@ -81,14 +93,20 @@ def simpan_data(data: list) -> None:
             archive_data[filename] = []
 
     # 2. Masukkan data job_posting yang baru ke dalam kategori yang sesuai
+    posting_utama = []
     for job in data:
-        job["source"] = "job_posting" # Berikan penanda
+        job["source"] = "job_posting"
         kategori_file = _get_category_file(job.get("Judul_Pekerjaan", ""))
-        if kategori_file not in archive_data:
-            archive_data[kategori_file] = []
-        archive_data[kategori_file].append(job)
+        
+        if kategori_file:
+            if kategori_file not in archive_data:
+                archive_data[kategori_file] = []
+            archive_data[kategori_file].append(job)
+        else:
+            # Jika tidak ada kategori, masuk ke Data_Upload_Job.JSON
+            posting_utama.append(job)
 
-    # 3. Tulis ulang semua file yang ada di archive_data
+    # 3. Tulis ulang semua file di Job Archive
     for filename, isi in archive_data.items():
         file_path = os.path.join(JOB_ARCHIVE_DIR, filename)
         try:
@@ -96,6 +114,16 @@ def simpan_data(data: list) -> None:
                 json.dump(isi, f, ensure_ascii=False, indent=4)
         except Exception as e:
             print(f"Gagal menyimpan ke {filename}: {e}")
+
+    # 4. Tulis ke Data_Upload_Job.JSON
+    try:
+        post_dir = os.path.dirname(JOB_POSTING_FILE)
+        if not os.path.exists(post_dir):
+            os.makedirs(post_dir)
+        with open(JOB_POSTING_FILE, "w", encoding="utf-8") as f:
+            json.dump(posting_utama, f, ensure_ascii=False, indent=4)
+    except Exception as e:
+        print(f"Gagal menyimpan ke Data_Upload_Job.JSON: {e}")
 
 # ─────────────────────────────────────────────
 # UTILITAS TAMPILAN
