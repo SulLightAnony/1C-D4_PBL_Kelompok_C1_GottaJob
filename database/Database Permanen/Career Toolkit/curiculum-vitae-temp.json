@@ -1,1 +1,38 @@
-{}
+{
+    "cv_id": "90249a7b",
+    "cv_name": "CV Sulthan Faazaa Akbar Riyandoro",
+    "photo": {
+        "path": "D:/Download/Pictures/Almusayid Char.jpg",
+        "ratio": "3x4"
+    },
+    "full_name": "Sulthan Faazaa Akbar Riyandoro",
+    "email": "sulthanfaaz@gmail.com",
+    "phone": "0838-9360-6988",
+    "linkedin": "google.com",
+    "summary": "Aku orang hebat",
+    "skills": [
+        "Fullstack Web Development"
+    ],
+    "languages": [],
+    "education": [
+        {
+            "institution": "POLBAN",
+            "degree": "Teknik Informatika D4",
+            "year": "2026",
+            "gpa": "4"
+        }
+    ],
+    "experience": [
+        {
+            "company": "MOBOID",
+            "role": "Senior Programmer",
+            "start_date": "05/2026",
+            "end_date": "05/2026",
+            "description": [
+                "Fullstack Website Developer"
+            ]
+        }
+    ],
+    "organizations": [],
+    "certifications": []
+}
