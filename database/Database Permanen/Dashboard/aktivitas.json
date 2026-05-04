@@ -1,10 +1,6 @@
 [
     {
-        "pesan": "<b>Lowongan Dihapus</b><br>Python Dev",
-        "waktu": ""
-    },
-    {
-        "pesan": "<b>Lowongan Ditambah</b><br>Python Dev",
+        "pesan": "<b>Lowongan Dihapus</b><br>1 data lowongan",
         "waktu": ""
     },
     {
@@ -16,11 +12,15 @@
         "waktu": ""
     },
     {
+        "pesan": "<b>Lowongan Dihapus</b><br>Python Dev",
+        "waktu": ""
+    },
+    {
         "pesan": "<b>Lowongan Ditambah</b><br>Python Dev",
         "waktu": ""
     },
     {
-        "pesan": "<b>Lowongan Dihapus</b><br>Python Developer",
+        "pesan": "<b>Lowongan Ditambah</b><br>Python Dev",
         "waktu": ""
     }
 ]

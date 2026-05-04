@@ -14,20 +14,5 @@
         "matched_skills": [
             "postgresql"
         ]
-    },
-    {
-        "id": "2026-05-04 13:46:53",
-        "Judul_Pekerjaan": "Python Dev",
-        "Nama_Perusahaan": "POLBAN",
-        "Jenis_Pekerjaan": "Full-time",
-        "Lokasi": "",
-        "Rentang_Gaji": "9.000.000-10.000.000",
-        "Skills": "",
-        "Link_Lowongan": "",
-        "Deskripsi_Pekerjaan": "",
-        "Benefit_Pekerjaan": "",
-        "Kualifikasi_Persyaratan": "",
-        "Tanggal_Kadaluarsa": "03/06/2026",
-        "source": "job_posting"
     }
 ]
