@@ -206,7 +206,7 @@ class JobPostingPage(QWidget):
         # Action Buttons
         btn_style_primary = "QPushButton { border: none; border-radius: 6px; background-color: #2C687B; color: white; font-size: 14px; font-weight: bold; padding: 0 20px;} QPushButton:hover { background-color: #408699; }"
 
-        self.btn_refresh = QPushButton(" Segarkan")
+        self.btn_refresh = QPushButton(" Refresh")
         self.btn_refresh.setIcon(QIcon(refresh_icon_path))
         self.btn_refresh.setIconSize(QSize(18, 18))
         self.btn_refresh.setFixedHeight(40)
