@@ -32,7 +32,6 @@ class CareerToolkitPage(QWidget):
         self.selected_template = None 
         
         self.init_ui()
-        self.check_for_draft()
 
     def init_ui(self):
         self.main_layout = QVBoxLayout(self)
@@ -398,9 +397,3 @@ class CareerToolkitPage(QWidget):
 
     def handle_ai_enhance(self, target_section):
         QMessageBox.information(self, "Persiapan AI", f"Mempersiapkan AI untuk memoles bagian: {target_section.upper()}.")
-
-    def check_for_draft(self):
-        temp = self.manager.get_temp_data()
-        if temp and temp.get("full_name"):
-            if QMessageBox.question(self, "Draft Tersedia", "Anda memiliki draft yang belum selesai, ingin dilanjutkan?", QMessageBox.Yes | QMessageBox.No) == QMessageBox.Yes:
-                self.open_form_editor(temp.get("cv_id"))

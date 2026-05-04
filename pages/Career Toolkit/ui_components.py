@@ -3,8 +3,8 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                              QPushButton, QFrame, QMenu, QAction, QLineEdit, 
                              QTextEdit, QToolButton, QSizePolicy, QTextBrowser,
                              QFileDialog, QComboBox, QDateEdit, QCheckBox,
-                             QGridLayout, QScrollArea)
-from PyQt5.QtCore import Qt, pyqtSignal, QDate
+                             QGridLayout, QScrollArea, QMessageBox)
+from PyQt5.QtCore import Qt, pyqtSignal, QDate, QTimer
 from PyQt5.QtGui import QIcon, QFont, QPixmap, QCursor
 
 # ==========================================
@@ -70,7 +70,7 @@ class CompactInputWidget(QFrame):
         self.input_field = QLineEdit()
         self.input_field.setPlaceholderText(placeholder)
         
-        self.btn_delete = QPushButton()
+        self.btn_delete = QPushButton(self)
         self.btn_delete.setCursor(QCursor(Qt.PointingHandCursor))
         self.btn_delete.setStyleSheet("border: none; background: transparent;")
         
@@ -156,95 +156,119 @@ class CVCard(QFrame):
         action_layout.addWidget(self.btn_edit); action_layout.addWidget(self.btn_print)
         layout.addLayout(action_layout)
 
+
 # ==========================================
-# 2. KOMPONEN FOTO (FUNGSI TERPISAH & ABSOLUT)
+# 2. KOMPONEN FOTO (VERSI ALTERNATIF MINIMALIS)
 # ==========================================
 class PhotoUploaderWidget(QFrame):
     def __init__(self, data=None, parent=None):
         super().__init__(parent)
         self.photo_path = ""
         self.setStyleSheet("QFrame { background-color: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; }")
+        
+        # --- BUILD UI HANYA SEKALI DI SINI ---
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(15, 15, 15, 15)
+
+        # Label Informasi
+        self.lbl_info = QLabel("<b>Pilih Pas Foto Resmi</b>")
+        self.lbl_info.setStyleSheet("border: none; background: transparent; color: #333;")
+        layout.addWidget(self.lbl_info)
+
+        # Baris Tombol
+        btn_layout = QHBoxLayout()
+        
+        self.btn_browse = QPushButton("Pilih File")
+        self.btn_browse.setCursor(QCursor(Qt.PointingHandCursor))
+        self.btn_browse.setStyleSheet("padding: 6px 15px; background-color: #2C687B; color: white; border-radius: 4px; font-weight: bold;")
+        self.btn_browse.clicked.connect(self.browse_image)
+        btn_layout.addWidget(self.btn_browse)
+        
+        self.btn_view = QPushButton("Lihat Foto")
+        self.btn_view.setCursor(QCursor(Qt.PointingHandCursor))
+        self.btn_view.setStyleSheet("padding: 6px 15px; background-color: #E28F41; color: white; border-radius: 4px; font-weight: bold;")
+        self.btn_view.clicked.connect(self.view_image)
+        self.btn_view.setVisible(False)
+        btn_layout.addWidget(self.btn_view)
+
+        self.btn_remove = QPushButton("Hapus")
+        self.btn_remove.setCursor(QCursor(Qt.PointingHandCursor))
+        self.btn_remove.setStyleSheet("padding: 6px 15px; background-color: #ef4444; color: white; border-radius: 4px; font-weight: bold;")
+        self.btn_remove.clicked.connect(self.remove_image)
+        self.btn_remove.setVisible(False)
+        btn_layout.addWidget(self.btn_remove)
+        
+        btn_layout.addStretch()
+        layout.addLayout(btn_layout)
+
+        # Teks Path Foto
+        self.lbl_path = QLabel("Belum ada foto yang dipilih.")
+        self.lbl_path.setWordWrap(True)
+        self.lbl_path.setStyleSheet("color: #64748b; font-size: 11px; border: none; margin-top: 5px;")
+        layout.addWidget(self.lbl_path)
+
+        # Panggil pengisian data awal
         self.init_ui(data)
 
     def init_ui(self, data):
-        layout = QGridLayout(self)
-        layout.setContentsMargins(15, 15, 15, 15)
-
-        # [0, 0] Kotak Foto (Murni Tampilan Pasif, tidak bisa diklik)
-        self.lbl_preview = QLabel("Tidak ada\nfoto")
-        self.lbl_preview.setFont(QFont("Segoe UI", 8))
-        self.lbl_preview.setAlignment(Qt.AlignCenter)
-        self.lbl_preview.setFixedSize(90, 120) 
-        self.lbl_preview.setStyleSheet("background-color: #e2e8f0; border: 1px solid #cbd5e1; border-radius: 4px; color: #64748b;")
-        layout.addWidget(self.lbl_preview, 0, 0, 2, 1, Qt.AlignLeft | Qt.AlignTop)
-
-        # [2, 0] Ikon Hapus di Bawah Foto
-        self.btn_remove = QPushButton()
-        self.btn_remove.setCursor(QCursor(Qt.PointingHandCursor))
-        self.btn_remove.setStyleSheet("border: none; background: transparent;")
-        base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        icon_path = os.path.join(base_path, "assets", "Career Toolkit", "icon-delete.png")
-        if os.path.exists(icon_path):
-            self.btn_remove.setIcon(QIcon(icon_path))
-        else:
-            self.btn_remove.setText("✖")
-            self.btn_remove.setStyleSheet("color: red; border: none;")
-        self.btn_remove.clicked.connect(self.remove_image)
-        layout.addWidget(self.btn_remove, 2, 0, Qt.AlignCenter)
-
-        # [0, 1] Teks & Kontrol Upload Eksplisit
-        info_layout = QVBoxLayout()
-        info_layout.setAlignment(Qt.AlignTop)
-        
-        lbl_info = QLabel("<b>Unggah Pas Foto Resmi</b>")
-        lbl_info.setStyleSheet("border: none; background: transparent; color: #333;")
-        
-        self.btn_browse = QPushButton("Pilih Foto")
-        self.btn_browse.setCursor(QCursor(Qt.PointingHandCursor))
-        self.btn_browse.setStyleSheet("padding: 6px 12px; background-color: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; max-width: 120px; font-weight: bold;")
-        self.btn_browse.clicked.connect(self.browse_image)
-        
-        self.combo_ratio = QComboBox()
-        self.combo_ratio.addItems(["Rasio 3x4", "Rasio 2x3"])
-        self.combo_ratio.setStyleSheet("border: 1px solid #cbd5e1; border-radius: 5px; padding: 4px; background: white; max-width: 150px;")
-        
-        info_layout.addWidget(lbl_info)
-        info_layout.addWidget(self.btn_browse)
-        info_layout.addWidget(self.combo_ratio)
-        info_layout.addStretch()
-        
-        layout.addLayout(info_layout, 0, 1, 3, 1, Qt.AlignLeft | Qt.AlignTop)
-        layout.setColumnStretch(2, 1)
-
+        # --- FUNGSI INI SEKARANG HANYA UNTUK UPDATE DATA ---
         if data and data.get("path"):
             self.photo_path = data["path"]
-            if data.get("ratio") == "2x3":
-                self.combo_ratio.setCurrentIndex(1)
-            self.update_preview()
+            self.update_ui_state()
+        else:
+            self.remove_image()
 
     def browse_image(self):
         path, _ = QFileDialog.getOpenFileName(self, "Pilih Pas Foto", "", "Images (*.png *.jpg *.jpeg)")
         if path:
             self.photo_path = path
-            self.update_preview()
+            self.update_ui_state()
 
-    def update_preview(self):
+    def update_ui_state(self):
         if self.photo_path and os.path.exists(self.photo_path):
-            pixmap = QPixmap(self.photo_path)
-            # FIX UKURAN ABSOLUT: 90x120 dikunci rapat agar menghindari bug render 0-pixel saat di background
-            self.lbl_preview.setPixmap(pixmap.scaled(90, 120, Qt.IgnoreAspectRatio, Qt.SmoothTransformation))
+            self.lbl_path.setText(f"File Terpilih:\n{self.photo_path}")
+            self.btn_view.setVisible(True)
+            self.btn_remove.setVisible(True)
         else:
             self.remove_image()
-        self.lbl_preview.repaint()
+
+    def view_image(self):
+        """Membuka foto menggunakan OS bawaan dengan popup loading anti-spam"""
+        if self.photo_path and os.path.exists(self.photo_path):
+            import platform, subprocess
+            
+            # 1. Siapkan Popup (MessageBox)
+            msg_box = QMessageBox(self)
+            msg_box.setWindowTitle("Memuat Foto")
+            msg_box.setText("Gambar sedang dibuka, harap tunggu...")
+            msg_box.setIcon(QMessageBox.Information)
+            msg_box.addButton("Oke", QMessageBox.AcceptRole)
+            
+            # 2. Pasang Timer 3 Detik (3000 ms) untuk menutup otomatis
+            QTimer.singleShot(3000, msg_box.accept)
+
+            # 3. Panggil sistem operasi untuk membuka foto
+            try:
+                if platform.system() == 'Windows':
+                    os.startfile(self.photo_path)
+                elif platform.system() == 'Darwin': # macOS
+                    subprocess.call(('open', self.photo_path))
+                else: # Linux
+                    subprocess.call(('xdg-open', self.photo_path))
+            except Exception as e:
+                print(f"Gagal membuka foto: {e}")
+                
+            # 4. Eksekusi Popup secara modal
+            msg_box.exec_()
 
     def remove_image(self):
         self.photo_path = ""
-        self.lbl_preview.clear()
-        self.lbl_preview.setText("Tidak ada\nfoto")
-        self.lbl_preview.repaint()
+        self.lbl_path.setText("Belum ada foto yang dipilih.")
+        self.btn_view.setVisible(False)
+        self.btn_remove.setVisible(False)
 
     def get_data(self):
-        return {"path": self.photo_path, "ratio": "2x3" if self.combo_ratio.currentIndex() == 1 else "3x4"}
+        return {"path": self.photo_path, "ratio": "3x4"}
 
 
 # ==========================================
@@ -261,7 +285,7 @@ class BaseInputWidget(QFrame):
         header = QHBoxLayout()
         lbl_title = QLabel(title); lbl_title.setFont(QFont("Segoe UI", 10, QFont.Bold)); lbl_title.setStyleSheet("border: none; background: transparent;")
         
-        self.btn_delete = QPushButton()
+        self.btn_delete = QPushButton(self)
         self.btn_delete.setCursor(QCursor(Qt.PointingHandCursor))
         self.btn_delete.setStyleSheet("border: none; background: transparent;")
         
@@ -352,7 +376,7 @@ class CertificationInputWidget(BaseInputWidget):
         return {"name": self.input_name.text(), "issuer": self.input_issuer.text(), "year": self.input_year.text(), "description": self.input_desc.toPlainText()}
 
 # ==========================================
-# 4. KARTU TEMPLATE & PREVIEW (ZOOM DIHAPUS)
+# 4. KARTU TEMPLATE & PREVIEW
 # ==========================================
 class TemplateCard(QFrame):
     template_selected = pyqtSignal(str)
@@ -394,14 +418,13 @@ class CVPreviewWidget(QFrame):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         
-        # SCROLL AREA UNTUK MEMBUNGKUS KANVAS A4 KAKU (Zoom Dihapus)
         self.scroll_area = QScrollArea()
         self.scroll_area.setStyleSheet("background-color: #cbd5e1; border: none;")
         self.scroll_area.setAlignment(Qt.AlignCenter)
         
         self.browser = QTextBrowser()
-        self.browser.setTextInteractionFlags(Qt.NoTextInteraction) # Tidak bisa di-select!
-        self.browser.setFixedSize(794, 1123) # KUNCI MATI UKURAN A4!
+        self.browser.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.browser.setFixedSize(794, 1123) # KUNCI MATI UKURAN A4
         self.browser.setStyleSheet("background-color: white; border: 1px solid #94a3b8; margin: 20px;")
         
         self.scroll_area.setWidget(self.browser)
@@ -424,7 +447,6 @@ class CVPreviewWidget(QFrame):
             img_h = "151" if photo_data.get("ratio") == "3x4" else "170"
             photo_html = f'<img src="file:///{img_uri}" width="{img_w}" height="{img_h}" style="border: 1px solid #ccc; display: block;">'
 
-        # KANVAS HTML TABLE MURNI
         html = f'''
         <div style="padding: 30px;">
             <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 10px;">
