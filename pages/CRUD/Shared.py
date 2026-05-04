@@ -1,14 +1,17 @@
 import json
 import os
-import uuid
+import glob
 import datetime
+import threading
+
+_SIMPAN_LOCK = threading.Lock()
 
 # ─────────────────────────────────────────────
 # KONFIGURASI
 # ─────────────────────────────────────────────
 # Root project = 2 level di atas file ini (pages/CRUD/Shared.py → root)
 _ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-FILE_NAME = os.path.join(_ROOT, "database", "Database Permanen", "Job Posting", "Data_Upload_Job.JSON")
+JOB_ARCHIVE_DIR = os.path.join(_ROOT, "database", "Database Permanen", "Job Archive")
 
 FIELDS = [
     ("Judul_Pekerjaan",         "Judul Pekerjaan         "),
@@ -23,31 +26,76 @@ FIELDS = [
     ("Link_Lowongan",           "Link Lowongan            (contoh: https://...)"),
 ]
 
+def _get_category_file(judul: str) -> str:
+    """Fungsi helper untuk menentukan nama file kategori di Job Archive berdasarkan judul."""
+    j = judul.lower()
+    if "web" in j: return "web_developer.json"
+    if "mobile" in j or "android" in j or "ios" in j: return "mobile_developer.json"
+    if "game" in j: return "game_developer.json"
+    if "python" in j: return "python_developer.json"
+    if "penetration" in j or "pentest" in j or "security" in j or "cyber" in j: return "penetration_tester.json"
+    return "it_programmer.json"
+
 # ─────────────────────────────────────────────
 # UTILITAS FILE
 # ─────────────────────────────────────────────
 def muat_data() -> list:
-    """Membaca data dari file JSON. Jika file belum ada, kembalikan list kosong."""
-    if not os.path.exists(FILE_NAME):
-        return []
-    try:
-        with open(FILE_NAME, "r", encoding="utf-8") as f:
-            isi = f.read().strip()
-            if not isi:
-                return []
-            data = json.loads(isi)
-            if not isinstance(data, list):
-                print(f"[PERINGATAN] Format file {FILE_NAME} tidak valid. Mereset data...")
-                return []
-            return data
-    except json.JSONDecodeError:
-        print(f"[PERINGATAN] File {FILE_NAME} rusak/tidak bisa dibaca. Mereset data...")
-        return []
+    """Membaca data dari seluruh file di Job Archive yang memiliki penanda source='job_posting'."""
+    if not os.path.exists(JOB_ARCHIVE_DIR):
+        os.makedirs(JOB_ARCHIVE_DIR)
+        
+    hasil = []
+    for file_path in glob.glob(os.path.join(JOB_ARCHIVE_DIR, "*.json")):
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, list):
+                    for job in data:
+                        # Hanya memuat data yang berasal dari Job Posting
+                        if job.get("source") == "job_posting":
+                            hasil.append(job)
+        except Exception:
+            pass
+    return hasil
 
 def simpan_data(data: list) -> None:
-    """Menulis seluruh data ke file JSON dengan indentasi rapi."""
-    with open(FILE_NAME, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+    """Menyimpan data job posting ke dalam file-file di Job Archive dengan penanda source='job_posting'."""
+    with _SIMPAN_LOCK:
+        if not os.path.exists(JOB_ARCHIVE_DIR):
+            os.makedirs(JOB_ARCHIVE_DIR)
+
+    # 1. Baca semua file di Job Archive, hapus yang source == 'job_posting'
+    archive_data = {}
+    for file_path in glob.glob(os.path.join(JOB_ARCHIVE_DIR, "*.json")):
+        filename = os.path.basename(file_path)
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                isi = json.load(f)
+                if isinstance(isi, list):
+                    # Simpan hanya data yang BUKAN dari Job Posting (agar data lama tidak hilang)
+                    isi_bersih = [job for job in isi if job.get("source") != "job_posting"]
+                    archive_data[filename] = isi_bersih
+                else:
+                    archive_data[filename] = []
+        except Exception:
+            archive_data[filename] = []
+
+    # 2. Masukkan data job_posting yang baru ke dalam kategori yang sesuai
+    for job in data:
+        job["source"] = "job_posting" # Berikan penanda
+        kategori_file = _get_category_file(job.get("Judul_Pekerjaan", ""))
+        if kategori_file not in archive_data:
+            archive_data[kategori_file] = []
+        archive_data[kategori_file].append(job)
+
+    # 3. Tulis ulang semua file yang ada di archive_data
+    for filename, isi in archive_data.items():
+        file_path = os.path.join(JOB_ARCHIVE_DIR, filename)
+        try:
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump(isi, f, ensure_ascii=False, indent=4)
+        except Exception as e:
+            print(f"Gagal menyimpan ke {filename}: {e}")
 
 # ─────────────────────────────────────────────
 # UTILITAS TAMPILAN
@@ -92,8 +140,7 @@ def clear_menu():
 # AUTO-DELETE: Hapus data yang sudah kadaluarsa
 # ─────────────────────────────────────────────
 def bersihkan_data_kadaluarsa() -> int:
-    """Membaca semua data, menghapus yang Tanggal_Kadaluarsa-nya sudah lewat,
-    menyimpan kembali, dan mengembalikan jumlah data yang dihapus."""
+    """Membaca semua data job posting, menghapus yang Tanggal_Kadaluarsa-nya sudah lewat."""
     data = muat_data()
     if not data:
         return 0
@@ -105,7 +152,6 @@ def bersihkan_data_kadaluarsa() -> int:
     for job in data:
         tgl_str = job.get("Tanggal_Kadaluarsa", "").strip()
         try:
-            # Format yang dipakai Create.py: DD/MM/YYYY
             tgl = datetime.datetime.strptime(tgl_str, "%d/%m/%Y").date()
             if tgl < hari_ini:
                 jumlah_hapus += 1
@@ -115,10 +161,10 @@ def bersihkan_data_kadaluarsa() -> int:
             else:
                 data_valid.append(job)
         except (ValueError, TypeError):
-            # Jika format tanggal tidak bisa diparse, simpan datanya
             data_valid.append(job)
 
     if jumlah_hapus > 0:
         simpan_data(data_valid)
 
     return jumlah_hapus
+
