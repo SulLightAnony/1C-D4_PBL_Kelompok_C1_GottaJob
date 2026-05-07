@@ -1,5 +1,5 @@
 import os
-from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
+from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
                              QPushButton, QStackedWidget, QScrollArea, 
                              QGridLayout, QFrame, QLineEdit, QTextEdit, 
                              QMessageBox, QFileDialog)
@@ -396,4 +396,63 @@ class CareerToolkitPage(QWidget):
             self.manager.delete_cv(cv_id); self.refresh_dashboard()
 
     def handle_ai_enhance(self, target_section):
-        QMessageBox.information(self, "Persiapan AI", f"Mempersiapkan AI untuk memoles bagian: {target_section.upper()}.")
+        """
+        Mengeksekusi polesan AI pada bagian yang dipilih (summary/experience).
+        """
+        # Tentukan widget target
+        if target_section == "summary":
+            target_widget = self.input_summary
+        else:
+            # Jika dari pengalaman kerja, biasanya widget dikirim langsung 
+            # atau dicari yang sedang aktif
+            target_widget = target_section if not isinstance(target_section, str) else None
+
+        if not target_widget: return
+
+        text_to_fix = target_widget.toPlainText()
+        if not text_to_fix.strip():
+            QMessageBox.warning(self, "Kosong", "Ketik drafnya dulu ya!")
+            return
+
+        # Panggil API
+        from gemini_api import perbagus_teks_cv
+        job_info = getattr(self, 'target_job', None)
+
+        try:
+            QApplication.setOverrideCursor(Qt.WaitCursor)
+            hasil_ai = perbagus_teks_cv(job_info, text_to_fix)
+            target_widget.setPlainText(hasil_ai)
+        finally:
+            QApplication.restoreOverrideCursor()
+        
+    def apply_ai_enhancement(self, job_data):
+        """
+        Dijalankan saat user datang dari Job Archive.
+        """
+        # 1. Simpan target loker untuk referensi AI nanti
+        self.target_job = job_data
+        
+        # 2. Ambil data penting
+        judul = job_data.get("Judul_Pekerjaan", "")
+        perusahaan = job_data.get("Nama_Perusahaan", "")
+        kualifikasi = job_data.get("Kualifikasi_Persyaratan", "").replace("|", ", ")
+
+        # 3. Langsung arahkan ke Halaman Form (Index 1)
+        self.stack.setCurrentIndex(1)
+        
+        # 4. Auto-fill data ke form
+        # Kita isi nama user (jika kosong) atau tambahkan info loker ke summary sebagai draf
+        draf_summary = (
+            f"Seorang profesional yang berdedikasi untuk posisi {judul} di {perusahaan}. "
+            f"Memiliki kompetensi dalam: {kualifikasi}."
+        )
+        self.input_summary.setPlainText(draf_summary)
+        
+        # Opsional: Jika ada input nama CV/File, bisa diisi juga
+        # self.input_cv_name.setText(f"CV - {judul} - {perusahaan}")
+
+        QMessageBox.information(
+            self, "AI Matcher Siap ✨", 
+            f"Sistem telah menyesuaikan draf CV Anda untuk posisi {judul}.\n\n"
+            "Gunakan tombol 'Perbagus' pada tiap bagian untuk hasil yang lebih maksimal!"
+        )

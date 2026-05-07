@@ -579,6 +579,7 @@ class JobMatchResultContainer(QWidget):
     save_clicked = pyqtSignal(dict)
     favorite_clicked = pyqtSignal(dict)
     delete_clicked = pyqtSignal(dict)
+    build_cv_clicked = pyqtSignal(dict) # <--- TAMBAHAN: Sinyal Bangun CV AI
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -596,9 +597,10 @@ class JobMatchResultContainer(QWidget):
         self.table.save_clicked.connect(self.save_clicked.emit)
         self.table.favorite_clicked.connect(self.favorite_clicked.emit)
         self.table.delete_clicked.connect(self.delete_clicked.emit)
+        self.table.build_cv_clicked.connect(self.build_cv_clicked.emit) # <--- TAMBAHAN: Teruskan sinyal dari tabel
         layout.addWidget(self.table, stretch=1)
 
-    def set_data(self, hasil, selected_skills, show_save=True, show_favorite=True, show_delete=False, fav_link=None):
+    def set_data(self, hasil, selected_skills, show_save=True, show_favorite=True, show_delete=False, show_ai_cv=False, fav_link=None):
         if not hasil:
             return
         
@@ -607,17 +609,19 @@ class JobMatchResultContainer(QWidget):
         self.best_match_card.update_data(best, selected_skills)
         
         # Isi tabel dengan semua data (atau sisanya)
-        self.table.set_data(hasil, selected_skills, show_save=show_save, show_favorite=show_favorite, show_delete=show_delete, fav_link=fav_link)
+        self.table.set_data(hasil, selected_skills, show_save=show_save, show_favorite=show_favorite, show_delete=show_delete, show_ai_cv=show_ai_cv, fav_link=fav_link)
         self.current_data = hasil
 
     def _on_item_double_clicked(self, item):
         self.itemDoubleClicked.emit(item)
+
 
 class JobMatchTable(QTableWidget):
     """Komponen tabel hasil pencarian lowongan yang terstandarisasi."""
     save_clicked = pyqtSignal(dict)
     favorite_clicked = pyqtSignal(dict)
     delete_clicked = pyqtSignal(dict)
+    build_cv_clicked = pyqtSignal(dict) # <--- TAMBAHAN: Sinyal Bangun CV AI
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -627,7 +631,8 @@ class JobMatchTable(QTableWidget):
         self.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
         self.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
         self.horizontalHeader().setSectionResizeMode(3, QHeaderView.Fixed)
-        self.setColumnWidth(3, 245)
+        self.setColumnWidth(3, 380)
+        self.horizontalHeader().setMinimumSectionSize(150)
         self.verticalHeader().setDefaultSectionSize(70)
         self.verticalHeader().setVisible(False)
         self.setShowGrid(False)
@@ -659,39 +664,25 @@ class JobMatchTable(QTableWidget):
                 text-align: left;
             }
             QScrollBar:vertical {
-                border: none;
-                background: #F3F4F6;
-                width: 8px;
-                border-radius: 4px;
+                border: none; background: #F3F4F6; width: 8px; border-radius: 4px;
             }
             QScrollBar::handle:vertical {
-                background: #B2D2D9;
-                border-radius: 4px;
+                background: #B2D2D9; border-radius: 4px;
             }
-            QScrollBar::handle:vertical:hover {
-                background: #7A9EB0;
-            }
+            QScrollBar::handle:vertical:hover { background: #7A9EB0; }
             QScrollBar:horizontal {
-                border: none;
-                background: #F3F4F6;
-                height: 8px;
-                border-radius: 4px;
+                border: none; background: #F3F4F6; height: 8px; border-radius: 4px;
             }
-            QScrollBar::handle:horizontal {
-                background: #B2D2D9;
-                border-radius: 4px;
-            }
-            QScrollBar::handle:horizontal:hover {
-                background: #7A9EB0;
-            }
+            QScrollBar::handle:horizontal { background: #B2D2D9; border-radius: 4px; }
+            QScrollBar::handle:horizontal:hover { background: #7A9EB0; }
         """)
 
-    def set_data(self, hasil, selected_skills, show_save=True, show_favorite=True, show_delete=False, fav_link=None):
+    def set_data(self, hasil, selected_skills, show_save=True, show_favorite=True, show_delete=False, show_ai_cv=False, fav_link=None):
         """Isi tabel dengan data lowongan hasil pencocokan."""
         self.setRowCount(len(hasil))
         
-        # Sembunyikan kolom aksi jika tidak ada tombol yang ditampilkan
-        if not show_save and not show_favorite and not show_delete:
+        # Sembunyikan kolom aksi jika tidak ada tombol sama sekali
+        if not show_save and not show_favorite and not show_delete and not show_ai_cv:
             self.setColumnHidden(3, True)
         else:
             self.setColumnHidden(3, False)
@@ -729,17 +720,33 @@ class JobMatchTable(QTableWidget):
             
             self.setItem(row, 2, match_item)
             
-            if not show_save and not show_favorite and not show_delete:
+            if not show_save and not show_favorite and not show_delete and not show_ai_cv:
                 continue
                 
             # Container untuk tombol aksi
             btn_widget = QWidget()
             btn_widget.setStyleSheet("background-color: transparent;")
             btn_lay = QHBoxLayout(btn_widget)
-            btn_lay.setContentsMargins(10, 0, 10, 0)
-            btn_lay.setSpacing(10)
+            btn_lay.setContentsMargins(5, 0, 5, 0)
+            btn_lay.setSpacing(8)
             btn_lay.setAlignment(Qt.AlignCenter)
-            
+
+            # --- TAMBAHAN: Tombol Bangun CV AI ---
+            if show_ai_cv:
+                btn_ai = QPushButton("Bangun CV")
+                btn_ai.setCursor(Qt.PointingHandCursor)
+                btn_ai.setStyleSheet("""
+                    QPushButton {
+                        background-color: #8E44AD; color: white;
+                        border: none; border-radius: 8px; padding: 8px 12px; font-weight: bold; font-size: 13px;
+                        min-height: 32px;
+                    }
+                    QPushButton:hover { background-color: #9B59B6; }
+                """)
+                # Kita menembakkan data JSON pekerjaan saat ini
+                btn_ai.clicked.connect(lambda checked, d=data: self.build_cv_clicked.emit(d))
+                btn_lay.addWidget(btn_ai)
+
             # 4. Tombol Simpan
             if show_save:
                 btn_save = QPushButton(" Simpan")

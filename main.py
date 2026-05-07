@@ -113,6 +113,7 @@ class Dashboard(QMainWindow):
         self.halaman_archive = JobArchivePage()
         # Koneksi signal refresh dashboard
         self.halaman_archive.favorite_changed.connect(self.halaman_dashboard.load_data)
+        self.halaman_archive.build_cv_requested.connect(self.go_to_toolkit_for_ai)
         
         self.toolkit_page = CareerToolkitPage()
         
@@ -186,6 +187,18 @@ class Dashboard(QMainWindow):
         except:
             pass
         event.accept()
+        
+    def go_to_toolkit_for_ai(self, job_data):
+        """
+        Fungsi ini dipanggil ketika user klik 'Bangun CV' di Job Archive.
+        Tugasnya: Membuka menu CV Toolkit dan mengirim data pekerjaan untuk dianalisis.
+        """
+        # 1. Pindah Halaman ke Career Toolkit
+        # Pastikan variabel 'self.toolkit_page' sesuai dengan nama variabel halaman CV-mu di main.py
+        self.content_stack.setCurrentWidget(self.toolkit_page)
+        
+        # 2. Panggil fungsi di toolkit_main.py untuk memproses AI
+        self.toolkit_page.apply_ai_enhancement(job_data)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
