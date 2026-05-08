@@ -308,10 +308,26 @@ class GlintsScraper:
                     if alamat_loc.count() > 0:
                         lokasi = alamat_loc.first.inner_text().strip() or "-"
 
-                    # --- Gaji ---
-                    gaji_raw = self._teks_bersih(self.page.locator("[class*='Salary']"))
-                    if gaji_raw != "-" and "tidak menampilkan" not in gaji_raw.lower():
-                        gaji = gaji_raw
+                    # --- Gaji & Bonus ---
+                    # Glints memisahkan gaji pokok dan bonus dalam class yang berbeda
+                    basic_salary_loc = self.page.locator("[class*='BasicSalary']")
+                    bonus_salary_loc = self.page.locator("[class*='BonusSalary']")
+                    
+                    basic_salary = self._teks_bersih(basic_salary_loc)
+                    bonus_salary = self._teks_bersih(bonus_salary_loc)
+                    
+                    if basic_salary != "-" and "tidak menampilkan" not in basic_salary.lower():
+                        gaji = basic_salary
+                    else:
+                        # Fallback ke selector umum jika class spesifik tidak ditemukan
+                        gaji_raw = self._teks_bersih(self.page.locator("[class*='Salary']"))
+                        if gaji_raw != "-" and "tidak menampilkan" not in gaji_raw.lower():
+                            gaji = gaji_raw
+                            
+                    if bonus_salary != "-" and bonus_salary.lower() != "bonus":
+                        benefits_bonus = bonus_salary
+                    else:
+                        benefits_bonus = "-"
 
                     # --- Jenis Pekerjaan ---
                     html_penuh = self.page.content()
@@ -424,6 +440,7 @@ class GlintsScraper:
                     "Nama_Perusahaan":         perusahaan,
                     "Lokasi":                  lokasi,
                     "Rentang_Gaji":            gaji,
+                    "Bonus":                   benefits_bonus,
                     "Skills":                  skills,
                     "Benefit_Pekerjaan":       benefits,
                     "Kualifikasi_Persyaratan": kualifikasi,

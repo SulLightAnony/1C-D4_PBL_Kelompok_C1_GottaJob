@@ -4,11 +4,14 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                              QGridLayout, QFrame, QLineEdit, QTextEdit, 
                              QMessageBox, QFileDialog)
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QCursor
 
-# Import komponen pro dari ui_components
+# Import komponen lokal
 from data_manager import CVDataManager
-from ui_components import CVCard, ExperienceInputWidget, EducationInputWidget, TemplateCard, CVPreviewWidget
+from ui_components import (CVCard, ExperienceInputWidget, EducationInputWidget, 
+                           OrganizationInputWidget, CertificationInputWidget, 
+                           PhotoUploaderWidget, TemplateCard, CVPreviewWidget,
+                           CompactInputWidget)
 from pdf_generator import CVRenderer
 
 class CareerToolkitPage(QWidget):
@@ -16,15 +19,19 @@ class CareerToolkitPage(QWidget):
         super().__init__(parent)
         self.manager = CVDataManager()
         
+        # Penampung widget dinamis
         self.experience_widgets = []
         self.education_widgets = []
+        self.organization_widgets = []
+        self.certification_widgets = []
+        self.skills_widgets = []
+        self.languages_widgets = []
         
         self.current_editing_id = None
         self.temp_form_data = {} 
-        self.selected_template = None # Menyimpan ID template sementara
+        self.selected_template = None 
         
         self.init_ui()
-        self.check_for_draft()
 
     def init_ui(self):
         self.main_layout = QVBoxLayout(self)
@@ -33,16 +40,15 @@ class CareerToolkitPage(QWidget):
         self.stack = QStackedWidget()
         self.main_layout.addWidget(self.stack)
 
-        # Inisialisasi Empat Layar Utama
         self.view_dashboard = QWidget()
         self.view_form = QWidget()
         self.view_template_select = QWidget()
-        self.view_preview = QWidget() # LAYAR BARU
+        self.view_preview = QWidget()
 
         self.setup_dashboard_ui()
         self.setup_form_ui()
         self.setup_template_selection_ui()
-        self.setup_preview_ui() # SETUP LAYAR BARU
+        self.setup_preview_ui()
 
         self.stack.addWidget(self.view_dashboard)        # Index 0
         self.stack.addWidget(self.view_form)             # Index 1
@@ -58,7 +64,7 @@ class CareerToolkitPage(QWidget):
         layout = QVBoxLayout(self.view_dashboard)
         header = QLabel("ATS CV Builder")
         header.setFont(QFont("Segoe UI", 24, QFont.Bold))
-        header.setStyleSheet("color: #2C687B; margin: 20px;")
+        header.setStyleSheet("color: #2C687B; margin: 20px 20px 0 20px;")
         layout.addWidget(header)
 
         scroll = QScrollArea()
@@ -69,23 +75,30 @@ class CareerToolkitPage(QWidget):
         self.grid_layout = QGridLayout(self.grid_container)
         self.grid_layout.setAlignment(Qt.AlignTop | Qt.AlignLeft)
         self.grid_layout.setSpacing(25)
+        self.grid_layout.setContentsMargins(20, 20, 20, 20)
         
         scroll.setWidget(self.grid_container)
         layout.addWidget(scroll)
 
     def refresh_dashboard(self):
+        # Clear grid
         for i in reversed(range(self.grid_layout.count())): 
-            widget = self.grid_layout.itemAt(i).widget()
-            if widget: widget.setParent(None)
+            item = self.grid_layout.itemAt(i)
+            if item.widget(): item.widget().setParent(None)
 
+        # Tombol Tambah Baru
         btn_add = QPushButton("+")
         btn_add.setFixedSize(220, 280)
-        btn_add.setCursor(Qt.PointingHandCursor)
+        btn_add.setCursor(QCursor(Qt.PointingHandCursor))
         btn_add.setFont(QFont("Arial", 48))
-        btn_add.setStyleSheet("QPushButton { background-color: #f5f5f5; color: #2C687B; border: 2px dashed #2C687B; border-radius: 10px; }")
+        btn_add.setStyleSheet("""
+            QPushButton { background-color: #f1f5f9; color: #2C687B; border: 2px dashed #94a3b8; border-radius: 12px; }
+            QPushButton:hover { background-color: #e2e8f0; border: 2px dashed #2C687B; }
+        """)
         btn_add.clicked.connect(lambda: self.open_form_editor())
         self.grid_layout.addWidget(btn_add, 0, 0)
 
+        # Load CV dari Database
         all_cv = self.manager.get_all_cv()
         row, col = 0, 1
         for cv_data in all_cv:
@@ -100,183 +113,272 @@ class CareerToolkitPage(QWidget):
             if col > 3: col = 0; row += 1
 
     # ==========================================
-    # 2. UI FORM EDITOR
+    # 2. UI FORM EDITOR 
     # ==========================================
     def setup_form_ui(self):
         layout = QVBoxLayout(self.view_form)
-        scroll = QScrollArea(); scroll.setWidgetResizable(True)
-        form_container = QWidget(); self.form_layout = QVBoxLayout(form_container)
+        scroll = QScrollArea(); scroll.setWidgetResizable(True); scroll.setStyleSheet("border: none;")
+        form_container = QWidget(); self.form_layout = QVBoxLayout(form_container); self.form_layout.setSpacing(15)
         
-        self.form_layout.addWidget(QLabel("<b>INFORMASI PRIBADI</b>"))
+        # --- INFO PRIBADI & FOTO ---
+        self.form_layout.addWidget(QLabel("<b>INFORMASI PRIBADI & FOTO</b>"))
+        self.photo_uploader = PhotoUploaderWidget()
+        self.form_layout.addWidget(self.photo_uploader)
+
         self.input_name = QLineEdit(); self.input_name.setPlaceholderText("Nama Lengkap")
         self.input_email = QLineEdit(); self.input_email.setPlaceholderText("Email")
         self.input_phone = QLineEdit(); self.input_phone.setPlaceholderText("Nomor Telepon")
-        self.input_linkedin = QLineEdit(); self.input_linkedin.setPlaceholderText("URL LinkedIn")
-        for w in [self.input_name, self.input_email, self.input_phone, self.input_linkedin]: self.form_layout.addWidget(w)
+        self.input_linkedin = QLineEdit(); self.input_linkedin.setPlaceholderText("URL LinkedIn / Portofolio")
+        
+        for w in [self.input_name, self.input_email, self.input_phone, self.input_linkedin]: 
+            w.setStyleSheet("padding: 8px; border: 1px solid #cbd5e1; border-radius: 5px;")
+            self.form_layout.addWidget(w)
 
-        h_ai = QHBoxLayout(); h_ai.addWidget(QLabel("<b>RINGKASAN PROFESIONAL</b>")); h_ai.addStretch()
-        btn_ai = QPushButton("✨ Perbagus (AI)"); btn_ai.clicked.connect(self.handle_ai_enhance)
-        h_ai.addWidget(btn_ai); self.form_layout.addLayout(h_ai)
-        self.input_summary = QTextEdit(); self.input_summary.setFixedHeight(100); self.form_layout.addWidget(self.input_summary)
+        # STYLE AI DENGAN FONT 12PX (LEBIH BESAR)
+        style_ai_btn = "background-color: #e0e7ff; color: #4338ca; border-radius: 12px; padding: 5px 15px; font-weight: bold; font-size: 12px;"
 
+        # --- SEKSI-SEKSI DENGAN AI ENHANCE ---
+        sections = [
+            ("RINGKASAN PROFESIONAL", "summary", self.handle_ai_enhance),
+            ("PENGALAMAN KERJA", "experience", self.handle_ai_enhance),
+            ("PENGALAMAN ORGANISASI / VOLUNTEER", "organization", self.handle_ai_enhance)
+        ]
+
+        for title, target, func in sections:
+            h_header = QHBoxLayout(); h_header.addWidget(QLabel(f"<br><b>{title}</b>")); h_header.addStretch()
+            btn_ai = QPushButton("Perbagus"); btn_ai.setCursor(QCursor(Qt.PointingHandCursor)); btn_ai.setStyleSheet(style_ai_btn)
+            btn_ai.clicked.connect(lambda checked, t=target: func(t))
+            h_header.addWidget(btn_ai); self.form_layout.addLayout(h_header)
+            
+            if target == "summary":
+                self.input_summary = QTextEdit(); self.input_summary.setFixedHeight(100)
+                self.input_summary.setStyleSheet("padding: 8px; border: 1px solid #cbd5e1; border-radius: 5px;")
+                self.form_layout.addWidget(self.input_summary)
+            elif target == "experience":
+                self.exp_container = QVBoxLayout(); self.form_layout.addLayout(self.exp_container)
+                btn_add = QPushButton("+ Tambah Pengalaman"); btn_add.setCursor(QCursor(Qt.PointingHandCursor))
+                btn_add.setStyleSheet("padding: 8px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 5px;")
+                btn_add.clicked.connect(lambda: self.add_dynamic_block("experience"))
+                self.form_layout.addWidget(btn_add)
+            elif target == "organization":
+                self.org_container = QVBoxLayout(); self.form_layout.addLayout(self.org_container)
+                btn_add = QPushButton("+ Tambah Organisasi"); btn_add.setCursor(QCursor(Qt.PointingHandCursor))
+                btn_add.setStyleSheet("padding: 8px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 5px;")
+                btn_add.clicked.connect(lambda: self.add_dynamic_block("organization"))
+                self.form_layout.addWidget(btn_add)
+
+        # --- PENDIDIKAN, SERTIFIKASI, SKILLS, BAHASA ---
         self.form_layout.addWidget(QLabel("<br><b>RIWAYAT PENDIDIKAN</b>"))
         self.edu_container = QVBoxLayout(); self.form_layout.addLayout(self.edu_container)
-        btn_add_edu = QPushButton("+ Tambah Pendidikan"); btn_add_edu.clicked.connect(lambda: self.add_education_block())
+        btn_add_edu = QPushButton("+ Tambah Pendidikan"); btn_add_edu.clicked.connect(lambda: self.add_dynamic_block("education"))
         self.form_layout.addWidget(btn_add_edu)
 
-        self.form_layout.addWidget(QLabel("<br><b>PENGALAMAN KERJA</b>"))
-        self.exp_container = QVBoxLayout(); self.form_layout.addLayout(self.exp_container)
-        btn_add_exp = QPushButton("+ Tambah Pengalaman"); btn_add_exp.clicked.connect(lambda: self.add_experience_block())
-        self.form_layout.addWidget(btn_add_exp)
+        self.form_layout.addWidget(QLabel("<br><b>SERTIFIKASI & PENGHARGAAN</b>"))
+        self.cert_container = QVBoxLayout(); self.form_layout.addLayout(self.cert_container)
+        btn_add_cert = QPushButton("+ Tambah Sertifikasi"); btn_add_cert.clicked.connect(lambda: self.add_dynamic_block("certification"))
+        self.form_layout.addWidget(btn_add_cert)
 
-        self.form_layout.addWidget(QLabel("<br><b>KEAHLIAN (SKILLS)</b>"))
-        self.input_skills = QLineEdit(); self.input_skills.setPlaceholderText("Misal: Python, SQL, Project Management (Pisahkan dengan koma)")
-        self.form_layout.addWidget(self.input_skills)
+        self.form_layout.addWidget(QLabel("<br><b>KEAHLIAN / ALAT</b>"))
+        self.skills_container = QVBoxLayout(); self.form_layout.addLayout(self.skills_container)
+        btn_add_skill = QPushButton("+ Tambah Keahlian"); btn_add_skill.clicked.connect(lambda: self.add_dynamic_block("skill"))
+        self.form_layout.addWidget(btn_add_skill)
 
-        footer = QHBoxLayout(); btn_back = QPushButton("Batal"); btn_back.clicked.connect(lambda: self.stack.setCurrentIndex(0))
-        btn_next = QPushButton("Selanjutnya: Pilih Desain"); btn_next.setStyleSheet("background-color: #2C687B; color: white; padding: 10px;")
+        self.form_layout.addWidget(QLabel("<br><b>BAHASA</b>"))
+        self.lang_container = QVBoxLayout(); self.form_layout.addLayout(self.lang_container)
+        btn_add_lang = QPushButton("+ Tambah Bahasa"); btn_add_lang.clicked.connect(lambda: self.add_dynamic_block("language"))
+        self.form_layout.addWidget(btn_add_lang)
+        
+        # Tambahkan styling pada semua tombol tambah
+        for i in range(self.form_layout.count()):
+            w = self.form_layout.itemAt(i).widget()
+            if isinstance(w, QPushButton) and "+" in w.text():
+                w.setCursor(QCursor(Qt.PointingHandCursor))
+                w.setStyleSheet("padding: 8px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 5px;")
+
+        # --- FOOTER NAVIGASI (DENGAN TOMBOL EDIT/SIMPAN PERUBAHAN) ---
+        footer = QHBoxLayout(); footer.setContentsMargins(0, 20, 0, 10)
+        btn_back = QPushButton("Batal"); btn_back.setCursor(QCursor(Qt.PointingHandCursor))
+        btn_back.setStyleSheet("padding: 10px 20px; border: 1px solid #cbd5e1; border-radius: 6px;")
+        btn_back.clicked.connect(lambda: self.stack.setCurrentIndex(0))
+        
+        # TOMBOL SIMPAN PERUBAHAN (HANYA MUNCUL DI MODE EDIT)
+        self.btn_direct_save = QPushButton("Simpan Perubahan")
+        self.btn_direct_save.setCursor(QCursor(Qt.PointingHandCursor))
+        self.btn_direct_save.setStyleSheet("background-color: #E28F41; color: white; padding: 10px 20px; border-radius: 6px; font-weight: bold;")
+        self.btn_direct_save.clicked.connect(self.save_changes_direct)
+        self.btn_direct_save.hide() # Sembunyikan default
+        
+        btn_next = QPushButton("Selanjutnya"); btn_next.setCursor(QCursor(Qt.PointingHandCursor))
+        btn_next.setStyleSheet("background-color: #2C687B; color: white; padding: 10px 20px; border-radius: 6px; font-weight: bold;")
         btn_next.clicked.connect(self.go_to_template_selection)
-        footer.addWidget(btn_back); footer.addStretch(); footer.addWidget(btn_next)
+        
+        footer.addWidget(btn_back); footer.addStretch(); footer.addWidget(self.btn_direct_save); footer.addWidget(btn_next)
         
         scroll.setWidget(form_container); layout.addWidget(scroll); layout.addLayout(footer)
 
     # ==========================================
-    # 3. UI TEMPLATE SELECTION
-    # ==========================================
-    def setup_template_selection_ui(self):
-        layout = QVBoxLayout(self.view_template_select)
-        
-        header = QLabel("Pilih Desain CV")
-        header.setFont(QFont("Segoe UI", 18, QFont.Bold))
-        layout.addWidget(header)
-
-        scroll = QScrollArea(); scroll.setWidgetResizable(True)
-        grid_widget = QWidget(); grid = QGridLayout(grid_widget)
-        
-        templates = [
-            ("ats_classic", "ATS Classic", "Profesional dengan aksen biru."),
-            ("ats_modern", "ATS Modern", "Elegan, font serif, teks rata tengah."),
-            ("ats_minimalist", "ATS Minimalist", "Bersih, rata kiri, hemat ruang.")
-        ]
-
-        col = 0
-        for t_id, t_name, t_desc in templates:
-            t_card = TemplateCard(t_id, t_name, t_desc)
-            # UBAH: Sekarang menuju ke preview, bukan langsung save
-            t_card.template_selected.connect(self.go_to_preview) 
-            grid.addWidget(t_card, 0, col)
-            col += 1
-
-        btn_back = QPushButton("Kembali ke Edit Data")
-        btn_back.clicked.connect(lambda: self.stack.setCurrentIndex(1))
-        
-        scroll.setWidget(grid_widget)
-        layout.addWidget(scroll)
-        layout.addWidget(btn_back)
-
-    # ==========================================
-    # 4. UI PREVIEW (LAYAR BARU)
-    # ==========================================
-    def setup_preview_ui(self):
-        layout = QVBoxLayout(self.view_preview)
-        
-        header = QLabel("Pratinjau CV")
-        header.setFont(QFont("Segoe UI", 18, QFont.Bold))
-        layout.addWidget(header)
-
-        # Komponen Preview HTML
-        self.preview_widget = CVPreviewWidget()
-        layout.addWidget(self.preview_widget)
-
-        # Footer Navigasi
-        footer = QHBoxLayout()
-        btn_back = QPushButton("← Kembali Pilih Desain")
-        btn_back.clicked.connect(lambda: self.stack.setCurrentIndex(2))
-        
-        btn_save = QPushButton("Simpan & Cetak PDF")
-        btn_save.setStyleSheet("background-color: #E28F41; color: white; padding: 10px; font-weight: bold;")
-        btn_save.clicked.connect(self.finalize_and_save)
-        
-        footer.addWidget(btn_back)
-        footer.addStretch()
-        footer.addWidget(btn_save)
-        layout.addLayout(footer)
-
-    # ==========================================
-    # 5. LOGIKA OPERASIONAL
+    # 3. LOGIKA OPERASIONAL
     # ==========================================
     def open_form_editor(self, cv_id=None):
         self.current_editing_id = cv_id
-        for w in self.experience_widgets + self.education_widgets: w.setParent(None)
-        self.experience_widgets = []; self.education_widgets = []
-        self.input_name.clear(); self.input_email.clear(); self.input_phone.clear(); self.input_linkedin.clear(); self.input_summary.clear(); self.input_skills.clear()
+        
+        # Munculkan tombol simpan perubahan jika mengedit CV lama
+        if cv_id: self.btn_direct_save.show()
+        else: self.btn_direct_save.hide()
+        
+        # Bersihkan form
+        for w_list in [self.experience_widgets, self.education_widgets, self.organization_widgets, 
+                       self.certification_widgets, self.skills_widgets, self.languages_widgets]:
+            for w in w_list: w.setParent(None)
+            w_list.clear()
+            
+        self.input_name.clear(); self.input_email.clear(); self.input_phone.clear()
+        self.input_linkedin.clear(); self.input_summary.clear()
+        self.photo_uploader.remove_image()
 
         if cv_id:
             all_cv = self.manager.get_all_cv()
             data = next((item for item in all_cv if item["cv_id"] == cv_id), {})
+            
+            if "photo" in data: self.photo_uploader.init_ui(data["photo"])
             self.input_name.setText(data.get("full_name", ""))
             self.input_email.setText(data.get("email", ""))
             self.input_phone.setText(data.get("phone", ""))
             self.input_linkedin.setText(data.get("linkedin", ""))
             self.input_summary.setPlainText(data.get("summary", ""))
-            self.input_skills.setText(", ".join(data.get("skills", [])))
-            for edu in data.get("education", []): self.add_education_block(edu)
-            for exp in data.get("experience", []): self.add_experience_block(exp)
+            self.selected_template = data.get("template_id", "ats_classic")
+            
+            for exp in data.get("experience", []): self.add_dynamic_block("experience", exp)
+            for edu in data.get("education", []): self.add_dynamic_block("education", edu)
+            for org in data.get("organizations", []): self.add_dynamic_block("organization", org)
+            for cert in data.get("certifications", []): self.add_dynamic_block("certification", cert)
+            for skill in data.get("skills", []): self.add_dynamic_block("skill", skill)
+            for lang in data.get("languages", []): self.add_dynamic_block("language", lang)
         else:
-            self.add_education_block(); self.add_experience_block()
+            # Isi default untuk CV baru
+            self.add_dynamic_block("education"); self.add_dynamic_block("experience")
+            self.add_dynamic_block("skill"); self.add_dynamic_block("language")
 
         self.stack.setCurrentIndex(1)
 
-    def add_experience_block(self, data=None):
-        block = ExperienceInputWidget(data); block.delete_requested.connect(self.remove_exp)
-        self.exp_container.addWidget(block); self.experience_widgets.append(block)
-
-    def remove_exp(self, w): w.setParent(None); self.experience_widgets.remove(w)
-
-    def add_education_block(self, data=None):
-        block = EducationInputWidget(data); block.delete_requested.connect(self.remove_edu)
-        self.edu_container.addWidget(block); self.education_widgets.append(block)
-
-    def remove_edu(self, w): w.setParent(None); self.education_widgets.remove(w)
-
-    def go_to_template_selection(self):
+    def save_changes_direct(self):
+        """Menyimpan data langsung ke JSON tanpa harus memilih template ulang."""
         if not self.input_name.text():
             QMessageBox.warning(self, "Peringatan", "Nama Lengkap harus diisi!")
             return
+            
+        self.gather_form_data()
+        self.manager.save_final_cv(self.temp_form_data, self.selected_template)
         
-        skill_list = [s.strip() for s in self.input_skills.text().split(",") if s.strip()]
+        # Kembali ke Dashboard dengan silent save
+        self.refresh_dashboard()
+        self.stack.setCurrentIndex(0)
+
+    def gather_form_data(self):
+        """Mengumpulkan semua input dari form ke dalam dictionary temp_form_data."""
+        skill_list = [w.get_data() for w in self.skills_widgets if w.get_data().strip()]
+        lang_list = [w.get_data() for w in self.languages_widgets if w.get_data().strip()]
+        
         self.temp_form_data = {
             "cv_id": self.current_editing_id,
             "cv_name": f"CV {self.input_name.text()}",
+            "photo": self.photo_uploader.get_data(),
             "full_name": self.input_name.text(),
             "email": self.input_email.text(),
             "phone": self.input_phone.text(),
             "linkedin": self.input_linkedin.text(),
             "summary": self.input_summary.toPlainText(),
             "skills": skill_list,
+            "languages": lang_list,
             "education": [w.get_data() for w in self.education_widgets],
-            "experience": [w.get_data() for w in self.experience_widgets]
+            "experience": [w.get_data() for w in self.experience_widgets],
+            "organizations": [w.get_data() for w in self.organization_widgets],
+            "certifications": [w.get_data() for w in self.certification_widgets]
         }
+
+    def go_to_template_selection(self):
+        if not self.input_name.text():
+            QMessageBox.warning(self, "Peringatan", "Nama Lengkap harus diisi!")
+            return
+        self.gather_form_data()
         self.manager.save_to_temp(self.temp_form_data)
         self.stack.setCurrentIndex(2)
 
-    def go_to_preview(self, template_id):
-        """Memuat data form ke dalam widget preview."""
-        self.selected_template = template_id
-        self.preview_widget.render_preview(self.temp_form_data, template_id)
-        self.stack.setCurrentIndex(3)
-
     def finalize_and_save(self):
-        """Tahap akhir dari tombol Simpan di layar Preview."""
+        """Fungsi akhir: Simpan ke JSON dan langsung trigger simpan PDF."""
         if not self.selected_template: return
         
-        # 1. Simpan ke database JSON
         self.manager.save_final_cv(self.temp_form_data, self.selected_template)
         
-        # 2. Opsional: Beri pilihan user untuk langsung render file PDF ke komputernya
-        QMessageBox.information(self, "Berhasil", "Data CV telah disimpan ke Dashboard.")
+        cv_name = self.temp_form_data.get("cv_name", "Curriculum_Vitae")
+        path, _ = QFileDialog.getSaveFileName(self, "Simpan PDF", f"{cv_name}.pdf", "PDF Files (*.pdf)")
+        if path:
+            self.temp_form_data["template_id"] = self.selected_template
+            renderer = CVRenderer(self.temp_form_data)
+            renderer.generate_pdf(path, self.selected_template)
+
         self.refresh_dashboard()
         self.stack.setCurrentIndex(0)
+
+    # ==========================================
+    # LOGIKA LAIN (DYNAMIC BLOCKS & AI)
+    # ==========================================
+    def add_dynamic_block(self, block_type, data=None):
+        if block_type == "experience":
+            block = ExperienceInputWidget(data); block.delete_requested.connect(lambda w: self.remove_dynamic_block(w, self.experience_widgets))
+            self.exp_container.addWidget(block); self.experience_widgets.append(block)
+        elif block_type == "education":
+            block = EducationInputWidget(data); block.delete_requested.connect(lambda w: self.remove_dynamic_block(w, self.education_widgets))
+            self.edu_container.addWidget(block); self.education_widgets.append(block)
+        elif block_type == "organization":
+            block = OrganizationInputWidget(data); block.delete_requested.connect(lambda w: self.remove_dynamic_block(w, self.organization_widgets))
+            self.org_container.addWidget(block); self.organization_widgets.append(block)
+        elif block_type == "certification":
+            block = CertificationInputWidget(data); block.delete_requested.connect(lambda w: self.remove_dynamic_block(w, self.certification_widgets))
+            self.cert_container.addWidget(block); self.certification_widgets.append(block)
+        elif block_type == "skill":
+            block = CompactInputWidget("Misal: Python, SQL", data); block.delete_requested.connect(lambda w: self.remove_dynamic_block(w, self.skills_widgets))
+            self.skills_container.addWidget(block); self.skills_widgets.append(block)
+        elif block_type == "language":
+            block = CompactInputWidget("Misal: Bahasa Inggris (Aktif)", data); block.delete_requested.connect(lambda w: self.remove_dynamic_block(w, self.languages_widgets))
+            self.lang_container.addWidget(block); self.languages_widgets.append(block)
+
+    def remove_dynamic_block(self, widget, widget_list):
+        widget.setParent(None); widget_list.remove(widget)
+
+    def setup_template_selection_ui(self):
+        layout = QVBoxLayout(self.view_template_select)
+        header = QLabel("Pilih Desain CV"); header.setFont(QFont("Segoe UI", 18, QFont.Bold)); layout.addWidget(header)
+        scroll = QScrollArea(); scroll.setWidgetResizable(True); scroll.setStyleSheet("border: none;")
+        grid_widget = QWidget(); grid = QGridLayout(grid_widget); grid.setSpacing(20)
+        templates = [
+            ("ats_classic", "ATS Classic", "Profesional dengan aksen biru.", "CV-01.png"),
+            ("ats_modern", "ATS Modern", "Elegan, font serif, rata tengah.", "CV-02.png"),
+            ("ats_minimalist", "ATS Minimalist", "Bersih, rata kiri, hemat ruang.", "CV-03.png")
+        ]
+        col = 0
+        for t_id, t_name, t_desc, t_img in templates:
+            t_card = TemplateCard(t_id, t_name, t_desc, t_img)
+            t_card.template_selected.connect(self.go_to_preview); grid.addWidget(t_card, 0, col); col += 1
+        
+        btn_back = QPushButton("← Kembali ke Edit Data"); btn_back.setStyleSheet("padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;"); btn_back.clicked.connect(lambda: self.stack.setCurrentIndex(1))
+        scroll.setWidget(grid_widget); layout.addWidget(scroll); layout.addWidget(btn_back)
+
+    def setup_preview_ui(self):
+        layout = QVBoxLayout(self.view_preview)
+        header = QLabel("Pratinjau CV"); header.setFont(QFont("Segoe UI", 18, QFont.Bold)); layout.addWidget(header)
+        self.preview_widget = CVPreviewWidget(); layout.addWidget(self.preview_widget)
+        footer = QHBoxLayout(); btn_back = QPushButton("← Kembali Pilih Desain"); btn_back.clicked.connect(lambda: self.stack.setCurrentIndex(2))
+        
+        # --- PERUBAHAN TEKS TOMBOL ---
+        btn_save = QPushButton("Simpan")
+        btn_save.setStyleSheet("background-color: #E28F41; color: white; padding: 10px 20px; border-radius: 6px; font-weight: bold;")
+        btn_save.clicked.connect(self.finalize_and_save)
+        
+        footer.addWidget(btn_back); footer.addStretch(); footer.addWidget(btn_save); layout.addLayout(footer)
+
+    def go_to_preview(self, template_id):
+        self.selected_template = template_id; self.preview_widget.render_preview(self.temp_form_data, template_id); self.stack.setCurrentIndex(3)
 
     def handle_print_pdf(self, cv_id):
         all_cv = self.manager.get_all_cv()
@@ -284,9 +386,7 @@ class CareerToolkitPage(QWidget):
         if data:
             path, _ = QFileDialog.getSaveFileName(self, "Simpan PDF", f"{data['cv_name']}.pdf", "PDF Files (*.pdf)")
             if path:
-                renderer = CVRenderer(data)
-                renderer.generate_pdf(path, data.get("template_id", "ats_classic"))
-                QMessageBox.information(self, "Sukses", "CV Berhasil dicetak menjadi PDF!")
+                renderer = CVRenderer(data); renderer.generate_pdf(path, data.get("template_id", "ats_classic"))
 
     def handle_duplicate(self, cv_id):
         if self.manager.duplicate_cv(cv_id): self.refresh_dashboard()
@@ -295,12 +395,5 @@ class CareerToolkitPage(QWidget):
         if QMessageBox.question(self, 'Konfirmasi', 'Hapus CV ini?', QMessageBox.Yes | QMessageBox.No) == QMessageBox.Yes:
             self.manager.delete_cv(cv_id); self.refresh_dashboard()
 
-    def handle_ai_enhance(self):
-        QMessageBox.information(self, "Info AI", "Fitur 'Perbagus dengan AI' akan segera hadir setelah integrasi selesai!")
-
-    def check_for_draft(self):
-        temp = self.manager.get_temp_data()
-        if temp and temp.get("full_name"):
-            res = QMessageBox.question(self, "Draft Tersedia", "Anda memiliki form yang belum disave. Ingin dilanjutkan?", QMessageBox.Yes | QMessageBox.No)
-            if res == QMessageBox.Yes:
-                self.open_form_editor(temp.get("cv_id"))
+    def handle_ai_enhance(self, target_section):
+        QMessageBox.information(self, "Persiapan AI", f"Mempersiapkan AI untuk memoles bagian: {target_section.upper()}.")

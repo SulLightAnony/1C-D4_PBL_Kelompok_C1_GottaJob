@@ -1,0 +1,38 @@
+[
+    {
+        "Judul_Pekerjaan": "Head Chef",
+        "Jenis_Pekerjaan": "Penuh Waktu",
+        "Nama_Perusahaan": "Lionz Coffee - Annisa M***",
+        "Lokasi": "Jl. Vila Dago Raya A/55",
+        "Rentang_Gaji": "Rp7.000.000 - 9.000.000/Bulan",
+        "Bonus": "Bonus Rp500.000 - 1.000.000/month",
+        "Skills": "Cook | Baking | Food Decoration",
+        "Benefit_Pekerjaan": "Work Insurance | Meal Allowance | Training/Certification",
+        "Kualifikasi_Persyaratan": "Kerja di lokasi | 1 - 3 tahun pengalaman | Minimal Diploma (D1 - D4) | Laki-laki saja",
+        "Deskripsi_Pekerjaan": "Head Chef untuk Dapur MBG\nMin. D3/S1 Tata Boga atau setara\nPengalaman minimal 3 tahun sebagai Head Chef/Sous Chef di Hotel atau Dapur Besar\nMemahami sistem food safety (HACCP/ISO 22000)\nMampu bekerja dalam tekanan\nKreatif, disiplin dan manajemen waktu\nBenefit\nGaji Kompetitif\nBPJS TK\nLokasi Dapur : Jakarta",
+        "Link_Lowongan": "https://glints.com/id/opportunities/jobs/head-chef/a8c0354e-044e-4024-9b6d-19d69fb4978f",
+        "match_percentage": 66.7,
+        "matched_categorized": {
+            "hard_skills": [
+                "cook",
+                "food decoration"
+            ],
+            "soft_skills": [],
+            "positions": []
+        },
+        "all_categorized": {
+            "hard_skills": [
+                "Cook",
+                "Baking",
+                "Food Decoration"
+            ],
+            "soft_skills": [],
+            "positions": []
+        },
+        "matched_skills": [
+            "cook",
+            "food decoration"
+        ],
+        "is_type_match": true
+    }
+]

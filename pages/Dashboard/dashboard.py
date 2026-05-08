@@ -289,8 +289,15 @@ class DashboardPage(QWidget):
 
             top_info = QHBoxLayout()
             name_info = QLabel(f"<b>{judul.upper()}</b><br><font color='#777'>{perusahaan} | {jenis}</font>")
-            salary = QLabel(gaji)
+            salary_text = gaji
+            bonus = job_data.get("Bonus", "-")
+            if bonus != "-" and bonus.lower() != "bonus":
+                salary_text += f"<br><font color='#27AE60' size='3'>+ Bonus: {bonus}</font>"
+                
+            salary = QLabel(salary_text)
             salary.setStyleSheet("font-weight: bold; color: #333; font-size: 16px;")
+            salary.setAlignment(Qt.AlignRight | Qt.AlignTop)
+            
             top_info.addWidget(name_info)
             top_info.addStretch()
             top_info.addWidget(salary)
