@@ -1,5 +1,9 @@
 [
     {
+        "pesan": "<b>Lowongan Dihapus</b><br>asdadasd1",
+        "waktu": ""
+    },
+    {
         "pesan": "<b>Pekerjaan Favorit Diganti</b><br>Head Chef",
         "waktu": ""
     },
@@ -17,10 +21,6 @@
     },
     {
         "pesan": "<b>Lowongan Dihapus</b><br>1 data lowongan",
-        "waktu": ""
-    },
-    {
-        "pesan": "<b>Lowongan Dihapus</b><br>Python Dev",
         "waktu": ""
     }
 ]

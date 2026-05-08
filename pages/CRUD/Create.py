@@ -275,3 +275,45 @@ def gui_tambah_data(page, dialog_class):
         page.data.append(new_data)
         simpan_data(page.data)
         page.load_data()
+
+def proses_create_job(form_data, current_data):
+    import datetime as dt_mod
+    from PyQt5.QtCore import QDate
+
+    judul = form_data.get('judul', '').strip()
+    perusahaan = form_data.get('perusahaan', '').strip()
+    
+    if not judul:
+        return False, "Judul Pekerjaan wajib diisi!", current_data
+    if not perusahaan:
+        return False, "Nama Perusahaan wajib diisi!", current_data
+
+    # Validasi Tanggal Kadaluarsa
+    selected_date = form_data.get('date', QDate.currentDate())
+    if selected_date <= QDate.currentDate():
+        return False, "Tanggal Kadaluarsa tidak boleh hari ini atau di masa lalu!", current_data
+
+    g_min = form_data.get('gaji_min', '').strip()
+    g_max = form_data.get('gaji_max', '').strip()
+    rentang_final = f"{g_min}-{g_max}" if g_min and g_max else (g_min or g_max or "-")
+
+    skills_list = form_data.get('skills', [])
+    skills_str = "|".join(skills_list)
+
+    new_data = {
+        "id": dt_mod.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "Judul_Pekerjaan": judul,
+        "Nama_Perusahaan": perusahaan,
+        "Jenis_Pekerjaan": form_data.get('jenis', ''),
+        "Lokasi": form_data.get('lokasi', '').strip(),
+        "Rentang_Gaji": rentang_final,
+        "Skills": skills_str,
+        "Link_Lowongan": form_data.get('link', '').strip(),
+        "Deskripsi_Pekerjaan": form_data.get('desc', '').strip(),
+        "Benefit_Pekerjaan": "",
+        "Kualifikasi_Persyaratan": "",
+        "Tanggal_Kadaluarsa": f"{selected_date.day():02d}/{selected_date.month():02d}/{selected_date.year()}",
+    }
+
+    current_data.append(new_data)
+    return True, "Lowongan berhasil ditambahkan!", current_data

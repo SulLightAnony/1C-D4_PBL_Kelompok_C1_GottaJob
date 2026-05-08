@@ -20,6 +20,7 @@ if _pages_dir not in sys.path:
 from CRUD.Shared import muat_data, simpan_data, FIELDS
 from modul_antarmuka_pengguna import KeyboardScrollArea, show_message, show_question
 from Modul.modul_database import catat_aktivitas
+from CRUD.Read import JobDetailDialog
 
 # Path assets
 down_icon_path = os.path.join(_root_dir, "assets", "Job Archive", "down.png").replace("\\", "/")
@@ -448,173 +449,6 @@ class JobDialog(QDialog):
         data["Tanggal_Kadaluarsa"] = f"{dt.day():02d}/{dt.month():02d}/{dt.year()}"
         return data
 
-
-# --- Job Detail Dialog (Tampilan Read-Only) ---
-class JobDetailDialog(QDialog):
-    def __init__(self, job_data, parent=None):
-        super().__init__(parent)
-        self.job_data = job_data
-        self.setWindowTitle("Detail Lowongan Pekerjaan")
-        self.resize(600, 750)
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Dialog)
-        self.setAttribute(Qt.WA_TranslucentBackground)
-        self.setup_ui()
-
-    def setup_ui(self):
-        main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(20, 20, 20, 20)
-        main_layout.setSpacing(0)
-
-        # Main Container
-        container = QFrame()
-        container.setObjectName("DetailContainer")
-        container.setStyleSheet("""
-            QFrame#DetailContainer {
-                background-color: white;
-                border: 2px solid #2C687B;
-                border-radius: 15px;
-            }
-        """)
-        
-        # Efek Bayangan (Drop Shadow)
-        shadow = QGraphicsDropShadowEffect(self)
-        shadow.setBlurRadius(25)
-        shadow.setXOffset(0)
-        shadow.setYOffset(5)
-        shadow.setColor(QColor(0, 0, 0, 80))
-        container.setGraphicsEffect(shadow)
-        
-        main_layout.addWidget(container)
-        
-        inner_layout = QVBoxLayout(container)
-        inner_layout.setContentsMargins(0, 0, 0, 0)
-        inner_layout.setSpacing(0)
-
-        # Header
-        header_frame = QFrame()
-        header_frame.setStyleSheet("background-color: #F8FAFC; border-bottom: 1px solid #E2E8F0; border-top-left-radius: 13px; border-top-right-radius: 13px; border: none;")
-        header_layout = QHBoxLayout(header_frame)
-        header_layout.setContentsMargins(25, 20, 25, 20)
-        
-        title_label = QLabel("Rincian Pekerjaan")
-        title_label.setFont(QFont("Segoe UI", 18, QFont.Bold))
-        title_label.setStyleSheet("color: #1E293B; border: none; background: transparent;")
-        
-        btn_close = QPushButton("×")
-        btn_close.setFixedSize(32, 32)
-        btn_close.setCursor(Qt.PointingHandCursor)
-        btn_close.setStyleSheet("""
-            QPushButton { 
-                border: 1px solid #E2E8F0; border-radius: 6px; 
-                font-size: 20px; color: #64748B; background-color: white;
-            } 
-            QPushButton:hover { background-color: #F1F5F9; color: #0F172A; }
-        """)
-        btn_close.clicked.connect(self.reject)
-        
-        header_layout.addWidget(title_label)
-        header_layout.addStretch()
-        header_layout.addWidget(btn_close)
-        inner_layout.addWidget(header_frame)
-
-        # Content with Scroll Area
-        scroll = KeyboardScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setFrameShape(QFrame.NoFrame)
-        scroll.setStyleSheet("background-color: transparent;")
-        
-        content_widget = QWidget()
-        content_widget.setStyleSheet("background-color: transparent;")
-        content_layout = QVBoxLayout(content_widget)
-        content_layout.setContentsMargins(30, 25, 30, 35)
-        content_layout.setSpacing(20)
-        
-        scroll.setWidget(content_widget)
-        inner_layout.addWidget(scroll)
-
-        def add_detail_section(title, value):
-            if not value or value == "-":
-                return
-            lbl_title = QLabel(title)
-            lbl_title.setFont(QFont("Segoe UI", 10, QFont.Bold))
-            lbl_title.setStyleSheet("color: #777; margin-bottom: 2px;")
-            
-            lbl_value = QLabel(value)
-            lbl_value.setFont(QFont("Segoe UI", 12))
-            lbl_value.setStyleSheet("color: #222;")
-            lbl_value.setWordWrap(True)
-            lbl_value.setTextInteractionFlags(Qt.TextSelectableByMouse)
-            
-            content_layout.addWidget(lbl_title)
-            content_layout.addWidget(lbl_value)
-
-        # Basic Info
-        info_layout = QGridLayout()
-        info_layout.setSpacing(15)
-        
-        def create_grid_item(title, value, row, col):
-            container = QWidget()
-            lay = QVBoxLayout(container)
-            lay.setContentsMargins(0, 0, 0, 0)
-            lay.setSpacing(6)
-            t = QLabel(title)
-            t.setStyleSheet("color: #666; font-size: 13px; font-weight: bold;")
-            v = QLabel(value if value else "-")
-            v.setStyleSheet("color: #111; font-size: 16px;")
-            v.setWordWrap(True)
-            v.setTextInteractionFlags(Qt.TextSelectableByMouse)
-            lay.addWidget(t)
-            lay.addWidget(v)
-            info_layout.addWidget(container, row, col)
-
-        create_grid_item("PERUSAHAAN", self.job_data.get("Nama_Perusahaan", "-"), 0, 0)
-        create_grid_item("JENIS PEKERJAAN", self.job_data.get("Jenis_Pekerjaan", "-"), 0, 1)
-        create_grid_item("LOKASI", self.job_data.get("Lokasi", "-"), 1, 0)
-        create_grid_item("RENTANG GAJI", self.job_data.get("Rentang_Gaji", "-"), 1, 1)
-        create_grid_item("KADALUARSA", self.job_data.get("Tanggal_Kadaluarsa", "-"), 2, 0)
-        create_grid_item("SKILLS", self.job_data.get("Skills", "-"), 2, 1)
-
-        # Judul Besar
-        lbl_judul = QLabel(self.job_data.get("Judul_Pekerjaan", "-"))
-        lbl_judul.setFont(QFont("Segoe UI", 20, QFont.Bold))
-        lbl_judul.setStyleSheet("color: #111;")
-        lbl_judul.setWordWrap(True)
-        lbl_judul.setTextInteractionFlags(Qt.TextSelectableByMouse)
-        content_layout.addWidget(lbl_judul)
-        
-        content_layout.addLayout(info_layout)
-        
-        divider1 = QFrame()
-        divider1.setFrameShape(QFrame.HLine)
-        divider1.setStyleSheet("background-color: #eee; margin: 10px 0;")
-        content_layout.addWidget(divider1)
-        
-        add_detail_section("Link Lowongan", self.job_data.get("Link_Lowongan", "-"))
-        
-        desc = self.job_data.get("Deskripsi_Pekerjaan", "").strip()
-        if desc and desc != "-":
-            lbl_desc_title = QLabel("Deskripsi Pekerjaan")
-            lbl_desc_title.setFont(QFont("Segoe UI", 11, QFont.Bold))
-            lbl_desc_title.setStyleSheet("color: #333; margin-top: 10px;")
-            
-            text_desc = QTextEdit()
-            text_desc.setReadOnly(True)
-            text_desc.setPlainText(desc)
-            text_desc.setStyleSheet("QTextEdit { border: 1px solid #ddd; border-radius: 8px; padding: 12px; background-color: #fafafa; color: #444; font-size: 13px; line-height: 1.5; }")
-            text_desc.setMinimumHeight(150)
-            
-            content_layout.addWidget(lbl_desc_title)
-            content_layout.addWidget(text_desc)
-            
-        benefits = self.job_data.get("Benefit_Pekerjaan", "").strip()
-        if benefits and benefits != "-":
-            add_detail_section("Benefit Pekerjaan", benefits)
-            
-        reqs = self.job_data.get("Kualifikasi_Persyaratan", "").strip()
-        if reqs and reqs != "-":
-            add_detail_section("Kualifikasi & Persyaratan", reqs)
-
-        content_layout.addStretch()
 
 # --- Job Card Widget ---
 class JobCardWidget(QFrame):
@@ -1368,13 +1202,83 @@ class JobPostingPage(QWidget):
         grid.addWidget(make_field("Rentang Gaji (Angka Saja)", gaji_container), 2, 0)
         grid.addWidget(make_field("Tanggal Kadaluarsa", self.f_date), 2, 1)
 
-        # Baris 3: Skills (full width)
-        self.f_skills = QLineEdit(); self.f_skills.setPlaceholderText("cth. React Node.js SQL (pisah spasi)")
-        grid.addWidget(make_field("Skills", self.f_skills), 3, 0, 1, 2)
+        # Baris 3: Skills (Tag Input Style - Dashboard Theme)
+        skills_group = QWidget()
+        skills_group_layout = QVBoxLayout(skills_group)
+        skills_group_layout.setContentsMargins(0, 0, 0, 0)
+        skills_group_layout.setSpacing(5)
 
-        # Baris 4: Link (full width)
+        # Container Input + Button (+)
+        input_container = QFrame()
+        input_container.setFixedHeight(40) # Kunci tinggi agar tidak terpotong
+        input_container.setStyleSheet("""
+            QFrame {
+                border: 1px solid #ccc;
+                border-radius: 6px;
+                background-color: white;
+            }
+        """)
+        input_lay = QHBoxLayout(input_container)
+        input_lay.setContentsMargins(5, 0, 0, 0)
+        input_lay.setSpacing(0)
+
+        self.f_skills = QLineEdit()
+        self.f_skills.setPlaceholderText("cth. React Node.js SQL (pisah spasi)")
+        self.f_skills.setStyleSheet("border: none; background: transparent; color: #333; font-size: 14px;")
+        
+        self.btn_add_skill = QPushButton("+")
+        self.btn_add_skill.setFixedSize(40, 40) # Samakan dengan tinggi container
+        self.btn_add_skill.setCursor(Qt.PointingHandCursor)
+        self.btn_add_skill.setStyleSheet("""
+            QPushButton {
+                background-color: #2C687B;
+                border: none;
+                border-top-right-radius: 6px;
+                border-bottom-right-radius: 6px;
+                color: white;
+                font-size: 20px;
+                font-weight: bold;
+            }
+            QPushButton:hover { background-color: #408699; }
+        """)
+
+        input_lay.addWidget(self.f_skills)
+        input_lay.addWidget(self.btn_add_skill)
+        skills_group_layout.addWidget(input_container)
+
+        # Helper Text (Didesain seperti tombol keyboard)
+        self.lbl_skill_hint = QLabel(
+            'Tekan <span style="border: 1px solid #aaa; border-radius: 3px; padding: 1px 4px; background: #eee;">Enter</span> '
+            'atau klik <span style="border: 1px solid #aaa; border-radius: 3px; padding: 1px 4px; background: #eee;">+</span> '
+            'untuk menambah skill'
+        )
+        self.lbl_skill_hint.setStyleSheet("color: #777; font-size: 11px; margin-top: 5px; margin-left: 2px;")
+        skills_group_layout.addWidget(self.lbl_skill_hint)
+
+        # Tag Container (Dashboard Style Tags)
+        self.tag_container = QWidget()
+        self.tag_layout = FlowLayout(self.tag_container, margin=0, spacing=6)
+        skills_group_layout.addWidget(self.tag_container)
+
+        self.current_skills = []
+
+        def add_skill_from_input():
+            text = self.f_skills.text().strip()
+            if text:
+                words = [w.strip() for w in text.split(' ') if w.strip()]
+                for word in words:
+                    if word not in self.current_skills:
+                        self.create_skill_tag(word)
+                self.f_skills.clear()
+
+        self.f_skills.returnPressed.connect(add_skill_from_input)
+        self.btn_add_skill.clicked.connect(add_skill_from_input)
+
+        # Letakkan di kolom 0 saja agar sejajar dengan kolom kiri lainnya
+        grid.addWidget(make_field("Skills", skills_group), 3, 0)
+
         self.f_link = QLineEdit(); self.f_link.setPlaceholderText("https://...")
-        grid.addWidget(make_field("Link Lowongan", self.f_link), 4, 0, 1, 2)
+        grid.addWidget(make_field("Link Lowongan", self.f_link), 4, 0)
 
         # Baris 5: Deskripsi (full width)
         self.f_desc = QTextEdit(); self.f_desc.setPlaceholderText("Deskripsi singkat...")
@@ -1396,66 +1300,91 @@ class JobPostingPage(QWidget):
         card_layout.addWidget(btn_save)
 
         # Bisa disubmit menggunakan Enter (hardclick/enter)
-        for field in [self.f_judul, self.f_perusahaan, self.f_lokasi, self.f_gaji_min, self.f_gaji_max, self.f_skills, self.f_link]:
+        for field in [self.f_judul, self.f_perusahaan, self.f_lokasi, self.f_gaji_min, self.f_gaji_max, self.f_link]:
             field.returnPressed.connect(self._save_new_job)
 
         layout.addWidget(card)
         layout.addStretch()
         return page
 
+    def create_skill_tag(self, text):
+        """Membuat tag skill dengan warna Dashboard (#2C687B)."""
+        tag = QFrame()
+        tag.setStyleSheet("""
+            QFrame {
+                background-color: #2C687B;
+                border-radius: 6px;
+                padding: 2px 10px;
+            }
+        """)
+        tag_lay = QHBoxLayout(tag)
+        tag_lay.setContentsMargins(8, 4, 8, 4)
+        tag_lay.setSpacing(6)
+
+        lbl = QLabel(text)
+        lbl.setStyleSheet("color: white; font-size: 12px; border: none; font-weight: 500;")
+        
+        btn_close = QPushButton("×")
+        btn_close.setFixedSize(14, 14)
+        btn_close.setCursor(Qt.PointingHandCursor)
+        btn_close.setStyleSheet("QPushButton { color: rgba(255,255,255,0.7); border: none; background: transparent; font-size: 16px; font-weight: bold; } QPushButton:hover { color: white; }")
+        
+        def remove_tag():
+            self.tag_layout.removeWidget(tag)
+            tag.deleteLater()
+            if text in self.current_skills:
+                self.current_skills.remove(text)
+
+        btn_close.clicked.connect(remove_tag)
+        
+        tag_lay.addWidget(lbl)
+        tag_lay.addWidget(btn_close)
+        self.tag_layout.addWidget(tag)
+        self.current_skills.append(text)
+
     def _save_new_job(self):
-        """Validasi dan simpan data dari halaman form tambah."""
-        import datetime as dt_mod
-        if not self.f_judul.text().strip():
-            QMessageBox.warning(self, "Validasi Gagal", "Judul Pekerjaan wajib diisi!")
-            return
-        if not self.f_perusahaan.text().strip():
-            QMessageBox.warning(self, "Validasi Gagal", "Nama Perusahaan wajib diisi!")
-            return
-
-        # Validasi Tanggal Kadaluarsa (Preventif)
-        selected_qdate = self.f_date.date()
-        if selected_qdate <= QDate.currentDate():
-            QMessageBox.warning(self, "Validasi Gagal", "Tanggal Kadaluarsa tidak boleh hari ini atau di masa lalu!")
-            return
-
-        g_min = self.f_gaji_min.text().strip()
-        g_max = self.f_gaji_max.text().strip()
-        rentang_final = f"{g_min}-{g_max}" if g_min and g_max else (g_min or g_max or "-")
-
-        new_data = {
-            "id": self.editing_job_id if self.editing_job_id else dt_mod.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "Judul_Pekerjaan": self.f_judul.text().strip(),
-            "Nama_Perusahaan": self.f_perusahaan.text().strip(),
-            "Jenis_Pekerjaan": self.f_jenis.currentText(),
-            "Lokasi": self.f_lokasi.text().strip(),
-            "Rentang_Gaji": rentang_final,
-            "Skills": re.sub(r'\s+', '|', self.f_skills.text().strip()),
-            "Link_Lowongan": self.f_link.text().strip(),
-            "Deskripsi_Pekerjaan": self.f_desc.toPlainText().strip(),
-            "Benefit_Pekerjaan": "",
-            "Kualifikasi_Persyaratan": "",
-            "Tanggal_Kadaluarsa": f"{selected_qdate.day():02d}/{selected_qdate.month():02d}/{selected_qdate.year()}",
+        """Validasi dan simpan data dari halaman form tambah dengan mendelegasikan ke logika CRUD."""
+        form_data = {
+            "judul": self.f_judul.text().strip(),
+            "perusahaan": self.f_perusahaan.text().strip(),
+            "jenis": self.f_jenis.currentText(),
+            "lokasi": self.f_lokasi.text().strip(),
+            "gaji_min": self.f_gaji_min.text().strip(),
+            "gaji_max": self.f_gaji_max.text().strip(),
+            "skills": self.current_skills,
+            "link": self.f_link.text().strip(),
+            "desc": self.f_desc.toPlainText().strip(),
+            "date": self.f_date.date()
         }
 
         if self.editing_job_id:
-            for i, job in enumerate(self.data):
-                if job.get("id") == self.editing_job_id:
-                    self.data[i] = new_data
-                    break
-            catat_aktivitas(f"<b>Lowongan Diperbarui</b><br>{new_data.get('Judul_Pekerjaan')}")
+            from CRUD.Update import proses_update_job
+            success, msg, new_data = proses_update_job(self.editing_job_id, form_data, self.data)
         else:
-            self.data.append(new_data)
-            catat_aktivitas(f"<b>Lowongan Ditambah</b><br>{new_data.get('Judul_Pekerjaan')}")
+            from CRUD.Create import proses_create_job
+            success, msg, new_data = proses_create_job(form_data, self.data)
 
+        if not success:
+            QMessageBox.warning(self, "Validasi Gagal", msg)
+            return
+
+        self.data = new_data
+        action_msg = "Diperbarui" if self.editing_job_id else "Ditambah"
+        catat_aktivitas(f"<b>Lowongan {action_msg}</b><br>{form_data['judul']}")
         self.simpan_data_async()
 
-        msg = "Lowongan berhasil diedit!" if self.editing_job_id else "Lowongan berhasil ditambahkan!"
         self.editing_job_id = None
 
         # Reset form
-        for w in [self.f_judul, self.f_perusahaan, self.f_lokasi, self.f_gaji_min, self.f_gaji_max, self.f_skills, self.f_link]:
+        for w in [self.f_judul, self.f_perusahaan, self.f_lokasi, self.f_gaji_min, self.f_gaji_max, self.f_link]:
             w.clear()
+        self.f_skills.clear()
+        # Bersihkan tags
+        while self.tag_layout.count():
+            item = self.tag_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+        self.current_skills = []
         self.f_desc.clear()
         self.f_jenis.setCurrentIndex(0)
 
@@ -1467,8 +1396,15 @@ class JobPostingPage(QWidget):
         """Beralih ke halaman form tambah."""
         self.editing_job_id = None
         self.lbl_form_title.setText("Tambah Lowongan Baru")
-        for w in [self.f_judul, self.f_perusahaan, self.f_lokasi, self.f_gaji_min, self.f_gaji_max, self.f_skills, self.f_link]:
+        for w in [self.f_judul, self.f_perusahaan, self.f_lokasi, self.f_gaji_min, self.f_gaji_max, self.f_link]:
             w.clear()
+        self.f_skills.clear()
+        # Bersihkan tags
+        while self.tag_layout.count():
+            item = self.tag_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+        self.current_skills = []
         self.f_desc.clear()
         self.f_jenis.setCurrentIndex(0)
         self.f_date.setDate(QDate.currentDate().addDays(30))
@@ -1499,7 +1435,20 @@ class JobPostingPage(QWidget):
             self.f_gaji_min.setText(raw_sal)
             self.f_gaji_max.clear()
             
-        self.f_skills.setText(job_data.get("Skills", "").replace("|", " "))
+        # Bersihkan tags lama
+        while self.tag_layout.count():
+            item = self.tag_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+        self.current_skills = []
+        
+        raw_skills = job_data.get("Skills", "")
+        if raw_skills:
+            skills_list = [s.strip() for s in raw_skills.split('|') if s.strip()]
+            for s in skills_list:
+                self.create_skill_tag(s)
+
+        self.f_skills.clear()
         self.f_link.setText(job_data.get("Link_Lowongan", ""))
         self.f_desc.setPlainText(job_data.get("Deskripsi_Pekerjaan", ""))
         
@@ -1515,22 +1464,28 @@ class JobPostingPage(QWidget):
 
     def delete_single_data(self, job_data):
         from modul_antarmuka_pengguna import show_question
+        from CRUD.Delete import proses_delete_job
         reply = show_question(self, 'Konfirmasi Hapus', "Yakin ingin menghapus lowongan ini?")
         if reply == QMessageBox.Yes:
-            self.data = [j for j in self.data if j.get("id") != job_data.get("id")]
-            self.simpan_data_async()
-            catat_aktivitas(f"<b>Lowongan Dihapus</b><br>{job_data.get('Judul_Pekerjaan')}")
-            self.refresh_ui_only()
+            success, msg, new_data = proses_delete_job(job_data.get("id"), self.data)
+            if success:
+                self.data = new_data
+                self.simpan_data_async()
+                catat_aktivitas(msg)
+                self.refresh_ui_only()
 
     def delete_selected(self):
         from modul_antarmuka_pengguna import show_question
+        from CRUD.Delete import proses_delete_massal
         reply = show_question(self, 'Konfirmasi Hapus Massal', f"Yakin ingin menghapus {len(self.selected_ids)} lowongan terpilih?")
         if reply == QMessageBox.Yes:
-            jumlah = len(self.selected_ids)
-            self.data = [j for j in self.data if j.get("id") not in self.selected_ids]
-            self.simpan_data_async()
-            catat_aktivitas(f"<b>Lowongan Dihapus</b><br>{jumlah} data lowongan")
-            self.refresh_ui_only()
+            success, msg, new_data = proses_delete_massal(self.selected_ids, self.data)
+            if success:
+                self.data = new_data
+                self.simpan_data_async()
+                catat_aktivitas(msg)
+                self.selected_ids = set()
+                self.refresh_ui_only()
 
     def show_job_details(self, job_data):
         dialog = JobDetailDialog(job_data, self)
