@@ -140,6 +140,188 @@ class FlowLayout(QLayout):
             return y - rect.y() - spaceY if y > rect.y() else 0
 
 
+# --- Skill Tag Input Widget ---
+class SkillTagInput(QFrame):
+    """Widget input skill yang menampilkan tag pills langsung di dalam box input."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._skills = []
+        self._setup_ui()
+
+    def _setup_ui(self):
+        self.setObjectName("SkillTagInput")
+        self.setMinimumHeight(44)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        self.setStyleSheet("""
+            QFrame#SkillTagInput {
+                border: 1px solid #dcdcdc;
+                border-radius: 8px;
+                background-color: #fafafa;
+            }
+            QFrame#SkillTagInput:focus-within {
+                border: 1px solid #2C687B;
+                background-color: #fff;
+            }
+        """)
+
+        outer = QHBoxLayout(self)
+        outer.setContentsMargins(6, 5, 0, 5)
+        outer.setSpacing(0)
+
+        # Scroll area horizontal untuk tag + input
+        self._scroll = QScrollArea()
+        self._scroll.setFrameShape(QFrame.NoFrame)
+        self._scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self._scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self._scroll.setWidgetResizable(True)
+        self._scroll.setFixedHeight(34)
+        self._scroll.setStyleSheet("background: transparent; border: none;")
+
+        self._inner = QWidget()
+        self._inner.setStyleSheet("background: transparent;")
+        self._inner_layout = QHBoxLayout(self._inner)
+        self._inner_layout.setContentsMargins(0, 0, 0, 0)
+        self._inner_layout.setSpacing(5)
+        self._inner_layout.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+
+        # QLineEdit di paling kanan tags
+        self._edit = QLineEdit()
+        self._edit.setPlaceholderText("Tambah skill...")
+        self._edit.setMinimumWidth(120)
+        self._edit.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self._edit.setFixedHeight(28)
+        self._edit.setStyleSheet("""
+            QLineEdit {
+                border: none;
+                background: transparent;
+                color: #333;
+                font-size: 13px;
+                padding: 0 4px;
+            }
+        """)
+        self._edit.returnPressed.connect(self._add_from_input)
+        self._inner_layout.addWidget(self._edit)
+        self._inner_layout.addStretch()
+
+        self._scroll.setWidget(self._inner)
+        outer.addWidget(self._scroll, 1)
+
+        # Tombol +
+        self._btn_add = QPushButton("+")
+        self._btn_add.setFixedSize(44, 44)
+        self._btn_add.setCursor(Qt.PointingHandCursor)
+        self._btn_add.setStyleSheet("""
+            QPushButton {
+                background-color: #2C687B;
+                border: none;
+                border-top-right-radius: 7px;
+                border-bottom-right-radius: 7px;
+                color: white;
+                font-size: 22px;
+                font-weight: bold;
+            }
+            QPushButton:hover { background-color: #408699; }
+        """)
+        self._btn_add.clicked.connect(self._add_from_input)
+        outer.addWidget(self._btn_add)
+
+    def _add_from_input(self):
+        text = self._edit.text().strip()
+        if not text:
+            return
+        for word in text.split():
+            word = word.strip()
+            if word:
+                word = word[0].upper() + word[1:]
+                if word not in self._skills:
+                    self._insert_tag(word)
+        self._edit.clear()
+        # Scroll ke kanan setelah tag ditambah
+        QApplication = __import__('PyQt5.QtWidgets', fromlist=['QApplication']).QApplication
+        QApplication.processEvents()
+        self._scroll.horizontalScrollBar().setValue(
+            self._scroll.horizontalScrollBar().maximum()
+        )
+
+    def _insert_tag(self, text):
+        """Masukkan tag pill tepat sebelum QLineEdit."""
+        tag = QFrame()
+        tag.setStyleSheet("""
+            QFrame {
+                background-color: #1e4f5e;
+                border-radius: 5px;
+            }
+        """)
+        tag_lay = QHBoxLayout(tag)
+        tag_lay.setContentsMargins(8, 3, 4, 3)
+        tag_lay.setSpacing(4)
+
+        lbl = QLabel(text)
+        lbl.setStyleSheet("color: white; font-size: 12px; font-weight: 500; border: none; background: transparent;")
+
+        btn_x = QPushButton("x")
+        btn_x.setFixedSize(16, 16)
+        btn_x.setCursor(Qt.PointingHandCursor)
+        btn_x.setStyleSheet("""
+            QPushButton {
+                color: rgba(255,255,255,0.75);
+                border: none;
+                background: transparent;
+                font-size: 11px;
+                font-weight: bold;
+                padding: 0;
+            }
+            QPushButton:hover { color: white; }
+        """)
+
+        def _remove(t=text, w=tag):
+            if t in self._skills:
+                self._skills.remove(t)
+            idx = self._inner_layout.indexOf(w)
+            if idx >= 0:
+                self._inner_layout.takeAt(idx)
+            w.deleteLater()
+
+        btn_x.clicked.connect(_remove)
+        tag_lay.addWidget(lbl)
+        tag_lay.addWidget(btn_x)
+
+        # Sisipkan sebelum stretch (index terakhir)
+        count = self._inner_layout.count()
+        # Sisipkan sebelum QLineEdit (index -2) dan stretch (index -1)
+        insert_pos = count - 2  # sebelum _edit
+        if insert_pos < 0:
+            insert_pos = 0
+        self._inner_layout.insertWidget(insert_pos, tag)
+        self._skills.append(text)
+
+    # ── Public API ──
+    def get_skills(self):
+        return list(self._skills)
+
+    def clear_all(self):
+        """Hapus semua tag dan kosongkan input."""
+        # Hapus semua widget kecuali _edit dan stretch
+        to_remove = []
+        for i in range(self._inner_layout.count()):
+            item = self._inner_layout.itemAt(i)
+            if item and item.widget() and item.widget() is not self._edit:
+                to_remove.append(item.widget())
+        for w in to_remove:
+            self._inner_layout.removeWidget(w)
+            w.deleteLater()
+        self._skills.clear()
+        self._edit.clear()
+
+    def load_skills(self, skills_list):
+        """Muat daftar skill ke dalam widget."""
+        self.clear_all()
+        for s in skills_list:
+            if s:
+                self._insert_tag(s)
+
+
 # --- Job Dialog (Tampilan 2 Kolom) ---
 class JobDialog(QDialog):
     def __init__(self, parent=None, job_data=None):
@@ -1202,77 +1384,24 @@ class JobPostingPage(QWidget):
         grid.addWidget(make_field("Rentang Gaji (Angka Saja)", gaji_container), 2, 0)
         grid.addWidget(make_field("Tanggal Kadaluarsa", self.f_date), 2, 1)
 
-        # Baris 3: Skills (Tag Input Style - Dashboard Theme)
-        skills_group = QWidget()
-        skills_group_layout = QVBoxLayout(skills_group)
-        skills_group_layout.setContentsMargins(0, 0, 0, 0)
-        skills_group_layout.setSpacing(5)
-
-        # Container Input + Button (+)
-        input_container = QFrame()
-        input_container.setFixedHeight(40) # Kunci tinggi agar tidak terpotong
-        input_container.setStyleSheet("""
-            QFrame {
-                border: 1px solid #ccc;
-                border-radius: 6px;
-                background-color: white;
-            }
-        """)
-        input_lay = QHBoxLayout(input_container)
-        input_lay.setContentsMargins(5, 0, 0, 0)
-        input_lay.setSpacing(0)
-
-        self.f_skills = QLineEdit()
-        self.f_skills.setPlaceholderText("cth. React Node.js SQL (pisah spasi)")
-        self.f_skills.setStyleSheet("border: none; background: transparent; color: #333; font-size: 14px;")
-        
-        self.btn_add_skill = QPushButton("+")
-        self.btn_add_skill.setFixedSize(40, 40) # Samakan dengan tinggi container
-        self.btn_add_skill.setCursor(Qt.PointingHandCursor)
-        self.btn_add_skill.setStyleSheet("""
-            QPushButton {
-                background-color: #2C687B;
-                border: none;
-                border-top-right-radius: 6px;
-                border-bottom-right-radius: 6px;
-                color: white;
-                font-size: 20px;
-                font-weight: bold;
-            }
-            QPushButton:hover { background-color: #408699; }
-        """)
-
-        input_lay.addWidget(self.f_skills)
-        input_lay.addWidget(self.btn_add_skill)
-        skills_group_layout.addWidget(input_container)
-
-        # Helper Text (Didesain seperti tombol keyboard)
-        self.lbl_skill_hint = QLabel(
+        # Baris 3: Skills (Tag Input Style - Inline Box)
+        self.skill_input = SkillTagInput()
+        # Hint text di bawah
+        lbl_skill_hint = QLabel(
             'Tekan <span style="border: 1px solid #aaa; border-radius: 3px; padding: 1px 4px; background: #eee;">Enter</span> '
             'atau klik <span style="border: 1px solid #aaa; border-radius: 3px; padding: 1px 4px; background: #eee;">+</span> '
             'untuk menambah skill'
         )
-        self.lbl_skill_hint.setStyleSheet("color: #777; font-size: 11px; margin-top: 5px; margin-left: 2px;")
-        skills_group_layout.addWidget(self.lbl_skill_hint)
+        lbl_skill_hint.setTextFormat(Qt.RichText)
+        lbl_skill_hint.setStyleSheet("color: #777; font-size: 11px; margin-top: 2px; margin-left: 2px; border: none; background: transparent;")
 
-        # Tag Container (Dashboard Style Tags)
-        self.tag_container = QWidget()
-        self.tag_layout = FlowLayout(self.tag_container, margin=0, spacing=6)
-        skills_group_layout.addWidget(self.tag_container)
-
-        self.current_skills = []
-
-        def add_skill_from_input():
-            text = self.f_skills.text().strip()
-            if text:
-                words = [w.strip() for w in text.split(' ') if w.strip()]
-                for word in words:
-                    if word not in self.current_skills:
-                        self.create_skill_tag(word)
-                self.f_skills.clear()
-
-        self.f_skills.returnPressed.connect(add_skill_from_input)
-        self.btn_add_skill.clicked.connect(add_skill_from_input)
+        skills_group = QWidget()
+        skills_group.setStyleSheet("background: transparent; border: none;")
+        skills_group_layout = QVBoxLayout(skills_group)
+        skills_group_layout.setContentsMargins(0, 0, 0, 0)
+        skills_group_layout.setSpacing(4)
+        skills_group_layout.addWidget(self.skill_input)
+        skills_group_layout.addWidget(lbl_skill_hint)
 
         # Letakkan di kolom 0 saja agar sejajar dengan kolom kiri lainnya
         grid.addWidget(make_field("Skills", skills_group), 3, 0)
@@ -1351,7 +1480,7 @@ class JobPostingPage(QWidget):
             "lokasi": self.f_lokasi.text().strip(),
             "gaji_min": self.f_gaji_min.text().strip(),
             "gaji_max": self.f_gaji_max.text().strip(),
-            "skills": self.current_skills,
+            "skills": self.skill_input.get_skills(),
             "link": self.f_link.text().strip(),
             "desc": self.f_desc.toPlainText().strip(),
             "date": self.f_date.date()
@@ -1378,13 +1507,7 @@ class JobPostingPage(QWidget):
         # Reset form
         for w in [self.f_judul, self.f_perusahaan, self.f_lokasi, self.f_gaji_min, self.f_gaji_max, self.f_link]:
             w.clear()
-        self.f_skills.clear()
-        # Bersihkan tags
-        while self.tag_layout.count():
-            item = self.tag_layout.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
-        self.current_skills = []
+        self.skill_input.clear_all()
         self.f_desc.clear()
         self.f_jenis.setCurrentIndex(0)
 
@@ -1398,13 +1521,7 @@ class JobPostingPage(QWidget):
         self.lbl_form_title.setText("Tambah Lowongan Baru")
         for w in [self.f_judul, self.f_perusahaan, self.f_lokasi, self.f_gaji_min, self.f_gaji_max, self.f_link]:
             w.clear()
-        self.f_skills.clear()
-        # Bersihkan tags
-        while self.tag_layout.count():
-            item = self.tag_layout.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
-        self.current_skills = []
+        self.skill_input.clear_all()
         self.f_desc.clear()
         self.f_jenis.setCurrentIndex(0)
         self.f_date.setDate(QDate.currentDate().addDays(30))
@@ -1435,20 +1552,10 @@ class JobPostingPage(QWidget):
             self.f_gaji_min.setText(raw_sal)
             self.f_gaji_max.clear()
             
-        # Bersihkan tags lama
-        while self.tag_layout.count():
-            item = self.tag_layout.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
-        self.current_skills = []
-        
+        # Muat ulang skills
         raw_skills = job_data.get("Skills", "")
-        if raw_skills:
-            skills_list = [s.strip() for s in raw_skills.split('|') if s.strip()]
-            for s in skills_list:
-                self.create_skill_tag(s)
-
-        self.f_skills.clear()
+        skills_list = [s.strip() for s in raw_skills.split('|') if s.strip()] if raw_skills else []
+        self.skill_input.load_skills(skills_list)
         self.f_link.setText(job_data.get("Link_Lowongan", ""))
         self.f_desc.setPlainText(job_data.get("Deskripsi_Pekerjaan", ""))
         
