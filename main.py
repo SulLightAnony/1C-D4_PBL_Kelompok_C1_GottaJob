@@ -28,7 +28,7 @@ from toolkit_main import CareerToolkitPage
 
 # Tambahkan path untuk modul database agar bisa dibersihkan saat tutup
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pages", "Modul"))
-from modul_database import bersihkan_database_sementara
+from modul_database import bersihkan_database_sementara, sinkronisasi_folder_kategori
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pages", "Job Posting"))
 from job_posting import JobPostingPage
@@ -42,8 +42,13 @@ from dashboard import DashboardPage
 class Dashboard(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("GottaJob Dashboard")
+        self.setWindowTitle("Gottajob")
         self.resize(1280, 800)
+
+        # Set window icon dari assets/logo.png
+        logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "logo.png")
+        if os.path.exists(logo_path):
+            self.setWindowIcon(QIcon(logo_path))
 
         # Kerangka Utama
         self.main_widget = QWidget()
@@ -127,6 +132,10 @@ class Dashboard(QMainWindow):
 
         self.layout_utama.addWidget(self.sidebar)
         self.layout_utama.addWidget(self.content_stack)
+
+        # Sinkronisasi folder kategori di background saat aplikasi pertama dibuka
+        import threading
+        threading.Thread(target=sinkronisasi_folder_kategori, daemon=True).start()
 
     def setup_logo(self):
         container = QWidget()

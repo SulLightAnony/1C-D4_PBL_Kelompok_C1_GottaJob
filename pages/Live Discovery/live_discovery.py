@@ -226,7 +226,8 @@ class LiveDiscoveryPage(QWidget):
         root.setContentsMargins(28, 22, 28, 22)
         root.setSpacing(18)
 
-        root.addWidget(self._build_search_card())
+        self.search_card = self._build_search_card()
+        root.addWidget(self.search_card)
         
         self.status_lbl = QLabel("")
         self.status_lbl.setStyleSheet("color: #7A9EB0; font-style: italic; margin-left: 5px;")
@@ -291,6 +292,22 @@ class LiveDiscoveryPage(QWidget):
         self.main_stack.addWidget(self.detail_panel)
         
         self.main_stack.setCurrentWidget(self.dashboard_view)
+
+        # Sembunyikan search card saat user berpindah halaman (mirip job_archive)
+        self.main_stack.currentChanged.connect(self._update_search_card_visibility)
+        self.dashboard_view.right_stack.currentChanged.connect(self._update_search_card_visibility)
+
+    def _update_search_card_visibility(self):
+        """
+        Tampilkan search card HANYA saat dashboard utama aktif dan
+        right_stack ada di index 0 (tampilan Pilih Skill).
+        Sembunyikan di semua kondisi lain untuk mencegah aksi tidak sengaja.
+        """
+        on_dashboard = self.main_stack.currentWidget() == self.dashboard_view
+        on_skill_page = self.dashboard_view.right_stack.currentIndex() == 0
+        visible = on_dashboard and on_skill_page
+        self.search_card.setVisible(visible)
+        self.status_lbl.setVisible(visible)
 
     def _build_search_card(self):
         card = QFrame()
