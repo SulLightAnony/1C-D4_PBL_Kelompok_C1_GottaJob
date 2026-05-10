@@ -252,6 +252,7 @@ class JobDialog(QDialog):
             data["id"] = self.job_data["id"]
         else:
             data["id"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            data["Is_lamar"] = False
             
         for key, widget in self.inputs.items():
             if isinstance(widget, QLineEdit):
@@ -313,6 +314,7 @@ def proses_create_job(form_data, current_data):
         "Benefit_Pekerjaan": form_data.get('benefit', '').strip(),
         "Kualifikasi_Persyaratan": form_data.get('kualifikasi', '').strip(),
         "Tanggal_Kadaluarsa": f"{selected_date.day():02d}/{selected_date.month():02d}/{selected_date.year()}",
+        "Is_lamar": False
     }
 
     current_data.append(new_data)

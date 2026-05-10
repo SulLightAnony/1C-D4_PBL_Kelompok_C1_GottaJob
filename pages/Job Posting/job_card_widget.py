@@ -14,7 +14,7 @@ from PyQt5.QtGui import QFont, QIcon, QPixmap
 
 from constants import (
     check_icon_path, location_icon_path, currency_icon_path,
-    edit_icon_path, trash_icon_card_path
+    edit_icon_path, trash_icon_card_path, send_icon_path, checked_icon_path
 )
 
 
@@ -23,11 +23,12 @@ class JobCardWidget(QFrame):
     delete_clicked = pyqtSignal(dict)
     checkbox_toggled = pyqtSignal(dict, bool)
     card_clicked = pyqtSignal(dict)
+    lamar_clicked = pyqtSignal(dict)
 
     def __init__(self, job_data, parent=None):
         super().__init__(parent)
         self.job_data = job_data
-        self.setFixedHeight(240)
+        self.setFixedHeight(290)
         self.setMinimumWidth(320)
         self.setCursor(Qt.PointingHandCursor)
         self.setup_ui()
@@ -291,3 +292,47 @@ class JobCardWidget(QFrame):
         footer_layout.addWidget(btn_edit, alignment=Qt.AlignBottom)
         footer_layout.addWidget(btn_del, alignment=Qt.AlignBottom)
         main_layout.addLayout(footer_layout)
+
+        # ── Action: Lamar Sekarang ──
+        main_layout.addSpacing(6)
+        is_applied = self.job_data.get("Is_lamar", False)
+        btn_lamar = QPushButton("Terlamar" if is_applied else "Lamar Sekarang")
+        btn_lamar.setIcon(QIcon(checked_icon_path if is_applied else send_icon_path))
+        btn_lamar.setIconSize(QSize(16, 16))
+        btn_lamar.setFixedHeight(40)
+        btn_lamar.setCursor(Qt.PointingHandCursor)
+        
+        if is_applied:
+            btn_lamar.setEnabled(False)
+            btn_lamar.setStyleSheet("""
+                QPushButton {
+                    background-color: #E2EFF1;
+                    color: #2C687B;
+                    border-radius: 8px;
+                    padding: 6px 12px;
+                    font-weight: bold;
+                    font-size: 13px;
+                    border: 1px solid #B2D2D9;
+                }
+            """)
+        else:
+            btn_lamar.setStyleSheet("""
+                QPushButton {
+                    background-color: #408699;
+                    color: white;
+                    border-radius: 8px;
+                    padding: 6px 12px;
+                    font-weight: bold;
+                    font-size: 13px;
+                    border: none;
+                }
+                QPushButton:hover {
+                    background-color: #2C687B;
+                }
+                QPushButton:pressed {
+                    background-color: #1E4A58;
+                }
+            """)
+        
+        btn_lamar.clicked.connect(lambda: self.lamar_clicked.emit(self.job_data))
+        main_layout.addWidget(btn_lamar)

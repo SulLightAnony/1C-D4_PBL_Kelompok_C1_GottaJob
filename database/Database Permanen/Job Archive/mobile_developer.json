@@ -124,5 +124,43 @@
             "react native"
         ],
         "is_type_match": false
+    },
+    {
+        "Judul_Pekerjaan": "Mobile Apps Developer",
+        "Jenis_Pekerjaan": "full-time",
+        "Nama_Perusahaan": "PT NELLAVA FINE JEWELLERY",
+        "Lokasi": "PM7H+2PC, Jl. Mayjen Yono Suwoyo, Pradahkalikendal, Kec. Dukuhpakis, Surabaya, Jawa Timur 60225",
+        "Rentang_Gaji": "-",
+        "Skills": "Java | React Native | iOS Development | Swift | Kotlin | Restful API | Android Development | Mobile UI Design | Flutter | Mobile Development",
+        "Benefit_Pekerjaan": "THR | Work Insurance | Health Insurance | Career Path",
+        "Kualifikasi_Persyaratan": "Available to work onsite and full-time | 1–3 years of experience as a Mobile Apps Developer | Minimum education: Diploma (D3) | Able to understand and communicate in English (written and verbal) | Proficient in Flutter for cross-platform development (iOS & Android) | Familiar with Firebase (Authentication, Firestore/Realtime DB, Push Notifications, etc.) | Experience using Xcode and Android Studio | Understand the process of building and publishing apps to the App Store and Google Play Store | Experience with REST API / Web Services integration | Familiar with WordPress as a backend/CMS for application needs | Proficient in using Git for version control | Nice to Have | Understanding of UI/UX principles and ability to implement designs accurately | Experience in mobile app performance optimization | Strong debugging and troubleshooting skills | Experience working on apps that are already published on app stores | Soft Skills | Strong teamwork and collaboration skills (with web & UI/UX teams) | Good communication and responsiveness | Strong problem-solving mindset | Detail-oriented while maintaining efficiency",
+        "Deskripsi_Pekerjaan": "Mobile Apps Developer (iOS & Android)\nWe are looking for a mid-level Mobile Apps Developer who is capable of developing and maintaining iOS & Android applications end-to-end, and able to collaborate closely with the web and UI/UX teams to deliver high-quality products.\nDevelop mobile applications for iOS and Android platforms\nHandle maintenance, bug fixing, and performance improvements\nIntegrate mobile apps with backend systems, APIs, and WordPress-based platforms\nCollaborate with UI/UX designers to accurately implement designs\nWork closely with the web team to ensure seamless data and feature integration\nConduct testing to ensure application stability before release",
+        "Link_Lowongan": "https://glints.com/id/opportunities/jobs/mobile-apps-developer/30c9c868-5712-48a3-9b79-c8a98112f740",
+        "match_percentage": 60.0,
+        "matched_skills": [
+            "java",
+            "react native",
+            "ios development",
+            "kotlin",
+            "restful api",
+            "mobile development"
+        ],
+        "is_type_match": true
+    },
+    {
+        "id": "2026-05-10 11:10:05",
+        "Judul_Pekerjaan": "Mobile Developer (Flutter)",
+        "Nama_Perusahaan": "App Ventures",
+        "Jenis_Pekerjaan": "Kontrak",
+        "Lokasi": "Surabaya",
+        "Rentang_Gaji": "10.000.000-15.000.000",
+        "Skills": "Flutter|Dart|Firebase|Git",
+        "Link_Lowongan": "https://appventures.com/hiring",
+        "Deskripsi_Pekerjaan": "Building cross-platform mobile applications.",
+        "Benefit_Pekerjaan": "Project Bonus|Flexible Hours",
+        "Kualifikasi_Persyaratan": "Published apps on Play Store/App Store",
+        "Tanggal_Kadaluarsa": "25/06/2026",
+        "source": "job_posting",
+        "Is_lamar": true
     }
 ]

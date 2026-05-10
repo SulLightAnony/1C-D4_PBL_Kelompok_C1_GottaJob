@@ -38,6 +38,9 @@ def proses_update_job(job_id, form_data, current_data):
     skills_list = form_data.get('skills', [])
     skills_str = "|".join(skills_list)
 
+    # Cari data lama untuk mempertahankan field non-form (seperti Is_lamar)
+    old_job = next((j for j in current_data if j.get("id") == job_id), {})
+    
     new_data = {
         "id": job_id,
         "Judul_Pekerjaan": judul,
@@ -51,6 +54,7 @@ def proses_update_job(job_id, form_data, current_data):
         "Benefit_Pekerjaan": form_data.get('benefit', '').strip(),
         "Kualifikasi_Persyaratan": form_data.get('kualifikasi', '').strip(),
         "Tanggal_Kadaluarsa": f"{selected_date.day():02d}/{selected_date.month():02d}/{selected_date.year()}",
+        "Is_lamar": old_job.get("Is_lamar", False)
     }
 
     for i, job in enumerate(current_data):

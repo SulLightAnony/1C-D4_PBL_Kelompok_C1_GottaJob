@@ -3,11 +3,12 @@ import os
 import sys
 import copy
 import threading
+import json
 
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QScrollArea,
     QLineEdit, QTextEdit, QDateEdit, QGridLayout, QFrame, QComboBox, 
-    QMessageBox, QStackedWidget, QApplication, QStyledItemDelegate
+    QMessageBox, QStackedWidget, QApplication, QStyledItemDelegate, QDialog
 )
 from PyQt5.QtCore import Qt, QDate, QSize, pyqtSignal
 from PyQt5.QtGui import QFont, QIcon, QPixmap, QRegExpValidator
@@ -28,9 +29,122 @@ if _pages_dir not in sys.path:
     sys.path.insert(0, _pages_dir)
 
 from CRUD.Shared import muat_data, simpan_data
-from modul_antarmuka_pengguna import KeyboardScrollArea, show_message, show_question
+from modul_antarmuka_pengguna import KeyboardScrollArea, show_message, show_question, MODERN_BUTTON_STYLE
 from Modul.modul_database import catat_aktivitas
 from CRUD.Read import JobDetailDialog
+
+# --- Dialog Pemilihan CV ---
+class SelectCVDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Pilih CV")
+        self.setFixedWidth(420)
+        self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint | Qt.Dialog)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.selected_cv = None
+        self.setup_ui()
+
+    def setup_ui(self):
+        # Main Layout (Transparan)
+        main_lay = QVBoxLayout(self)
+        main_lay.setContentsMargins(10, 10, 10, 10)
+
+        # Container dengan styling ModernMessageBox
+        self.container = QFrame()
+        self.container.setStyleSheet("""
+            QFrame {
+                background-color: white;
+                border: 2px solid #2C687B;
+                border-radius: 15px;
+            }
+            QLabel { border: none; background: transparent; }
+        """)
+        main_lay.addWidget(self.container)
+
+        inner_lay = QVBoxLayout(self.container)
+        inner_lay.setContentsMargins(25, 25, 25, 25)
+        inner_lay.setSpacing(20)
+
+        title = QLabel("Pilih CV untuk Dikirim")
+        title.setFont(QFont("Segoe UI", 16, QFont.Bold))
+        title.setStyleSheet("color: #2C687B;")
+        inner_lay.addWidget(title)
+
+        # Load CV data
+        cvs = []
+        try:
+            root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            path = os.path.join(root_dir, "database", "Database Permanen", "Career Toolkit", "curiculum-vitae.json")
+            if os.path.exists(path):
+                with open(path, 'r', encoding='utf-8') as f:
+                    cvs = json.load(f)
+        except Exception as e:
+            print(f"Error loading CVs: {e}")
+
+        if not cvs:
+            lbl_empty = QLabel("Tidak ada CV tersedia. Silakan buat CV di Career Toolkit.")
+            lbl_empty.setWordWrap(True)
+            lbl_empty.setStyleSheet("color: #718096; font-size: 14px; font-style: italic;")
+            inner_lay.addWidget(lbl_empty)
+            
+            btn_close = QPushButton("Tutup")
+            btn_close.setCursor(Qt.PointingHandCursor)
+            btn_close.setFixedHeight(38)
+            btn_close.setStyleSheet(MODERN_BUTTON_STYLE)
+            btn_close.clicked.connect(self.reject)
+            inner_lay.addWidget(btn_close)
+            return
+
+        hint = QLabel("Pilih salah satu CV di bawah ini:")
+        hint.setStyleSheet("color: #4A5568; font-size: 14px;")
+        inner_lay.addWidget(hint)
+
+        self.combo_cv = QComboBox()
+        for cv in cvs:
+            self.combo_cv.addItem(cv.get("cv_name", "CV Tanpa Nama"), cv)
+        
+        self.combo_cv.setItemDelegate(QStyledItemDelegate())
+        self.combo_cv.setFixedHeight(40)
+        self.combo_cv.setStyleSheet("""
+            QComboBox { 
+                border: 1px solid #D1D5DB; border-radius: 8px; padding: 8px 12px; font-size: 14px; background: #F9FAFB; color: #1E3A4A;
+            }
+            QComboBox:focus { border: 2px solid #2C687B; }
+            QComboBox QAbstractItemView { background: white; border: 1px solid #D1D5DB; selection-background-color: #E2EFF1; selection-color: #2C687B; outline: none; }
+        """)
+        inner_lay.addWidget(self.combo_cv)
+
+        btn_layout = QHBoxLayout()
+        btn_layout.setSpacing(12)
+        
+        btn_cancel = QPushButton("Batal")
+        btn_cancel.setCursor(Qt.PointingHandCursor)
+        btn_cancel.setFixedHeight(38)
+        btn_cancel.setStyleSheet("""
+            QPushButton {
+                background-color: #F3F4F6; color: #4A5568;
+                border: 1px solid #D1D5DB; border-radius: 8px;
+                padding: 8px 18px; font-weight: bold; font-size: 14px;
+            }
+            QPushButton:hover { background-color: #E5E7EB; }
+        """)
+        btn_cancel.clicked.connect(self.reject)
+
+        btn_confirm = QPushButton("Kirim CV Ini")
+        btn_confirm.setCursor(Qt.PointingHandCursor)
+        btn_confirm.setFixedHeight(38)
+        btn_confirm.setStyleSheet(MODERN_BUTTON_STYLE)
+        btn_confirm.clicked.connect(self.on_confirm)
+
+        btn_layout.addWidget(btn_cancel)
+        btn_layout.addWidget(btn_confirm)
+        inner_lay.addLayout(btn_layout)
+
+    def on_confirm(self):
+        self.selected_cv = self.combo_cv.currentData()
+        self.accept()
+
+
 
 class JobPostingPage(QWidget):
     def __init__(self):
@@ -310,6 +424,7 @@ class JobPostingPage(QWidget):
             card.delete_clicked.connect(self.delete_single_data)
             card.checkbox_toggled.connect(self.handle_checkbox)
             card.card_clicked.connect(self.show_job_details)
+            card.lamar_clicked.connect(self.proses_lamar)
             self.flow_layout.addWidget(card)
             count += 1
             
@@ -576,7 +691,7 @@ class JobPostingPage(QWidget):
             success, msg, new_data = proses_create_job(form_data, self.data)
 
         if not success:
-            QMessageBox.warning(self, "Validasi Gagal", msg)
+            show_message(self, "Validasi Gagal", msg)
             return
 
         self.data = new_data
@@ -597,7 +712,7 @@ class JobPostingPage(QWidget):
 
         self.page_stack.setCurrentIndex(0)
         self.refresh_ui_only()
-        QMessageBox.information(self, "Berhasil", msg)
+        show_message(self, "Berhasil", msg)
 
     def add_data(self):
         """Beralih ke halaman form tambah."""
@@ -682,6 +797,42 @@ class JobPostingPage(QWidget):
                 catat_aktivitas(msg)
                 self.selected_ids = set()
                 self.refresh_ui_only()
+
+    def proses_lamar(self, job_data):
+        """Menampilkan alur pemilihan CV dan update status Is_lamar."""
+        if job_data.get("Is_lamar", False):
+            show_message(self, "Informasi", "Anda sudah melamar pekerjaan ini.")
+            return
+
+        # 1. Pilih CV
+        dialog = SelectCVDialog(self)
+        if dialog.exec_() != QDialog.Accepted:
+            return
+            
+        cv_data = dialog.selected_cv
+        cv_name = cv_data.get("cv_name", "CV Terpilih")
+
+        # 2. Konfirmasi Kirim
+        res = show_question(
+            self, "Konfirmasi Pengiriman",
+            f"Ingin mengirim {cv_name} untuk melamar posisi {job_data.get('Judul_Pekerjaan')} di {job_data.get('Nama_Perusahaan')}?"
+        )
+        
+        if res == QMessageBox.Yes:
+            # Update status di data lokal
+            for job in self.data:
+                if job.get("id") == job_data.get("id"):
+                    job["Is_lamar"] = True
+                    break
+            
+            # Simpan dan Refresh
+            self.simpan_data_async()
+            self.refresh_ui_only()
+            
+            show_message(
+                self, "Berhasil",
+                f"CV '{cv_name}' telah berhasil dikirim!\nStatus lamaran telah diperbarui."
+            )
 
     def show_job_details(self, job_data):
         dialog = JobDetailDialog(job_data, self)
