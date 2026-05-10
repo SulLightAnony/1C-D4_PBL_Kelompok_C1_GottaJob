@@ -1,10 +1,20 @@
 import os
+import sys
 import datetime
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QScrollArea, QWidget, QGridLayout, QFrame, QTextEdit, QCheckBox
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QScrollArea, QWidget, QGridLayout, QFrame, QTextEdit, QCheckBox, QGraphicsDropShadowEffect
 from PyQt5.QtCore import Qt, QSize, pyqtSignal
-from PyQt5.QtGui import QFont, QIcon, QPixmap
+from PyQt5.QtGui import QFont, QIcon, QPixmap, QColor
+
+# Setup path agar modul di folder Modul bisa ditemukan
+_crud_dir = os.path.dirname(os.path.abspath(__file__))
+_pages_dir_early = os.path.dirname(_crud_dir)
+_modul_dir = os.path.join(_pages_dir_early, "Modul")
+for _p in [_pages_dir_early, _modul_dir]:
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
 from CRUD.Shared import muat_data
+from modul_antarmuka_pengguna import KeyboardScrollArea
 
 _pages_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _root_dir = os.path.dirname(_pages_dir)
@@ -21,48 +31,82 @@ class JobDetailDialog(QDialog):
         super().__init__(parent)
         self.job_data = job_data
         self.setWindowTitle("Detail Lowongan Pekerjaan")
-        self.resize(600, 700)
-        self.setStyleSheet("background-color: white;")
+        self.resize(600, 750)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Dialog)
+        self.setAttribute(Qt.WA_TranslucentBackground)
         self.setup_ui()
 
     def setup_ui(self):
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setContentsMargins(20, 20, 20, 20)
         main_layout.setSpacing(0)
+
+        # Main Container
+        container = QFrame()
+        container.setObjectName("DetailContainer")
+        container.setStyleSheet("""
+            QFrame#DetailContainer {
+                background-color: white;
+                border: 2px solid #2C687B;
+                border-radius: 15px;
+            }
+        """)
+        
+        # Efek Bayangan (Drop Shadow)
+        shadow = QGraphicsDropShadowEffect(self)
+        shadow.setBlurRadius(25)
+        shadow.setXOffset(0)
+        shadow.setYOffset(5)
+        shadow.setColor(QColor(0, 0, 0, 80))
+        container.setGraphicsEffect(shadow)
+        
+        main_layout.addWidget(container)
+        
+        inner_layout = QVBoxLayout(container)
+        inner_layout.setContentsMargins(0, 0, 0, 0)
+        inner_layout.setSpacing(0)
 
         # Header
         header_frame = QFrame()
+        header_frame.setStyleSheet("background-color: #F8FAFC; border-bottom: 1px solid #E2E8F0; border-top-left-radius: 13px; border-top-right-radius: 13px; border: none;")
         header_layout = QHBoxLayout(header_frame)
-        header_layout.setContentsMargins(20, 15, 20, 15)
+        header_layout.setContentsMargins(25, 20, 25, 20)
+        
         title_label = QLabel("Rincian Pekerjaan")
-        title_label.setFont(QFont("Segoe UI", 16, QFont.Bold))
-        title_label.setStyleSheet("color: #333;")
+        title_label.setFont(QFont("Segoe UI", 18, QFont.Bold))
+        title_label.setStyleSheet("color: #1E293B; border: none; background: transparent;")
         
         btn_close = QPushButton("×")
-        btn_close.setFixedSize(30, 30)
-        btn_close.setStyleSheet("QPushButton { border: 1px solid #ddd; border-radius: 4px; font-size: 18px; color: #666; background-color: white;} QPushButton:hover { background-color: #f0f0f0; }")
+        btn_close.setFixedSize(32, 32)
+        btn_close.setCursor(Qt.PointingHandCursor)
+        btn_close.setStyleSheet("""
+            QPushButton { 
+                border: 1px solid #E2E8F0; border-radius: 6px; 
+                font-size: 20px; color: #64748B; background-color: white;
+            } 
+            QPushButton:hover { background-color: #F1F5F9; color: #0F172A; }
+        """)
         btn_close.clicked.connect(self.reject)
         
         header_layout.addWidget(title_label)
         header_layout.addStretch()
         header_layout.addWidget(btn_close)
-        
-        line = QFrame()
-        line.setFrameShape(QFrame.HLine)
-        line.setStyleSheet("background-color: #eee;")
-        
-        main_layout.addWidget(header_frame)
-        main_layout.addWidget(line)
+        inner_layout.addWidget(header_frame)
 
-        # Content
-        scroll = QScrollArea()
+        # Content with Scroll Area
+        scroll = KeyboardScrollArea()
         scroll.setWidgetResizable(True)
-        scroll.setStyleSheet("QScrollArea { border: none; }")
+        scroll.setFrameShape(QFrame.NoFrame)
+        scroll.setStyleSheet("background-color: transparent;")
         
         content_widget = QWidget()
+        content_widget.setStyleSheet("background-color: transparent;")
         content_layout = QVBoxLayout(content_widget)
-        content_layout.setContentsMargins(30, 20, 30, 30)
-        content_layout.setSpacing(15)
+        content_layout.setContentsMargins(30, 25, 30, 35)
+        content_layout.setSpacing(20)
+        
+        scroll.setWidget(content_widget)
+        inner_layout.addWidget(scroll)
 
         def add_detail_section(title, value):
             if not value or value == "-":
@@ -88,11 +132,11 @@ class JobDetailDialog(QDialog):
             container = QWidget()
             lay = QVBoxLayout(container)
             lay.setContentsMargins(0, 0, 0, 0)
-            lay.setSpacing(4)
+            lay.setSpacing(6)
             t = QLabel(title)
-            t.setStyleSheet("color: #777; font-size: 11px; font-weight: bold;")
+            t.setStyleSheet("color: #666; font-size: 13px; font-weight: bold;")
             v = QLabel(value if value else "-")
-            v.setStyleSheet("color: #222; font-size: 13px;")
+            v.setStyleSheet("color: #111; font-size: 16px;")
             v.setWordWrap(True)
             v.setTextInteractionFlags(Qt.TextSelectableByMouse)
             lay.addWidget(t)
@@ -147,8 +191,6 @@ class JobDetailDialog(QDialog):
             add_detail_section("Kualifikasi & Persyaratan", reqs)
 
         content_layout.addStretch()
-        scroll.setWidget(content_widget)
-        main_layout.addWidget(scroll)
 
 
 # --- Job Card Widget ---

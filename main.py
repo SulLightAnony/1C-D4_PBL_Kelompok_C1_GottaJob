@@ -39,7 +39,7 @@ from toolkit_main import CareerToolkitPage
 
 # Tambahkan path untuk modul database agar bisa dibersihkan saat tutup
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pages", "Modul"))
-from modul_database import bersihkan_database_sementara
+from modul_database import bersihkan_database_sementara, sinkronisasi_folder_kategori
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pages", "Job Posting"))
 from job_posting import JobPostingPage
@@ -163,6 +163,9 @@ class Dashboard(QMainWindow):
         self.sidebar.show() # Munculkan lagi sidebarnya
         self.btn_admin.hide() # Sembunyikan menu admin untuk user biasa
         self.pindah_halaman(self.btn_dashboard, 0) # Paksa pindah ke dashboard user (index 0)
+        # Sinkronisasi folder kategori di background saat aplikasi pertama dibuka
+        import threading
+        threading.Thread(target=sinkronisasi_folder_kategori, daemon=True).start()
 
     def setup_logo(self):
         container = QWidget()

@@ -1,0 +1,17 @@
+[
+    {
+        "id": "053e80ef-25ca-49f6-b9de-703ed38be19e",
+        "Judul_Pekerjaan": "UI/UX Designer",
+        "Nama_Perusahaan": "Creative Studio",
+        "Jenis_Pekerjaan": "Kontrak",
+        "Lokasi": "Bandung (Remote)",
+        "Rentang_Gaji": "8.500.000 - 12.000.000",
+        "Skills": "Figma|Adobe XD|UI Design",
+        "Kategori": "Desain",
+        "Tanggal_Kadaluarsa": "15/06/2026",
+        "Deskripsi_Pekerjaan": "Merancang antarmuka pengguna yang menarik.",
+        "Link_Lowongan": "https://example.com/design",
+        "source": "job_posting",
+        "Is_lamar": true
+    }
+]

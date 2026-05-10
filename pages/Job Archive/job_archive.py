@@ -71,14 +71,18 @@ class LinkValidatorWorker(QObject):
     progress_signal = pyqtSignal(str)
     finished_signal = pyqtSignal(list) # Mengembalikan list of {'file': path, 'job': job_dict}
 
-    def __init__(self, db_dir):
+    def __init__(self, target_path):
         super().__init__()
-        self.db_dir = db_dir
+        self.target_path = target_path
 
     def run(self):
         try:
             dead_links = []
-            file_paths = glob.glob(os.path.join(self.db_dir, "*.json"))
+            if os.path.isfile(self.target_path):
+                file_paths = [self.target_path]
+            else:
+                # Cari file JSON di root dan semua subfolder kategori
+                file_paths = glob.glob(os.path.join(self.target_path, "**", "*.json"), recursive=True)
             
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
@@ -264,18 +268,26 @@ class JobArchivePage(QWidget):
         sub = QLabel("Pilih data lowongan yang telah tersimpan untuk melihat visualisasinya.")
         sub.setObjectName("SubLabel")
 
-        # Kontrol pemilihan file
+        # Kontrol pemilihan file (Cascading Dropdowns)
         ctrl_layout = QHBoxLayout()
+        ctrl_layout.setSpacing(10)
+
+        self.combo_category = QComboBox()
+        self.combo_category.setPlaceholderText("Pilih Kategori")
+        self.combo_category.currentIndexChanged.connect(self._on_category_changed)
+        
         self.combo_file = QComboBox()
+        self.combo_file.setPlaceholderText("Pilih File")
         self.combo_file.currentIndexChanged.connect(self._on_file_selected)
         
-        btn_refresh = QPushButton(" Perbarui Daftar")
+        btn_refresh = QPushButton(" Perbarui")
         refresh_icon_path = os.path.join(root_dir, "assets", "Job Archive", "refresh.png")
         btn_refresh.setIcon(QIcon(refresh_icon_path))
         btn_refresh.setIconSize(QSize(18, 18))
-        btn_refresh.setToolTip("Muat ulang daftar file data dari database")
+        btn_refresh.setToolTip("Muat ulang daftar kategori dan file")
         btn_refresh.clicked.connect(self.load_file_list)
         
+        ctrl_layout.addWidget(self.combo_category, stretch=1)
         ctrl_layout.addWidget(self.combo_file, stretch=1)
         ctrl_layout.addWidget(btn_refresh)
 
@@ -351,37 +363,65 @@ class JobArchivePage(QWidget):
 
 
     def load_file_list(self, auto_check=False):
-        """Memuat daftar file JSON dan opsional melakukan validasi link."""
-        self.combo_file.clear()
-        self.combo_file.addItem("-- Pilih File Data --", "")
+        """Memuat daftar kategori (folder) dari database."""
+        prev_cat = self.combo_category.currentText()
+        
+        self.combo_category.clear()
+        self.combo_category.addItem("-- Pilih Kategori --", "")
         
         if not os.path.exists(self.db_dir):
             return
+
+        # 1. Ambil semua sub-direktori (Kategori)
+        categories = []
+        for entry in os.scandir(self.db_dir):
+            if entry.is_dir():
+                categories.append(entry.name)
+        
+        # Tambahkan folder root jika ada file JSON langsung di dalamnya
+        root_files = glob.glob(os.path.join(self.db_dir, "*.json"))
+        if root_files:
+            categories.append("(Tanpa Kategori)")
             
-        file_paths = glob.glob(os.path.join(self.db_dir, "*.json"))
-        for fp in file_paths:
-            file_name = os.path.basename(fp)
-            self.combo_file.addItem(file_name, fp)
+        for cat in sorted(categories):
+            self.combo_category.addItem(cat, cat)
+
+        # Kembalikan pilihan kategori jika masih ada
+        idx = self.combo_category.findText(prev_cat)
+        if idx >= 0:
+            self.combo_category.setCurrentIndex(idx)
+        else:
+            self.combo_file.clear()
+            self.combo_file.addItem("-- Pilih File --", "")
 
         # Jika dipanggil via tombol (manual refresh), tanya apakah mau bersih-bersih data
         if not auto_check:
+            # Gunakan pilihan file saat ini untuk validasi
+            selected_path = self.combo_file.currentData()
+            msg = ""
+            if selected_path:
+                file_name = os.path.splitext(os.path.basename(selected_path))[0].replace('_', ' ')
+                msg = f"Apakah Anda ingin mengecek lowongan kadaluarsa pada file '{file_name}'?"
+                target = selected_path
+            else:
+                msg = "Apakah Anda ingin mengecek seluruh lowongan kadaluarsa di semua folder arsip?\n(Proses ini mungkin sangat lama)"
+                target = self.db_dir
+
             res = QMessageBox.question(
-                self, "Validasi Link", 
-                "Apakah Anda ingin sekaligus mengecek dan menghapus lowongan yang sudah kadaluarsa?\n"
-                "(Proses ini mungkin memerlukan waktu beberapa saat)",
+                self, "Validasi Link", msg,
                 QMessageBox.Yes | QMessageBox.No
             )
             if res == QMessageBox.Yes:
-                self._start_link_validation()
+                self._start_link_validation(target)
 
-    def _start_link_validation(self):
+    def _start_link_validation(self, target_path):
         self.progress_dialog = QProgressDialog("Memulai validasi link...", "Batal", 0, 0, self)
         self.progress_dialog.setWindowTitle("Membersihkan Data Kadaluarsa")
         self.progress_dialog.setWindowModality(Qt.WindowModal)
         self.progress_dialog.show()
 
         self.val_thread = QThread()
-        self.val_worker = LinkValidatorWorker(self.db_dir)
+        self.val_worker = LinkValidatorWorker(target_path)
         self.val_worker.moveToThread(self.val_thread)
 
         self.val_thread.started.connect(self.val_worker.run)
@@ -430,6 +470,33 @@ class JobArchivePage(QWidget):
             QMessageBox.information(self, "Berhasil", f"Berhasil menghapus {total_deleted} lowongan kadaluarsa.")
             self.favorite_changed.emit()
             self.load_file_list(auto_check=True)
+
+    def _on_category_changed(self, index):
+        """Update dropdown file berdasarkan kategori yang dipilih."""
+        cat_name = self.combo_category.itemData(index)
+        prev_file = self.combo_file.currentData()
+        
+        self.combo_file.clear()
+        self.combo_file.addItem("-- Pilih File --", "")
+        
+        if not cat_name:
+            return
+
+        # Tentukan path folder kategori
+        if cat_name == "(Tanpa Kategori)":
+            search_path = os.path.join(self.db_dir, "*.json")
+        else:
+            search_path = os.path.join(self.db_dir, cat_name, "*.json")
+            
+        file_paths = sorted(glob.glob(search_path))
+        for fp in file_paths:
+            name = os.path.splitext(os.path.basename(fp))[0].replace('_', ' ')
+            self.combo_file.addItem(name, fp)
+            
+        # Kembalikan pilihan file jika masih ada
+        idx = self.combo_file.findData(prev_file)
+        if idx >= 0:
+            self.combo_file.setCurrentIndex(idx)
 
     def _on_file_selected(self, index):
         file_path = self.combo_file.itemData(index)
