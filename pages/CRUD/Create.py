@@ -139,7 +139,22 @@ class JobDialog(QDialog):
         self.date_edit.setDate(QDate.currentDate().addDays(30))
         # Validasi Preventif: Minimal besok
         self.date_edit.setMinimumDate(QDate.currentDate().addDays(1))
-        
+        # Styling popup kalender agar tidak hitam
+        _cal = self.date_edit.calendarWidget()
+        _cal.setStyleSheet("""
+            QCalendarWidget { background-color: white; border: 1px solid #B2D2D9; border-radius: 8px; }
+            QCalendarWidget QAbstractItemView { background-color: white; color: #1E3A4A; selection-background-color: #1D4E5F; selection-color: white; outline: none; font-size: 13px; }
+            QCalendarWidget QAbstractItemView:disabled { color: #B2D2D9; }
+            QCalendarWidget QWidget#qt_calendar_navigationbar { background-color: #1D4E5F; padding: 4px; }
+            QCalendarWidget QToolButton { color: white; background-color: transparent; border: none; font-weight: bold; font-size: 14px; padding: 4px 8px; }
+            QCalendarWidget QToolButton:hover { background-color: rgba(255,255,255,0.15); border-radius: 4px; }
+            QCalendarWidget QToolButton::menu-indicator { image: none; }
+            QCalendarWidget QSpinBox { color: white; background-color: transparent; border: none; font-weight: bold; font-size: 14px; }
+            QCalendarWidget QMenu { background-color: white; color: #1E3A4A; border: 1px solid #B2D2D9; font-size: 13px; }
+            QCalendarWidget QMenu::item:selected { background-color: #E2EFF1; color: #1D4E5F; }
+            QCalendarWidget QHeaderView::section { background-color: #F0F7F9; color: #2C687B; font-weight: bold; font-size: 12px; border: none; padding: 4px; }
+        """)
+
         create_field("Tanggal Kadaluarsa", self.date_edit, 2, 1)
 
         # Baris 4: Skills (Full Width)

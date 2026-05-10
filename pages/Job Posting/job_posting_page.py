@@ -155,9 +155,11 @@ class JobDetailPage(QWidget):
         f_lay = QHBoxLayout(footer)
         f_lay.setContentsMargins(30, 0, 30, 0)
 
-        self.btn_edit = QPushButton("Edit")
+        self.btn_edit = QPushButton(" Edit")
+        self.btn_edit.setIcon(QIcon(edit_icon_path))
+        self.btn_edit.setIconSize(QSize(18, 18))
         self.btn_edit.setCursor(Qt.PointingHandCursor)
-        self.btn_edit.setFixedSize(90, 40)
+        self.btn_edit.setFixedSize(100, 40)
         self.btn_edit.setStyleSheet("""
             QPushButton { border: 1px solid #D1D5DB; border-radius: 8px; color: #4A5568; font-weight: 500; }
             QPushButton:hover { background-color: #F9FAFB; border-color: #9CA3AF; }
@@ -891,6 +893,73 @@ class JobPostingPage(QWidget):
         self.f_date.setDisplayFormat("dd/MM/yyyy")
         self.f_date.setDate(QDate.currentDate().addDays(30))
         self.f_date.setMinimumDate(QDate.currentDate().addDays(1))
+
+        # Terapkan style langsung ke popup kalender agar tidak hitam
+        cal = self.f_date.calendarWidget()
+        cal.setStyleSheet("""
+            QCalendarWidget {
+                background-color: white;
+                border: 1px solid #B2D2D9;
+                border-radius: 8px;
+            }
+            QCalendarWidget QAbstractItemView {
+                background-color: white;
+                color: #1E3A4A;
+                selection-background-color: #1D4E5F;
+                selection-color: white;
+                outline: none;
+                font-size: 13px;
+            }
+            QCalendarWidget QAbstractItemView:disabled {
+                color: #B2D2D9;
+            }
+            QCalendarWidget QWidget#qt_calendar_navigationbar {
+                background-color: #1D4E5F;
+                border-top-left-radius: 8px;
+                border-top-right-radius: 8px;
+                padding: 4px;
+            }
+            QCalendarWidget QToolButton {
+                color: white;
+                background-color: transparent;
+                border: none;
+                font-weight: bold;
+                font-size: 14px;
+                padding: 4px 8px;
+            }
+            QCalendarWidget QToolButton:hover {
+                background-color: rgba(255,255,255,0.15);
+                border-radius: 4px;
+            }
+            QCalendarWidget QToolButton::menu-indicator {
+                image: none;
+            }
+            QCalendarWidget QSpinBox {
+                color: white;
+                background-color: transparent;
+                border: none;
+                font-weight: bold;
+                font-size: 14px;
+            }
+            QCalendarWidget QMenu {
+                background-color: white;
+                color: #1E3A4A;
+                border: 1px solid #B2D2D9;
+                font-size: 13px;
+            }
+            QCalendarWidget QMenu::item:selected {
+                background-color: #E2EFF1;
+                color: #1D4E5F;
+            }
+            QCalendarWidget QHeaderView::section {
+                background-color: #F0F7F9;
+                color: #2C687B;
+                font-weight: bold;
+                font-size: 12px;
+                border: none;
+                padding: 4px;
+            }
+        """)
 
         self.skill_input = SkillTagInput(btn_text="Tambah")
         lbl_skill_hint = QLabel('Ketik skill lalu tekan Enter atau klik Tambah')

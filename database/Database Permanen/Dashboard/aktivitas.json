@@ -1,5 +1,9 @@
 [
     {
+        "pesan": "<b>Lowongan Dihapus</b><br>UI/UX Designer",
+        "waktu": ""
+    },
+    {
         "pesan": "<b>Pekerjaan Favorit Diganti</b><br>Admin E-Commerce",
         "waktu": ""
     },
@@ -17,10 +21,6 @@
     },
     {
         "pesan": "<b>Lowongan disimpan</b><br>RS Royal Surabaya",
-        "waktu": ""
-    },
-    {
-        "pesan": "<b>Lowongan disimpan</b><br>Klinik Younger Looks",
         "waktu": ""
     }
 ]

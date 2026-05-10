@@ -12,6 +12,6 @@
         "Deskripsi_Pekerjaan": "Melayani tamu hotel di meja depan.",
         "Link_Lowongan": "https://example.com/hotel",
         "source": "job_posting",
-        "Is_lamar": false
+        "Is_lamar": true
     }
 ]
