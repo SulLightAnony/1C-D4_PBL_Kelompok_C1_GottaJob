@@ -28,7 +28,7 @@ if db_mod_dir not in sys.path:
 from modul_visualisasi_data import PieChartWidget
 from modul_antarmuka_pengguna import (
     JobMatchResultContainer, JobDetailPanel, JobDashboardWidget, 
-    show_message, show_question
+    show_message, show_question, ActionButton
 )
 from modul_database import (simpan_ke_database_sementara, simpan_ke_database_permanen, 
                             bersihkan_database_sementara, set_favorit, get_favorit, catat_aktivitas, get_all_saved_links)
@@ -212,6 +212,14 @@ QFrame#PanelCard {
 class LiveDiscoveryPage(QWidget):
     favorite_changed = pyqtSignal()
 
+    def update_theme_mode(self, is_admin):
+        """Memperbarui warna tombol di Live Discovery dan komponen dashboard anaknya."""
+        theme = "admin" if is_admin else "user"
+        if hasattr(self, 'btn_scrape'):
+            self.btn_scrape.set_theme(theme)
+        if hasattr(self, 'dashboard_view'):
+            self.dashboard_view.update_theme_mode(theme)
+
     def __init__(self):
         super().__init__()
         self.setObjectName("LiveDiscoveryPage")
@@ -329,8 +337,7 @@ class LiveDiscoveryPage(QWidget):
         self.keyword_input.setPlaceholderText("Contoh: python developer, data scientist")
         self.keyword_input.returnPressed.connect(self._start_scraping)
 
-        self.btn_scrape = QPushButton("▶  Cari Pekerjaan")
-        self.btn_scrape.setObjectName("BtnScrape")
+        self.btn_scrape = ActionButton("▶  Cari Pekerjaan", color_theme="user")
         self.btn_scrape.setFixedWidth(180)
         self.btn_scrape.clicked.connect(self._start_scraping)
 

@@ -294,7 +294,8 @@ class DashboardPage(QWidget):
                 # Pembersihan instan untuk data lama agar tidak "+ Bonus: Bonus" dan ganti "month"
                 bonus_clean = re.sub(r'^bonus\s*:?\s*', '', bonus, flags=re.IGNORECASE).strip()
                 bonus_clean = bonus_clean.replace("/month", "/Bulan").replace("month", "Bulan")
-                salary_text += f"<br><font color='#27AE60' size='3'>+ Bonus: {bonus_clean}</font>"
+                if bonus_clean:
+                    salary_text += f"<br><font color='#27AE60' size='3'>+ Bonus: {bonus_clean}</font>"
                 
             salary = QLabel(salary_text)
             salary.setStyleSheet("font-weight: bold; color: #333; font-size: 16px;")

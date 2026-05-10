@@ -153,7 +153,7 @@ if process_dir not in sys.path:
 from modul_visualisasi_data import PieChartWidget
 from modul_pengolahan_data import hitung_persentase_skill, cari_pekerjaan_cocok, ambil_jenis_pekerjaan_unik
 from modul_database import get_database_permanen_dir, set_favorit, get_favorit, catat_aktivitas
-from modul_antarmuka_pengguna import JobMatchResultContainer, JobDetailPanel, JobDashboardWidget, show_message, show_question
+from modul_antarmuka_pengguna import JobMatchResultContainer, JobDetailPanel, JobDashboardWidget, show_message, show_question, ActionButton
 
 # ─────────────────────────────────────────────────────────────
 # Style Sheet
@@ -226,6 +226,15 @@ QPushButton:hover {
 
 class JobArchivePage(QWidget):
     favorite_changed = pyqtSignal()
+    build_cv_requested = pyqtSignal(dict)
+
+    def update_theme_mode(self, is_admin):
+        """Memperbarui warna tombol di Job Archive dan komponen dashboard anaknya."""
+        theme = "admin" if is_admin else "user"
+        if hasattr(self, 'btn_refresh'):
+            self.btn_refresh.set_theme(theme)
+        if hasattr(self, 'dashboard_view'):
+            self.dashboard_view.update_theme_mode(theme)
 
     def __init__(self):
         super().__init__()
@@ -280,16 +289,14 @@ class JobArchivePage(QWidget):
         self.combo_file.setPlaceholderText("Pilih File")
         self.combo_file.currentIndexChanged.connect(self._on_file_selected)
         
-        btn_refresh = QPushButton(" Perbarui")
         refresh_icon_path = os.path.join(root_dir, "assets", "Job Archive", "refresh.png")
-        btn_refresh.setIcon(QIcon(refresh_icon_path))
-        btn_refresh.setIconSize(QSize(18, 18))
-        btn_refresh.setToolTip("Muat ulang daftar kategori dan file")
-        btn_refresh.clicked.connect(self.load_file_list)
+        self.btn_refresh = ActionButton(" Perbarui", icon_path=refresh_icon_path, color_theme="user")
+        self.btn_refresh.setToolTip("Muat ulang daftar kategori dan file")
+        self.btn_refresh.clicked.connect(self.load_file_list)
         
         ctrl_layout.addWidget(self.combo_category, stretch=1)
         ctrl_layout.addWidget(self.combo_file, stretch=1)
-        ctrl_layout.addWidget(btn_refresh)
+        ctrl_layout.addWidget(self.btn_refresh)
 
         box_layout.addWidget(judul_container)
         box_layout.addWidget(sub)
@@ -344,6 +351,7 @@ class JobArchivePage(QWidget):
         self.match_results.itemDoubleClicked.connect(self._show_job_detail)
         self.match_results.favorite_clicked.connect(self._on_favorite_clicked)
         self.match_results.delete_clicked.connect(self._on_delete_clicked)
+        self.match_results.build_cv_clicked.connect(self.build_cv_requested.emit) 
         table_lay.addWidget(self.match_results)
 
         # 3. VIEW DETAIL
@@ -581,7 +589,15 @@ class JobArchivePage(QWidget):
         fav_link = fav.get("Link_Lowongan") if fav else None
         
         # Tampilkan Favorit & Hapus (show_save=False)
-        self.match_results.set_data(hasil, selected, show_save=False, show_favorite=True, show_delete=True, fav_link=fav_link)
+        # Tampilkan Favorit & Hapus (show_save=False), dan tampilkan tombol Bangun CV AI
+        self.match_results.set_data(
+            hasil, selected, 
+            show_save=False, 
+            show_favorite=True, 
+            show_delete=True, 
+            show_ai_cv=True,
+            fav_link=fav_link
+        )
         self.main_stack.setCurrentWidget(self.table_view)
 
     def _show_job_detail(self, item):
@@ -619,6 +635,7 @@ class JobArchivePage(QWidget):
                 show_save=False, 
                 show_favorite=True, 
                 show_delete=True,
+                show_ai_cv=True,
                 fav_link=job_data.get("Link_Lowongan")
             )
         else:
@@ -681,6 +698,7 @@ class JobArchivePage(QWidget):
                         show_save=False, 
                         show_favorite=True, 
                         show_delete=True,
+                        show_ai_cv=True,
                         fav_link=fav_link
                     )
         except Exception as e:

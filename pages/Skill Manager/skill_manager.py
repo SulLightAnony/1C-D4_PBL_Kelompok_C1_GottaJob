@@ -6,7 +6,7 @@ import sys
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QTableWidget, 
     QTableWidgetItem, QPushButton, QFrame, QHeaderView, 
-    QLineEdit, QMessageBox, QProgressBar
+    QLineEdit, QMessageBox
 )
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, QSize
 from PyQt5.QtGui import QIcon
@@ -21,7 +21,6 @@ from Modul.modul_database import get_database_permanen_dir
 from Modul.modul_antarmuka_pengguna import ModernComboBox, show_message, show_question, MODERN_TABLE_STYLE, SkillTag
 
 class SkillScannerWorker(QThread):
-    progress_signal = pyqtSignal(int, int) # current, total
     finished_signal = pyqtSignal(dict)    # { skill_name: { 'count': int, 'class': HasilKlasifikasi } }
 
     def __init__(self, target_dir):
@@ -54,7 +53,6 @@ class SkillScannerWorker(QThread):
                         skill_counts[s_lower]["count"] += 1
             except:
                 continue
-            self.progress_signal.emit(i + 1, total_files)
 
         # Klasifikasikan hasil unik
         final_results = {}

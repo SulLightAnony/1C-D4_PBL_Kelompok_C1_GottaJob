@@ -31,7 +31,7 @@ if _pages_dir not in sys.path:
     sys.path.insert(0, _pages_dir)
 
 from CRUD.Shared import muat_data, simpan_data
-from modul_antarmuka_pengguna import KeyboardScrollArea, show_message, show_question, MODERN_BUTTON_STYLE
+from modul_antarmuka_pengguna import KeyboardScrollArea, show_message, show_question, MODERN_BUTTON_STYLE, ActionButton
 from Modul.modul_database import catat_aktivitas
 from CRUD.Read import JobDetailDialog
 
@@ -117,7 +117,7 @@ class JobDetailPage(QWidget):
         c_lay.addWidget(self._create_section_lbl("DESKRIPSI PEKERJAAN"))
         self.lbl_desc = QLabel()
         self.lbl_desc.setWordWrap(True)
-        self.lbl_desc.setStyleSheet("color: #4A5568; font-size: 14px; line-height: 160%; border: none;")
+        self.lbl_desc.setStyleSheet("color: #4A5568; font-size: 16px; line-height: 160%; border: none;")
         c_lay.addWidget(self.lbl_desc)
 
         add_divider()
@@ -156,14 +156,15 @@ class JobDetailPage(QWidget):
         f_lay.setContentsMargins(30, 0, 30, 0)
 
         self.btn_edit = QPushButton("Edit")
-        self.btn_delete = QPushButton("Hapus")
-        for b in [self.btn_edit, self.btn_delete]:
-            b.setCursor(Qt.PointingHandCursor)
-            b.setFixedSize(90, 40)
-            b.setStyleSheet("""
-                QPushButton { border: 1px solid #D1D5DB; border-radius: 8px; color: #4A5568; font-weight: 500; }
-                QPushButton:hover { background-color: #F9FAFB; border-color: #9CA3AF; }
-            """)
+        self.btn_edit.setCursor(Qt.PointingHandCursor)
+        self.btn_edit.setFixedSize(90, 40)
+        self.btn_edit.setStyleSheet("""
+            QPushButton { border: 1px solid #D1D5DB; border-radius: 8px; color: #4A5568; font-weight: 500; }
+            QPushButton:hover { background-color: #F9FAFB; border-color: #9CA3AF; }
+        """)
+        
+        self.btn_delete = ActionButton(" Hapus", icon_path=trash_icon_path, color_theme="danger")
+        self.btn_delete.setFixedSize(100, 40)
         
         self.btn_edit.clicked.connect(lambda: self.edit_requested.emit(self.job_data))
         self.btn_delete.clicked.connect(lambda: self.delete_requested.emit(self.job_data))
@@ -221,11 +222,11 @@ class JobDetailPage(QWidget):
 
         v_lbl = QLabel(str(value))
         color = "#0F6E56" if "Gaji" in label else "#1E293B"
-        v_lbl.setStyleSheet(f"color: {color}; font-size: 14px; font-weight: 700; border: none; background: transparent;")
+        v_lbl.setStyleSheet(f"color: {color}; font-size: 16px; font-weight: 700; border: none; background: transparent;")
         
         if is_link and value != "-":
             v_lbl.setCursor(Qt.PointingHandCursor)
-            v_lbl.setStyleSheet("color: #1D4E5F; font-size: 14px; font-weight: 700; text-decoration: underline; border: none; background: transparent;")
+            v_lbl.setStyleSheet("color: #1D4E5F; font-size: 16px; font-weight: 700; text-decoration: underline; border: none; background: transparent;")
             # Mouse press logic to open link
             v_lbl.mousePressEvent = lambda e: QDesktopServices.openUrl(QUrl(value))
             
@@ -247,7 +248,7 @@ class JobDetailPage(QWidget):
         items = [i.strip() for i in items_str.split("|") if i.strip()]
         if not items:
             l = QLabel("Tidak ada data")
-            l.setStyleSheet("color: #94A3B8; font-style: italic; font-size: 13px; border: none;")
+            l.setStyleSheet("color: #94A3B8; font-style: italic; font-size: 16px; border: none;")
             layout.addWidget(l)
             return
 
@@ -260,7 +261,7 @@ class JobDetailPage(QWidget):
             
             t_lbl = QLabel(text)
             t_lbl.setWordWrap(True)
-            t_lbl.setStyleSheet("color: #334155; font-size: 13px; line-height: 140%; border: none;")
+            t_lbl.setStyleSheet("color: #334155; font-size: 16px; line-height: 140%; border: none;")
             row.addWidget(t_lbl, 1)
             layout.addLayout(row)
 
@@ -303,7 +304,7 @@ class JobDetailPage(QWidget):
         skills = [s.strip() for s in data.get("Skills", "").split("|") if s.strip()]
         for s in skills:
             pill = QLabel(s)
-            pill.setStyleSheet("background-color: #F1F5F9; color: #475569; border-radius: 15px; padding: 6px 15px; font-size: 12px; font-weight: 500; border: 1px solid #E2E8F0;")
+            pill.setStyleSheet("background-color: #F1F5F9; color: #475569; border-radius: 15px; padding: 6px 15px; font-size: 16px; font-weight: 500; border: 1px solid #E2E8F0;")
             self.skills_flow.addWidget(pill)
 
         # Populate Checklist
@@ -446,6 +447,14 @@ class JobPostingPage(QWidget):
         self._init_stack()
         self.load_data()
 
+    def update_theme_mode(self, is_admin):
+        """Memperbarui gaya tombol mengikuti peran user yang sedang login."""
+        theme = "admin" if is_admin else "user"
+        if hasattr(self, 'btn_refresh'):
+            self.btn_refresh.set_theme(theme)
+        if hasattr(self, 'btn_add'):
+            self.btn_add.set_theme(theme)
+
     def showEvent(self, event):
         if hasattr(self, 'page_stack'):
             self.page_stack.setCurrentIndex(0)
@@ -505,31 +514,14 @@ class JobPostingPage(QWidget):
         header_layout.addStretch()
         
         # Action Buttons
-        btn_style_primary = "QPushButton { border: none; border-radius: 6px; background-color: #2C687B; color: white; font-size: 14px; font-weight: bold; padding: 0 20px;} QPushButton:hover { background-color: #408699; }"
-
-        self.btn_refresh = QPushButton(" Refresh")
-        self.btn_refresh.setIcon(QIcon(refresh_icon_path))
-        self.btn_refresh.setIconSize(QSize(18, 18))
-        self.btn_refresh.setFixedHeight(40)
-        self.btn_refresh.setCursor(Qt.PointingHandCursor)
-        self.btn_refresh.setStyleSheet(btn_style_primary)
+        self.btn_refresh = ActionButton(" Refresh", icon_path=refresh_icon_path, color_theme="user")
         self.btn_refresh.clicked.connect(self.load_data)
         
-        self.btn_delete_multi = QPushButton(" Hapus ")
-        self.btn_delete_multi.setIcon(QIcon(trash_icon_path))
-        self.btn_delete_multi.setIconSize(QSize(18, 18))
-        self.btn_delete_multi.setFixedHeight(40)
-        self.btn_delete_multi.setCursor(Qt.PointingHandCursor)
-        self.btn_delete_multi.setStyleSheet(btn_style_primary)
+        self.btn_delete_multi = ActionButton(" Hapus ", icon_path=trash_icon_path, color_theme="danger")
         self.btn_delete_multi.clicked.connect(self.delete_selected)
         self.btn_delete_multi.hide() # Hidden by default
         
-        self.btn_add = QPushButton(" Tambah Data ")
-        self.btn_add.setIcon(QIcon(plus_icon_path))
-        self.btn_add.setIconSize(QSize(18, 18))
-        self.btn_add.setFixedHeight(40)
-        self.btn_add.setCursor(Qt.PointingHandCursor)
-        self.btn_add.setStyleSheet(btn_style_primary)
+        self.btn_add = ActionButton(" Tambah Data ", icon_path=plus_icon_path, color_theme="user")
         self.btn_add.clicked.connect(self.add_data)
         
         header_layout.addWidget(self.btn_refresh)
@@ -965,8 +957,16 @@ class JobPostingPage(QWidget):
         for field in [self.f_judul, self.f_perusahaan, self.f_lokasi, self.f_gaji_min, self.f_gaji_max, self.f_link]:
             field.returnPressed.connect(self._save_new_job)
 
-        layout.addWidget(card)
-        layout.addStretch()
+        # Bungkus form ke dalam Scroll Area agar tidak merusak ukuran jendela
+        scroll = KeyboardScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.NoFrame)
+        scroll.setStyleSheet("background-color: transparent;")
+        
+        # Masukkan card ke dalam scroll
+        scroll.setWidget(card)
+        
+        layout.addWidget(scroll)
         return page
 
     def _refresh_form_layout(self):

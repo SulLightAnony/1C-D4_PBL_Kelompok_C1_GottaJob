@@ -336,6 +336,8 @@ class GlintsScraper:
                     if bonus_salary != "-" and "tidak menampilkan" not in bonus_salary.lower():
                         # Hapus kata "Bonus" di awal jika ada (agar tidak "+ Bonus: Bonus")
                         clean_bonus = re.sub(r'^bonus\s*:?\s*', '', bonus_salary, flags=re.IGNORECASE).strip()
+                        # Ganti month menjadi Bulan
+                        clean_bonus = clean_bonus.replace("/month", "/Bulan").replace("month", "Bulan")
                         benefits_bonus = clean_bonus if clean_bonus else "-"
                     else:
                         benefits_bonus = "-"

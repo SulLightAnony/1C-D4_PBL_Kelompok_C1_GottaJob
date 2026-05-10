@@ -1,4 +1,5 @@
 import os
+import re
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
     QFrame, QTableWidget, QTableWidgetItem, QHeaderView, QScrollArea,
@@ -97,6 +98,51 @@ QPushButton:pressed {
     background-color: #1E3A4A;
 }
 """
+
+class ActionButton(QPushButton):
+    """
+    Tombol aksi terstandarisasi.
+    color_theme: 'user' (teal), 'admin' (dark blue), atau 'danger' (merah).
+    """
+    def __init__(self, text, icon_path=None, color_theme="user", parent=None):
+        super().__init__(text, parent)
+        
+        if icon_path:
+            self.setIcon(QIcon(icon_path))
+            self.setIconSize(QSize(18, 18))
+            
+        self.setFixedHeight(40)
+        self.setCursor(Qt.PointingHandCursor)
+        self.set_theme(color_theme)
+        
+    def set_theme(self, color_theme):
+        if color_theme == "danger":
+            bg = "#E74C3C"
+            hover = "#C0392B"
+            pressed = "#922B21"
+        elif color_theme == "admin":
+            bg = "#1E3A5F"
+            hover = "#295180"
+            pressed = "#152945"
+        else: # user
+            bg = "#2C687B"
+            hover = "#408699"
+            pressed = "#1E3A4A"
+            
+        self.setStyleSheet(f"""
+            QPushButton {{ 
+                border: none; 
+                border-radius: 6px; 
+                background-color: {bg}; 
+                color: white; 
+                font-size: 14px; 
+                font-weight: bold; 
+                padding: 0 20px;
+            }} 
+            QPushButton:hover {{ background-color: {hover}; }}
+            QPushButton:pressed {{ background-color: {pressed}; }}
+        """)
+
 
 MODERN_COMBO_STYLE = """
 QComboBox {
@@ -368,6 +414,7 @@ class JobDashboardWidget(QWidget):
         self._init_ui()
 
     def _init_ui(self):
+        self.current_theme = "user"
         # Layout utama horizontal: Kiri (Stats + Chart) | Kanan (Skill List)
         main_layout = QHBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
@@ -443,17 +490,7 @@ class JobDashboardWidget(QWidget):
         page_skill_lay.addWidget(self.skill_list, stretch=1)
         page_skill_lay.addSpacing(15)
         
-        self.btn_next_job_type = QPushButton(" Pilih jenis pekerjaan")
-        base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        self.btn_next_job_type.setCursor(Qt.PointingHandCursor)
-        self.btn_next_job_type.setStyleSheet("""
-            QPushButton {
-                background-color: #2C687B; color: white;
-                font-size: 14px; font-weight: bold;
-                border-radius: 8px; padding: 10px;
-            }
-            QPushButton:hover { background-color: #3B7C91; }
-        """)
+        self.btn_next_job_type = ActionButton(" Pilih jenis pekerjaan", color_theme=self.current_theme)
         self.btn_next_job_type.clicked.connect(lambda: self.right_stack.setCurrentIndex(1))
         page_skill_lay.addWidget(self.btn_next_job_type)
         self.right_stack.addWidget(page_skill)
@@ -490,19 +527,9 @@ class JobDashboardWidget(QWidget):
         page_type_lay.addWidget(self.job_type_list, stretch=1)
         page_type_lay.addSpacing(15)
         
-        self.btn_find_match = QPushButton(" Cari pekerjaan yang cocok")
+        base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         search_icon_path = os.path.join(base_path, 'assets', 'Job Archive', 'search.png')
-        self.btn_find_match.setIcon(QIcon(search_icon_path))
-        self.btn_find_match.setIconSize(QSize(18, 18))
-        self.btn_find_match.setCursor(Qt.PointingHandCursor)
-        self.btn_find_match.setStyleSheet("""
-            QPushButton {
-                background-color: #2C687B; color: white;
-                font-size: 14px; font-weight: bold;
-                border-radius: 8px; padding: 10px;
-            }
-            QPushButton:hover { background-color: #3B7C91; }
-        """)
+        self.btn_find_match = ActionButton(" Cari pekerjaan yang cocok", icon_path=search_icon_path, color_theme=self.current_theme)
         self.btn_find_match.clicked.connect(self.find_match_clicked.emit)
         page_type_lay.addWidget(self.btn_find_match)
         self.right_stack.addWidget(page_type)
@@ -514,6 +541,13 @@ class JobDashboardWidget(QWidget):
         self.card_total.update_value(total_jobs)
         self.card_skills.update_value(total_skills)
         self.card_dominant.update_value(dominant_skill, color="#2C687B")
+
+    def update_theme_mode(self, theme):
+        self.current_theme = theme
+        if hasattr(self, 'btn_next_job_type'):
+            self.btn_next_job_type.set_theme(theme)
+        if hasattr(self, 'btn_find_match'):
+            self.btn_find_match.set_theme(theme)
 
     def _toggle_item_check(self, item):
         last_state = item.data(Qt.UserRole)
@@ -681,6 +715,7 @@ class JobMatchResultContainer(QWidget):
     save_clicked = pyqtSignal(dict)
     favorite_clicked = pyqtSignal(dict)
     delete_clicked = pyqtSignal(dict)
+    build_cv_clicked = pyqtSignal(dict) # <--- TAMBAHAN: Sinyal Bangun CV AI
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -698,9 +733,10 @@ class JobMatchResultContainer(QWidget):
         self.table.save_clicked.connect(self.save_clicked.emit)
         self.table.favorite_clicked.connect(self.favorite_clicked.emit)
         self.table.delete_clicked.connect(self.delete_clicked.emit)
+        self.table.build_cv_clicked.connect(self.build_cv_clicked.emit) # <--- TAMBAHAN: Teruskan sinyal dari tabel
         layout.addWidget(self.table, stretch=1)
 
-    def set_data(self, hasil, selected_skills, show_save=True, show_favorite=True, show_delete=False, fav_link=None, saved_links=None):
+    def set_data(self, hasil, selected_skills, show_save=True, show_favorite=True, show_delete=False, show_ai_cv=False, fav_link=None):
         if not hasil:
             return
         
@@ -709,17 +745,19 @@ class JobMatchResultContainer(QWidget):
         self.best_match_card.update_data(best, selected_skills)
         
         # Isi tabel dengan semua data (atau sisanya)
-        self.table.set_data(hasil, selected_skills, show_save=show_save, show_favorite=show_favorite, show_delete=show_delete, fav_link=fav_link, saved_links=saved_links)
+        self.table.set_data(hasil, selected_skills, show_save=show_save, show_favorite=show_favorite, show_delete=show_delete, show_ai_cv=show_ai_cv, fav_link=fav_link)
         self.current_data = hasil
 
     def _on_item_double_clicked(self, item):
         self.itemDoubleClicked.emit(item)
+
 
 class JobMatchTable(QTableWidget):
     """Komponen tabel hasil pencarian lowongan yang terstandarisasi."""
     save_clicked = pyqtSignal(dict)
     favorite_clicked = pyqtSignal(dict)
     delete_clicked = pyqtSignal(dict)
+    build_cv_clicked = pyqtSignal(dict) # <--- TAMBAHAN: Sinyal Bangun CV AI
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -727,46 +765,60 @@ class JobMatchTable(QTableWidget):
         self.setHorizontalHeaderLabels(["Judul Pekerjaan", "Perusahaan", "Kecocokan", "Aksi"])
         self.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
         self.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
-        self.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
-        self.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
-        self.verticalHeader().setDefaultSectionSize(130)
+        self.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        self.horizontalHeader().setSectionResizeMode(3, QHeaderView.Fixed)
+        self.setColumnWidth(3, 380)
+        self.horizontalHeader().setMinimumSectionSize(150)
+        self.verticalHeader().setDefaultSectionSize(75)
         self.verticalHeader().setVisible(False)
         self.setShowGrid(False)
         self.setEditTriggers(QTableWidget.NoEditTriggers)
         self.setSelectionBehavior(QTableWidget.SelectRows)
-        self.setSelectionBehavior(QTableWidget.SelectRows)
-        self.setStyleSheet(MODERN_TABLE_STYLE)
+        self.setStyleSheet("""
+            QTableWidget {
+                border: none;
+                background-color: white;
+                font-size: 16px;
+                color: #1E3A4A;
+            }
+            QTableWidget::item {
+                padding: 12px;
+                border-bottom: 1px solid #F0F5F7;
+            }
+            QTableWidget::item:selected {
+                background-color: #F7FBFC;
+                color: #2C687B;
+            }
+            QHeaderView::section {
+                background-color: white;
+                padding: 12px;
+                border: none;
+                border-bottom: 2px solid #E0E7EF;
+                font-weight: bold;
+                font-size: 16px;
+                color: #2C687B;
+                text-align: left;
+            }
+            QScrollBar:vertical {
+                border: none; background: #F3F4F6; width: 8px; border-radius: 4px;
+            }
+            QScrollBar::handle:vertical {
+                background: #B2D2D9; border-radius: 4px;
+            }
+            QScrollBar::handle:vertical:hover { background: #7A9EB0; }
+            QScrollBar:horizontal {
+                border: none; background: #F3F4F6; height: 8px; border-radius: 4px;
+            }
+            QScrollBar::handle:horizontal { background: #B2D2D9; border-radius: 4px; }
+            QScrollBar::handle:horizontal:hover { background: #7A9EB0; }
+        """)
 
-    def resizeEvent(self, event):
-        """Picu pembaruan teks tombol saat ukuran tabel berubah."""
-        super().resizeEvent(event)
-        self._update_responsive_buttons()
-
-    def _update_responsive_buttons(self):
-        """Sembunyikan atau tampilkan teks tombol berdasarkan lebar tabel."""
-        # Ambang batas lebar (bisa disesuaikan, misal 1000px)
-        is_compact = self.width() < 1000
-        
-        for row in range(self.rowCount()):
-            widget = self.cellWidget(row, 3) # Kolom Aksi
-            if widget:
-                buttons = widget.findChildren(QPushButton)
-                for btn in buttons:
-                    original_text = btn.property("original_text")
-                    if original_text:
-                        if is_compact:
-                            btn.setText("") # Hanya ikon
-                            btn.setToolTip(original_text.strip()) # Tampilkan teks saat hover saja
-                        else:
-                            btn.setText(original_text) # Teks + Ikon
-                            btn.setToolTip("")
-
-    def set_data(self, hasil, selected_skills, show_save=True, show_favorite=True, show_delete=False, fav_link=None, saved_links=None):
+    def set_data(self, hasil, selected_skills, show_save=True, show_favorite=True, show_delete=False, show_ai_cv=False, fav_link=None):
         """Isi tabel dengan data lowongan hasil pencocokan."""
         self.setRowCount(len(hasil))
         
-        # Sembunyikan kolom aksi jika tidak ada tombol yang ditampilkan
-        if not show_save and not show_favorite and not show_delete:
+        # Sembunyikan kolom aksi jika tidak ada tombol sama sekali
+        if not show_save and not show_favorite and not show_delete and not show_ai_cv:
             self.setColumnHidden(3, True)
         else:
             self.setColumnHidden(3, False)
@@ -804,17 +856,33 @@ class JobMatchTable(QTableWidget):
             
             self.setItem(row, 2, match_item)
             
-            if not show_save and not show_favorite and not show_delete:
+            if not show_save and not show_favorite and not show_delete and not show_ai_cv:
                 continue
                 
             # Container untuk tombol aksi
             btn_widget = QWidget()
             btn_widget.setStyleSheet("background-color: transparent;")
             btn_lay = QHBoxLayout(btn_widget)
-            btn_lay.setContentsMargins(10, 0, 10, 0)
-            btn_lay.setSpacing(10)
+            btn_lay.setContentsMargins(5, 0, 5, 0)
+            btn_lay.setSpacing(8)
             btn_lay.setAlignment(Qt.AlignCenter)
-            
+
+            # --- TAMBAHAN: Tombol Bangun CV AI ---
+            if show_ai_cv:
+                btn_ai = QPushButton("Bangun CV")
+                btn_ai.setCursor(Qt.PointingHandCursor)
+                btn_ai.setStyleSheet("""
+                    QPushButton {
+                        background-color: #8E44AD; color: white;
+                        border: none; border-radius: 8px; padding: 8px 12px; font-weight: bold; font-size: 13px;
+                        min-height: 32px;
+                    }
+                    QPushButton:hover { background-color: #9B59B6; }
+                """)
+                # Kita menembakkan data JSON pekerjaan saat ini
+                btn_ai.clicked.connect(lambda checked, d=data: self.build_cv_clicked.emit(d))
+                btn_lay.addWidget(btn_ai)
+
             # 4. Tombol Simpan
             if show_save:
                 # Cek apakah sudah tersimpan di archive
@@ -899,9 +967,6 @@ class JobMatchTable(QTableWidget):
                 btn_lay.addWidget(btn_del)
             
             self.setCellWidget(row, 3, btn_widget)
-        
-        # Jalankan pengecekan responsif segera setelah data dimuat
-        self._update_responsive_buttons()
 
 class JobDetailPanel(QFrame):
     """Komponen detail lowongan pekerjaan yang terstandarisasi."""
@@ -1064,7 +1129,11 @@ class JobDetailPanel(QFrame):
         
         bonus = data.get("Bonus", "-")
         if bonus != "-" and bonus.lower() != "bonus":
-            self.salary_lay.addWidget(self._create_tag(f"Bonus: {bonus}", "salary"))
+            # Pembersihan agar tidak "+ Bonus: Bonus" dan ganti "month" menjadi "Bulan"
+            bonus_clean = re.sub(r'^bonus\s*:?\s*', '', bonus, flags=re.IGNORECASE).strip()
+            bonus_clean = bonus_clean.replace("/month", "/Bulan").replace("month", "Bulan")
+            if bonus_clean:
+                self.salary_lay.addWidget(self._create_tag(f"Bonus: {bonus_clean}", "salary"))
             
         self.salary_lay.addStretch()
 

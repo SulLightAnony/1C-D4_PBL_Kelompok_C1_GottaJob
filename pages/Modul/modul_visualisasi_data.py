@@ -15,13 +15,19 @@ class PieChartWidget(QWidget):
         self.main_layout.setSpacing(0)
         
         # Canvas Matplotlib
-        self.figure, self.ax = plt.subplots(figsize=(4, 4), dpi=100)
+        self.figure, self.ax = plt.subplots(figsize=(3, 3), dpi=100) # Diperkecil dari 4x4
         self.canvas = FigureCanvas(self.figure)
         self.figure.patch.set_alpha(0.0)
         self.ax.patch.set_alpha(0.0)
         self.canvas.setStyleSheet("background-color:transparent;")
         self.ax.axis('equal')
         self.ax.axis('off')
+        
+        # Atur Size Policy agar canvas bisa mengecil jika diperlukan
+        from PyQt5.QtWidgets import QSizePolicy
+        self.canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.canvas.setMinimumSize(200, 200) # Batas bawah agar tidak terlalu hancur
+        
         self.main_layout.addWidget(self.canvas)
 
         # Legend Area (Scrollable)
@@ -29,7 +35,7 @@ class PieChartWidget(QWidget):
         self.scroll.setWidgetResizable(True)
         self.scroll.setFrameShape(QFrame.NoFrame)
         self.scroll.setStyleSheet("background: transparent;")
-        self.scroll.setMaximumHeight(180)
+        self.scroll.setMaximumHeight(120) # Diperkecil dari 180
         
         self.legend_container = QWidget()
         self.legend_container.setStyleSheet("background: transparent;")
