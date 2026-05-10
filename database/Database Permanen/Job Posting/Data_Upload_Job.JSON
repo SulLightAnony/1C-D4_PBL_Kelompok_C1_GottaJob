@@ -1,1 +1,17 @@
-[]
+[
+    {
+        "id": "2026-05-10 08:35:06",
+        "Judul_Pekerjaan": "Front-end developer",
+        "Nama_Perusahaan": "PT. mencari cinta sejati",
+        "Jenis_Pekerjaan": "Penuh Waktu",
+        "Lokasi": "Jakarta",
+        "Rentang_Gaji": "5.000.000-8.000.000",
+        "Skills": "Figma|Vue.js|Nuxt.js|SQL",
+        "Link_Lowongan": "https://github.com/Smail0703",
+        "Deskripsi_Pekerjaan": "butuh orang yang bisa orang-orangan",
+        "Benefit_Pekerjaan": "",
+        "Kualifikasi_Persyaratan": "",
+        "Tanggal_Kadaluarsa": "10/06/2026",
+        "source": "job_posting"
+    }
+]

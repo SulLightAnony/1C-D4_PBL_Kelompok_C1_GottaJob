@@ -310,8 +310,8 @@ def proses_create_job(form_data, current_data):
         "Skills": skills_str,
         "Link_Lowongan": form_data.get('link', '').strip(),
         "Deskripsi_Pekerjaan": form_data.get('desc', '').strip(),
-        "Benefit_Pekerjaan": "",
-        "Kualifikasi_Persyaratan": "",
+        "Benefit_Pekerjaan": form_data.get('benefit', '').strip(),
+        "Kualifikasi_Persyaratan": form_data.get('kualifikasi', '').strip(),
         "Tanggal_Kadaluarsa": f"{selected_date.day():02d}/{selected_date.month():02d}/{selected_date.year()}",
     }
 

@@ -1,167 +1,191 @@
 """
-SkillTagInput — widget PyQt5 yang menampilkan tag pills
-skill langsung di dalam satu box input (inline).
-Mendukung Enter / tombol + untuk menambah skill,
-dan klik x untuk menghapus tag.
+SkillTagInput — Widget input skill dengan desain baru.
+Tags ditampilkan di atas box input menggunakan FlowLayout.
+Tombol + berada di sebelah kanan box input.
 """
 from PyQt5.QtWidgets import (
-    QFrame, QHBoxLayout, QScrollArea, QWidget, QLineEdit,
-    QPushButton, QLabel, QSizePolicy
+    QWidget, QVBoxLayout, QHBoxLayout, QLineEdit,
+    QPushButton, QLabel, QFrame
 )
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtGui import QIcon, QFont
+
+from constants import plus_icon_path
+from flow_layout import FlowLayout
 
 
-class SkillTagInput(QFrame):
-    """Widget input skill yang menampilkan tag pills langsung di dalam box input."""
+class SkillTagInput(QWidget):
+    """Widget input skill dengan tags di atas dan input box di bawah."""
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, placeholder="Ketik skill lalu tekan Enter...", btn_text=""):
         super().__init__(parent)
         self._skills = []
+        self._placeholder = placeholder
+        self._btn_text = btn_text
         self._setup_ui()
 
     def _setup_ui(self):
-        self.setObjectName("SkillTagInput")
-        self.setMinimumHeight(44)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        self.setStyleSheet("""
-            QFrame#SkillTagInput {
+        self.main_layout = QVBoxLayout(self)
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
+        self.main_layout.setSpacing(12)
+
+        # ── Row 1: Container untuk Tags (Pills) ──
+        self.tags_widget = QWidget()
+        self.tags_layout = FlowLayout(self.tags_widget, margin=0, spacing=8)
+        self.main_layout.addWidget(self.tags_widget)
+        self.tags_widget.hide()
+
+        # ── Row 2: Input Box + Tombol Tambah ──
+        input_row = QHBoxLayout()
+        input_row.setSpacing(8)
+
+        # Container untuk LineEdit agar ada border khusus
+        self.edit_frame = QFrame()
+        self.edit_frame.setObjectName("EditFrame")
+        self.edit_frame.setStyleSheet("""
+            QFrame#EditFrame {
                 border: 1px solid #dcdcdc;
                 border-radius: 8px;
-                background-color: #fafafa;
+                background-color: white;
             }
-            QFrame#SkillTagInput:focus-within {
+            QFrame#EditFrame:focus-within {
                 border: 1px solid #2C687B;
                 background-color: #fff;
             }
         """)
+        self.edit_frame.setFixedHeight(40)
+        
+        edit_layout = QHBoxLayout(self.edit_frame)
+        edit_layout.setContentsMargins(12, 0, 12, 0)
 
-        outer = QHBoxLayout(self)
-        outer.setContentsMargins(6, 5, 0, 5)
-        outer.setSpacing(0)
-
-        # Scroll area horizontal untuk tag + input
-        self._scroll = QScrollArea()
-        self._scroll.setFrameShape(QFrame.NoFrame)
-        self._scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self._scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self._scroll.setWidgetResizable(True)
-        self._scroll.setFixedHeight(34)
-        self._scroll.setStyleSheet("background: transparent; border: none;")
-
-        self._inner = QWidget()
-        self._inner.setStyleSheet("background: transparent;")
-        self._inner_layout = QHBoxLayout(self._inner)
-        self._inner_layout.setContentsMargins(0, 0, 0, 0)
-        self._inner_layout.setSpacing(5)
-        self._inner_layout.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-
-        # QLineEdit selalu di ujung kanan tags
         self._edit = QLineEdit()
-        self._edit.setPlaceholderText("Tambah skill...")
-        self._edit.setMinimumWidth(120)
-        self._edit.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self._edit.setFixedHeight(28)
-        self._edit.setStyleSheet("""
-            QLineEdit {
-                border: none;
-                background: transparent;
-                color: #333;
-                font-size: 13px;
-                padding: 0 4px;
-            }
-        """)
+        self._edit.setPlaceholderText(self._placeholder)
+        self._edit.setStyleSheet("border: none; background: transparent; font-size: 14px; color: #333;")
         self._edit.returnPressed.connect(self._add_from_input)
-        self._inner_layout.addWidget(self._edit)
-        self._inner_layout.addStretch()
+        edit_layout.addWidget(self._edit)
+        
+        input_row.addWidget(self.edit_frame, 1)
 
-        self._scroll.setWidget(self._inner)
-        outer.addWidget(self._scroll, 1)
-
-        # Tombol +
-        self._btn_add = QPushButton("+")
-        self._btn_add.setFixedSize(44, 44)
+        # Tombol + di luar box input
+        self._btn_add = QPushButton(self._btn_text)
+        self._btn_add.setIcon(QIcon(plus_icon_path))
+        self._btn_add.setIconSize(QSize(18, 18))
+        if self._btn_text:
+            self._btn_add.setFixedHeight(40)
+            self._btn_add.setMinimumWidth(100)
+            self._btn_add.setStyleSheet("""
+                QPushButton {
+                    background-color: #2C687B;
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    font-weight: bold;
+                    padding: 0 15px;
+                }
+                QPushButton:hover {
+                    background-color: #408699;
+                }
+            """)
+        else:
+            self._btn_add.setFixedSize(40, 40)
+            self._btn_add.setStyleSheet("""
+                QPushButton {
+                    background-color: #f0f0f0;
+                    border: 1px solid #dcdcdc;
+                    border-radius: 8px;
+                }
+                QPushButton:hover {
+                    background-color: #e8e8e8;
+                    border-color: #bbb;
+                }
+                QPushButton:pressed {
+                    background-color: #ddd;
+                }
+            """)
         self._btn_add.setCursor(Qt.PointingHandCursor)
-        self._btn_add.setStyleSheet("""
-            QPushButton {
-                background-color: #2C687B;
-                border: none;
-                border-top-right-radius: 7px;
-                border-bottom-right-radius: 7px;
-                color: white;
-                font-size: 22px;
-                font-weight: bold;
-            }
-            QPushButton:hover { background-color: #408699; }
-        """)
         self._btn_add.clicked.connect(self._add_from_input)
-        outer.addWidget(self._btn_add)
+        input_row.addWidget(self._btn_add)
+
+        self.main_layout.addLayout(input_row)
 
     def _add_from_input(self):
         text = self._edit.text().strip()
         if not text:
             return
-        for word in text.split():
-            word = word.strip()
-            if word:
+        
+        # Split berdasarkan koma atau spasi jika perlu
+        # Kita pisahkan berdasarkan koma terlebih dahulu, jika tidak ada koma, pisahkan berdasar spasi
+        if ',' in text:
+            parts = [p.strip() for p in text.split(',')]
+        else:
+            parts = [p.strip() for p in text.split()]
+        
+        for word in parts:
+            # Kapitalisasi huruf pertama
+            if len(word) > 0:
                 word = word[0].upper() + word[1:]
                 if word not in self._skills:
                     self._insert_tag(word)
+        
         self._edit.clear()
-        # Scroll ke kanan setelah tag ditambah
-        from PyQt5.QtWidgets import QApplication
-        QApplication.processEvents()
-        self._scroll.horizontalScrollBar().setValue(
-            self._scroll.horizontalScrollBar().maximum()
-        )
 
     def _insert_tag(self, text):
-        """Masukkan tag pill tepat sebelum QLineEdit."""
+        """Buat tag pill dengan desain baru: nama skill (bold) + tombol x (rounded border)."""
         tag = QFrame()
+        tag.setObjectName("SkillTag")
         tag.setStyleSheet("""
-            QFrame {
-                background-color: #1e4f5e;
-                border-radius: 5px;
+            QFrame#SkillTag {
+                background-color: #2C687B;
+                border-radius: 15px;
+                padding: 0;
             }
         """)
+        # Menetapkan tinggi yang konsisten untuk tag
+        tag.setFixedHeight(30)
+        
         tag_lay = QHBoxLayout(tag)
-        tag_lay.setContentsMargins(8, 3, 4, 3)
-        tag_lay.setSpacing(4)
+        tag_lay.setContentsMargins(12, 0, 4, 0)
+        tag_lay.setSpacing(6)
 
         lbl = QLabel(text)
-        lbl.setStyleSheet("color: white; font-size: 12px; font-weight: 500; border: none; background: transparent;")
+        lbl.setFont(QFont("Segoe UI", 10, QFont.Bold))
+        lbl.setStyleSheet("color: white; border: none; background: transparent;")
+        tag_lay.addWidget(lbl)
 
-        btn_x = QPushButton("x")
-        btn_x.setFixedSize(16, 16)
+        # Tombol x dengan border bulat kecil di dalamnya
+        btn_x = QPushButton("×")
+        btn_x.setFixedSize(20, 20)
         btn_x.setCursor(Qt.PointingHandCursor)
         btn_x.setStyleSheet("""
             QPushButton {
-                color: rgba(255,255,255,0.75);
-                border: none;
+                color: white;
+                border: 1px solid rgba(255, 255, 255, 0.4);
+                border-radius: 10px;
                 background: transparent;
-                font-size: 11px;
-                font-weight: bold;
-                padding: 0;
+                font-size: 16px;
+                font-weight: normal;
+                padding-bottom: 2px;
             }
-            QPushButton:hover { color: white; }
+            QPushButton:hover {
+                background-color: rgba(255, 255, 255, 0.2);
+                border-color: white;
+            }
         """)
 
         def _remove(t=text, w=tag):
             if t in self._skills:
                 self._skills.remove(t)
-            idx = self._inner_layout.indexOf(w)
-            if idx >= 0:
-                self._inner_layout.takeAt(idx)
+            self.tags_layout.removeWidget(w)
             w.deleteLater()
+            if not self._skills:
+                self.tags_widget.hide()
 
         btn_x.clicked.connect(_remove)
-        tag_lay.addWidget(lbl)
         tag_lay.addWidget(btn_x)
 
-        # Sisipkan sebelum QLineEdit (selalu di posisi count-2)
-        count = self._inner_layout.count()
-        insert_pos = max(0, count - 2)
-        self._inner_layout.insertWidget(insert_pos, tag)
+        self.tags_layout.addWidget(tag)
         self._skills.append(text)
+        self.tags_widget.show()
 
     # ── Public API ──
     def get_skills(self):
@@ -169,16 +193,13 @@ class SkillTagInput(QFrame):
 
     def clear_all(self):
         """Hapus semua tag dan kosongkan input."""
-        to_remove = []
-        for i in range(self._inner_layout.count()):
-            item = self._inner_layout.itemAt(i)
-            if item and item.widget() and item.widget() is not self._edit:
-                to_remove.append(item.widget())
-        for w in to_remove:
-            self._inner_layout.removeWidget(w)
-            w.deleteLater()
+        while self.tags_layout.count():
+            item = self.tags_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
         self._skills.clear()
         self._edit.clear()
+        self.tags_widget.hide()
 
     def load_skills(self, skills_list):
         """Muat daftar skill ke dalam widget."""

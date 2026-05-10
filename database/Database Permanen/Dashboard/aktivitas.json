@@ -1,5 +1,9 @@
 [
     {
+        "pesan": "<b>Lowongan Ditambah</b><br>Front-end developer",
+        "waktu": ""
+    },
+    {
         "pesan": "<b>Lowongan Dihapus</b><br>asdadasd1",
         "waktu": ""
     },
@@ -17,10 +21,6 @@
     },
     {
         "pesan": "<b>Live Discovery Selesai</b><br>temp_head_chef · 30 hasil",
-        "waktu": ""
-    },
-    {
-        "pesan": "<b>Lowongan Dihapus</b><br>1 data lowongan",
         "waktu": ""
     }
 ]

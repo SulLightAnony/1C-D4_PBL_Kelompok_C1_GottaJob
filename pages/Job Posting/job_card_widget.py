@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QSize, pyqtSignal
 from PyQt5.QtGui import QFont, QIcon, QPixmap
 
-from .constants import (
+from constants import (
     check_icon_path, location_icon_path, currency_icon_path,
     edit_icon_path, trash_icon_card_path
 )
