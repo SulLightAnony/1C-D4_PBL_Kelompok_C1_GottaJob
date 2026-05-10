@@ -1,40 +1,42 @@
 {
-    "Judul_Pekerjaan": "Mobile developer",
+    "Judul_Pekerjaan": "Admin E-Commerce",
     "Jenis_Pekerjaan": "Kontrak",
-    "Nama_Perusahaan": "IDE Asia",
-    "Lokasi": "Mekar Sejati, Bandung",
-    "Rentang_Gaji": "Rp10.000.000 - 15.000.000/Bulan",
-    "Skills": "Java | Restful API | Mobile Development | Kotlin | Android Development",
+    "Nama_Perusahaan": "Le Bianca Official",
+    "Lokasi": "Jl. Taman Holis Indah No.G1 no 49, Cigondewah Rahayu, Kec. Bandung Kulon, Kota Bandung, Jawa Barat 40215",
+    "Rentang_Gaji": "Rp2.400.000 - 3.000.000/Bulan",
+    "Bonus": "Bonus Rp500.000 - 2.000.000/month",
+    "Kategori_Utama": "Administrasi & HRD",
+    "Sub_Kategori": "Admin",
+    "Skills": "Administration | Google Sheets | Microsoft Office | Data Entry",
     "Benefit_Pekerjaan": "THR",
-    "Kualifikasi_Persyaratan": "Bachelor’s degree in Computer Science, Software Engineering, or equivalent experience | 3–5 years of experience as an Android Developer | Strong proficiency in Kotlin | Solid experience with Android SDK, Android Studio, and Gradle | Strong understanding of MVVM architecture and clean architecture principles | Experience with RESTful APIs, JSON, and third-party integrations | Proficient in Git version control | Experience with Room Database / SQLite | Strong knowledge of Android lifecycle, UI components, and performance optimization | Familiarity with unit testing and debugging techniques | Nice to Have | Experience with Jetpack Compose | Familiarity with Dependency Injection (Hilt / Dagger) | Experience with CI/CD pipelines | Knowledge of Firebase (Crashlytics, Analytics, FCM) | Experience publishing and maintaining apps on the Google Play Store | Soft Skills | Strong analytical and problem-solving skills | Effective communication and collaboration | Ability to work independently and in agile teams | High attention to detail and code quality",
-    "Deskripsi_Pekerjaan": "We are looking for an experienced Android Developer with 3–5 years of hands-on experience in Kotlin to develop and maintain high-quality mobile applications. The candidate will play a key role in building scalable, robust, and user-centric Android solutions while collaborating closely with cross-functional teams.\nResponsibililties\nDesign, develop, and maintain Android applications using Kotlin\nArchitect and implement scalable, maintainable, and high-performance mobile solutions\nCollaborate with product managers, designers, and backend teams to deliver new features\nEnsure code quality through best practices, code reviews, and testing\nOptimize application performance, responsiveness, and memory usage\nIntegrate RESTful APIs and manage data efficiently\nTroubleshoot, debug, and resolve production issues\nContribute to technical decisions, architecture design, and improvements\nWrite and maintain technical documentation\nStay updated with the latest Android development trends and technologies",
-    "Link_Lowongan": "https://glints.com/id/opportunities/jobs/mobile-developer/a4c4937e-b5c7-4fcb-ab61-346c7735e96a",
-    "match_percentage": 60.0,
-    "matched_skills": [
-        "mobile development",
-        "kotlin",
-        "android development"
-    ],
-    "is_type_match": false,
+    "Kualifikasi_Persyaratan": "Minimal 1 tahun pengalaman sebagai Admin E-Commerce | Familiar dengan pengelolaan marketplace (Shopee, Tokopedia, Lazada, TikTok Shop, dll.) | Mampu melakukan product listing, pengaturan harga & diskon, serta manajemen stok | Menguasai Microsoft Excel (level dasar) | Teliti, cekatan, dan mampu bekerja dengan target | Bersedia bekerja on-site di Taman Holis, Bandung",
+    "Deskripsi_Pekerjaan": "Admin E-Commerce - Lebianca Official\nLebianca Official membuka kesempatan bagi kandidat yang berpengalaman untuk bergabung sebagai Admin E-Commerce.\nMengelola seluruh akun e-commerce Lebianca Official\nUpload dan update produk (foto, deskripsi, harga)\nMengatur promo, voucher, dan campaign marketplace\nMemproses pesanan dan koordinasi pengiriman\nMembalas chat & ulasan pelanggan\nMembuat laporan penjualan harian/mingguan\nBenefit\nGaji: Rp2.400.000 – Rp3.000.000/bulan\n+ Bonus per Bulan berdasarkan pencapaian penjualan\nLingkungan kerja yang supportive",
+    "Link_Lowongan": "https://glints.com/id/opportunities/jobs/admin-e-commerce/a000463f-64fe-4428-86eb-f9b4b74e53a2",
+    "match_percentage": 75.0,
     "matched_categorized": {
         "hard_skills": [
-            "mobile development",
-            "kotlin",
-            "android development"
+            "administration",
+            "google sheets",
+            "data entry"
         ],
         "soft_skills": [],
         "positions": []
     },
     "all_categorized": {
         "hard_skills": [
-            "Java",
-            "Restful API",
-            "Mobile Development",
-            "Kotlin",
-            "Android Development"
+            "Administration",
+            "Google Sheets",
+            "Microsoft Office",
+            "Data Entry"
         ],
         "soft_skills": [],
         "positions": []
     },
-    "source_file": "C:\\Users\\farre\\OneDrive\\Dokumen\\GitHub\\1C-D4_PBL_Kelompok_C1_GottaJob\\database\\Database Permanen\\Job Archive\\mobile_developer.json"
+    "matched_skills": [
+        "administration",
+        "google sheets",
+        "data entry"
+    ],
+    "is_type_match": true,
+    "source_file": "C:\\Users\\farre\\OneDrive\\Dokumen\\GitHub\\1C-D4_PBL_Kelompok_C1_GottaJob\\database\\Database Permanen\\Job Archive\\Administrasi & HRD\\admin_e.json"
 }

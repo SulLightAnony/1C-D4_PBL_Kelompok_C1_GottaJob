@@ -41,7 +41,7 @@ class Dashboard(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Gottajob")
-        self.resize(1280, 800)
+        self.resize(1280, 720)
 
         # Set window icon dari assets/logo.png
         logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "logo.png")

@@ -349,3 +349,24 @@ def get_aktivitas():
         except:
             return []
     return []
+
+def get_all_saved_links():
+    """Mengambil semua link lowongan yang ada di Job Archive (semua subfolder)."""
+    db_dir = get_database_permanen_dir()
+    if not os.path.exists(db_dir):
+        return set()
+    
+    saved_links = set()
+    # Cari semua file JSON di subfolder Job Archive
+    file_paths = glob.glob(os.path.join(db_dir, "**", "*.json"), recursive=True)
+    for fp in file_paths:
+        try:
+            with open(fp, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                for item in data:
+                    lnk = item.get("Link_Lowongan")
+                    if lnk and lnk != "-":
+                        saved_links.add(lnk)
+        except:
+            continue
+    return saved_links

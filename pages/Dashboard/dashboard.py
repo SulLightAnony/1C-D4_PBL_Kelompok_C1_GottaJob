@@ -6,6 +6,7 @@ from PyQt5.QtGui import QColor
 #import file json 
 import json
 import os
+import re
 
 #import modul pengolahan data
 from Modul.modul_pengolahan_data import hitung_persentase_skill, ambil_insight_pasar, ambil_top_skills, hitung_gap_skill, cari_archive_terdekat
@@ -290,7 +291,10 @@ class DashboardPage(QWidget):
             salary_text = gaji
             bonus = job_data.get("Bonus", "-")
             if bonus != "-" and bonus.lower() != "bonus":
-                salary_text += f"<br><font color='#27AE60' size='3'>+ Bonus: {bonus}</font>"
+                # Pembersihan instan untuk data lama agar tidak "+ Bonus: Bonus" dan ganti "month"
+                bonus_clean = re.sub(r'^bonus\s*:?\s*', '', bonus, flags=re.IGNORECASE).strip()
+                bonus_clean = bonus_clean.replace("/month", "/Bulan").replace("month", "Bulan")
+                salary_text += f"<br><font color='#27AE60' size='3'>+ Bonus: {bonus_clean}</font>"
                 
             salary = QLabel(salary_text)
             salary.setStyleSheet("font-weight: bold; color: #333; font-size: 16px;")

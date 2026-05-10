@@ -2,7 +2,8 @@ import os
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
     QFrame, QTableWidget, QTableWidgetItem, QHeaderView, QScrollArea,
-    QPushButton, QListWidget, QStackedWidget, QDialog, QMessageBox
+    QPushButton, QListWidget, QStackedWidget, QDialog, QMessageBox,
+    QComboBox
 )
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from PyQt5.QtGui import QColor, QPixmap, QIcon, QFont
@@ -25,13 +26,14 @@ class SkillTag(QLabel):
         
         color = categories.get(color_or_category, color_or_category)
         
+        self.setObjectName("SkillTag")
         self.setStyleSheet(f"""
-            QLabel {{
-                background-color: transparent;
+            #SkillTag {{
+                background: transparent;
                 color: {color};
-                border: 1px solid {color};
+                border: 2px solid {color};
+                border-radius: 12px;
                 padding: 4px 12px;
-                border-radius: 15px;
                 font-size: {font_size}px;
                 font-weight: bold;
             }}
@@ -93,6 +95,106 @@ QPushButton:hover {
 }
 QPushButton:pressed {
     background-color: #1E3A4A;
+}
+"""
+
+MODERN_COMBO_STYLE = """
+QComboBox {
+    border: 2px solid #B2D2D9;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 16px;
+    color: #1E3A4A;
+    background-color: #F7FBFC;
+}
+QComboBox:hover {
+    border: 2px solid #2C687B;
+}
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 40px;
+    border: none;
+}
+QComboBox::down-arrow {
+    image: url(__ICON_PATH__);
+    width: 24px;
+    height: 24px;
+}
+QComboBox QAbstractItemView {
+    border: 1px solid #B2D2D9;
+    border-radius: 8px;
+    background-color: white;
+    selection-background-color: #E2EFF1;
+    selection-color: #2C687B;
+    outline: none;
+    padding: 5px;
+}
+"""
+
+class ModernComboBox(QComboBox):
+    """Dropdown dengan gaya modern yang terstandarisasi."""
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        
+        # Lokasi icon panah (menggunakan path relatif ke root)
+        curr_dir = os.path.dirname(os.path.abspath(__file__))
+        root_dir = os.path.dirname(os.path.dirname(curr_dir))
+        icon_path = os.path.join(root_dir, "assets", "Job Archive", "down.png").replace("\\", "/")
+        
+        self.setStyleSheet(MODERN_COMBO_STYLE.replace("__ICON_PATH__", icon_path))
+        self.setCursor(Qt.PointingHandCursor)
+
+MODERN_TABLE_STYLE = """
+QTableWidget {
+    border: none;
+    background-color: white;
+    font-size: 16px;
+    color: #1E3A4A;
+}
+QTableWidget::item {
+    padding: 12px;
+    border-bottom: 1px solid #F0F5F7;
+}
+QTableWidget::item:selected {
+    background-color: #F7FBFC;
+    color: #2C687B;
+}
+QHeaderView::section {
+    background-color: white;
+    padding: 12px;
+    border: none;
+    border-bottom: 2px solid #E0E7EF;
+    font-weight: bold;
+    font-size: 16px;
+    color: #2C687B;
+    text-align: left;
+}
+QScrollBar:vertical {
+    border: none;
+    background: #F3F4F6;
+    width: 8px;
+    border-radius: 4px;
+}
+QScrollBar::handle:vertical {
+    background: #B2D2D9;
+    border-radius: 4px;
+}
+QScrollBar::handle:vertical:hover {
+    background: #7A9EB0;
+}
+QScrollBar:horizontal {
+    border: none;
+    background: #F3F4F6;
+    height: 8px;
+    border-radius: 4px;
+}
+QScrollBar::handle:horizontal {
+    background: #B2D2D9;
+    border-radius: 4px;
+}
+QScrollBar::handle:horizontal:hover {
+    background: #7A9EB0;
 }
 """
 
@@ -598,7 +700,7 @@ class JobMatchResultContainer(QWidget):
         self.table.delete_clicked.connect(self.delete_clicked.emit)
         layout.addWidget(self.table, stretch=1)
 
-    def set_data(self, hasil, selected_skills, show_save=True, show_favorite=True, show_delete=False, fav_link=None):
+    def set_data(self, hasil, selected_skills, show_save=True, show_favorite=True, show_delete=False, fav_link=None, saved_links=None):
         if not hasil:
             return
         
@@ -607,7 +709,7 @@ class JobMatchResultContainer(QWidget):
         self.best_match_card.update_data(best, selected_skills)
         
         # Isi tabel dengan semua data (atau sisanya)
-        self.table.set_data(hasil, selected_skills, show_save=show_save, show_favorite=show_favorite, show_delete=show_delete, fav_link=fav_link)
+        self.table.set_data(hasil, selected_skills, show_save=show_save, show_favorite=show_favorite, show_delete=show_delete, fav_link=fav_link, saved_links=saved_links)
         self.current_data = hasil
 
     def _on_item_double_clicked(self, item):
@@ -625,68 +727,41 @@ class JobMatchTable(QTableWidget):
         self.setHorizontalHeaderLabels(["Judul Pekerjaan", "Perusahaan", "Kecocokan", "Aksi"])
         self.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
         self.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
-        self.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
-        self.horizontalHeader().setSectionResizeMode(3, QHeaderView.Fixed)
-        self.setColumnWidth(3, 245)
-        self.verticalHeader().setDefaultSectionSize(70)
+        self.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
+        self.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
+        self.verticalHeader().setDefaultSectionSize(130)
         self.verticalHeader().setVisible(False)
         self.setShowGrid(False)
         self.setEditTriggers(QTableWidget.NoEditTriggers)
         self.setSelectionBehavior(QTableWidget.SelectRows)
-        self.setStyleSheet("""
-            QTableWidget {
-                border: none;
-                background-color: white;
-                font-size: 16px;
-                color: #1E3A4A;
-            }
-            QTableWidget::item {
-                padding: 12px;
-                border-bottom: 1px solid #F0F5F7;
-            }
-            QTableWidget::item:selected {
-                background-color: #F7FBFC;
-                color: #2C687B;
-            }
-            QHeaderView::section {
-                background-color: white;
-                padding: 12px;
-                border: none;
-                border-bottom: 2px solid #E0E7EF;
-                font-weight: bold;
-                font-size: 16px;
-                color: #2C687B;
-                text-align: left;
-            }
-            QScrollBar:vertical {
-                border: none;
-                background: #F3F4F6;
-                width: 8px;
-                border-radius: 4px;
-            }
-            QScrollBar::handle:vertical {
-                background: #B2D2D9;
-                border-radius: 4px;
-            }
-            QScrollBar::handle:vertical:hover {
-                background: #7A9EB0;
-            }
-            QScrollBar:horizontal {
-                border: none;
-                background: #F3F4F6;
-                height: 8px;
-                border-radius: 4px;
-            }
-            QScrollBar::handle:horizontal {
-                background: #B2D2D9;
-                border-radius: 4px;
-            }
-            QScrollBar::handle:horizontal:hover {
-                background: #7A9EB0;
-            }
-        """)
+        self.setSelectionBehavior(QTableWidget.SelectRows)
+        self.setStyleSheet(MODERN_TABLE_STYLE)
 
-    def set_data(self, hasil, selected_skills, show_save=True, show_favorite=True, show_delete=False, fav_link=None):
+    def resizeEvent(self, event):
+        """Picu pembaruan teks tombol saat ukuran tabel berubah."""
+        super().resizeEvent(event)
+        self._update_responsive_buttons()
+
+    def _update_responsive_buttons(self):
+        """Sembunyikan atau tampilkan teks tombol berdasarkan lebar tabel."""
+        # Ambang batas lebar (bisa disesuaikan, misal 1000px)
+        is_compact = self.width() < 1000
+        
+        for row in range(self.rowCount()):
+            widget = self.cellWidget(row, 3) # Kolom Aksi
+            if widget:
+                buttons = widget.findChildren(QPushButton)
+                for btn in buttons:
+                    original_text = btn.property("original_text")
+                    if original_text:
+                        if is_compact:
+                            btn.setText("") # Hanya ikon
+                            btn.setToolTip(original_text.strip()) # Tampilkan teks saat hover saja
+                        else:
+                            btn.setText(original_text) # Teks + Ikon
+                            btn.setToolTip("")
+
+    def set_data(self, hasil, selected_skills, show_save=True, show_favorite=True, show_delete=False, fav_link=None, saved_links=None):
         """Isi tabel dengan data lowongan hasil pencocokan."""
         self.setRowCount(len(hasil))
         
@@ -742,24 +817,44 @@ class JobMatchTable(QTableWidget):
             
             # 4. Tombol Simpan
             if show_save:
-                btn_save = QPushButton(" Simpan")
+                # Cek apakah sudah tersimpan di archive
+                is_saved = False
+                if saved_links and data.get("Link_Lowongan") in saved_links:
+                    is_saved = True
+                
+                btn_text = " Tersimpan" if is_saved else " Simpan"
+                btn_save = QPushButton(btn_text)
+                btn_save.setProperty("original_text", btn_text)
                 btn_save.setIcon(QIcon(save_icon_path))
                 btn_save.setCursor(Qt.PointingHandCursor)
-                btn_save.setStyleSheet("""
-                    QPushButton {
-                        background-color: #2C687B; color: white;
-                        border: none; border-radius: 8px; padding: 8px 12px; font-weight: bold; font-size: 13px;
-                        min-height: 32px;
-                    }
-                    QPushButton:hover { background-color: #3B7C91; }
-                """)
+                
+                if is_saved:
+                    btn_save.setEnabled(False)
+                    btn_save.setStyleSheet("""
+                        QPushButton {
+                            background-color: #BDC3C7; color: white;
+                            border: none; border-radius: 8px; padding: 8px 12px; font-weight: bold; font-size: 13px;
+                            min-height: 32px;
+                        }
+                    """)
+                else:
+                    btn_save.setStyleSheet("""
+                        QPushButton {
+                            background-color: #2C687B; color: white;
+                            border: none; border-radius: 8px; padding: 8px 12px; font-weight: bold; font-size: 13px;
+                            min-height: 32px;
+                        }
+                        QPushButton:hover { background-color: #3B7C91; }
+                    """)
                 btn_save.clicked.connect(lambda checked, d=data: self.save_clicked.emit(d))
                 btn_lay.addWidget(btn_save)
 
             # 5. Tombol Favorit
             if show_favorite:
                 is_fav = (fav_link == data.get("Link_Lowongan"))
-                btn_fav = QPushButton(" Terfavorit" if is_fav else " Favorit")
+                btn_text = " Terfavorit" if is_fav else " Favorit"
+                btn_fav = QPushButton(btn_text)
+                btn_fav.setProperty("original_text", btn_text)
                 btn_fav.setIcon(QIcon(star_icon_path))
                 btn_fav.setCursor(Qt.PointingHandCursor)
                 
@@ -787,7 +882,9 @@ class JobMatchTable(QTableWidget):
 
             # 6. Tombol Hapus
             if show_delete:
-                btn_del = QPushButton(" Hapus")
+                btn_text = " Hapus"
+                btn_del = QPushButton(btn_text)
+                btn_del.setProperty("original_text", btn_text)
                 btn_del.setIcon(QIcon(delete_icon_path))
                 btn_del.setCursor(Qt.PointingHandCursor)
                 btn_del.setStyleSheet("""
@@ -802,6 +899,9 @@ class JobMatchTable(QTableWidget):
                 btn_lay.addWidget(btn_del)
             
             self.setCellWidget(row, 3, btn_widget)
+        
+        # Jalankan pengecekan responsif segera setelah data dimuat
+        self._update_responsive_buttons()
 
 class JobDetailPanel(QFrame):
     """Komponen detail lowongan pekerjaan yang terstandarisasi."""

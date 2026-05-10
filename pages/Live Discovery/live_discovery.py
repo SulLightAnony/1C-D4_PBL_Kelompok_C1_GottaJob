@@ -26,9 +26,12 @@ if db_mod_dir not in sys.path:
     sys.path.insert(0, db_mod_dir)
 
 from modul_visualisasi_data import PieChartWidget
-from modul_antarmuka_pengguna import JobMatchResultContainer, JobDetailPanel, JobDashboardWidget
+from modul_antarmuka_pengguna import (
+    JobMatchResultContainer, JobDetailPanel, JobDashboardWidget, 
+    show_message, show_question
+)
 from modul_database import (simpan_ke_database_sementara, simpan_ke_database_permanen, 
-                            bersihkan_database_sementara, set_favorit, get_favorit, catat_aktivitas)
+                            bersihkan_database_sementara, set_favorit, get_favorit, catat_aktivitas, get_all_saved_links)
 
 # ─────────────────────────────────────────────────────────────
 # Worker: jalankan scraper di thread terpisah agar UI tidak freeze
@@ -346,7 +349,7 @@ class LiveDiscoveryPage(QWidget):
     def _start_scraping(self):
         raw = self.keyword_input.text().strip()
         if not raw:
-            QMessageBox.warning(self, "Keyword Kosong", "Masukkan keyword pekerjaan terlebih dahulu.")
+            show_message(self, "Keyword Kosong", "Masukkan keyword pekerjaan terlebih dahulu.")
             return
         if self._running:
             return
@@ -389,7 +392,7 @@ class LiveDiscoveryPage(QWidget):
 
     def _handle_result(self, file_path):
         if file_path == "EMPTY":
-            QMessageBox.information(self, "Informasi", "Tidak ada lowongan pekerjaan lagi yang relevan.")
+            show_message(self, "Informasi", "Tidak ada lowongan pekerjaan lagi yang relevan.")
             return
             
         try:
@@ -435,11 +438,11 @@ class LiveDiscoveryPage(QWidget):
                 
                 self.main_stack.setCurrentWidget(self.dashboard_view)
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Gagal mengolah data: {e}")
+            show_message(self, "Error", f"Gagal mengolah data: {e}")
 
     def _show_matches(self):
         if not self.last_scraped_file:
-            QMessageBox.warning(self, "Peringatan", "Lakukan pencarian pekerjaan terlebih dahulu.")
+            show_message(self, "Peringatan", "Lakukan pencarian pekerjaan terlebih dahulu.")
             return
 
         selected_skills = []
@@ -450,7 +453,7 @@ class LiveDiscoveryPage(QWidget):
                 selected_skills.append(skill_name)
 
         if not selected_skills:
-            QMessageBox.warning(self, "Peringatan", "Pilih minimal satu skill.")
+            show_message(self, "Peringatan", "Pilih minimal satu skill.")
             return
 
         selected_job_types = []
@@ -464,16 +467,20 @@ class LiveDiscoveryPage(QWidget):
             from modul_pengolahan_data import cari_pekerjaan_cocok
             hasil = cari_pekerjaan_cocok(self.last_scraped_file, selected_skills, selected_job_types)
             if not hasil:
-                QMessageBox.information(self, "Informasi", "Tidak ada pekerjaan yang cocok.")
+                show_message(self, "Informasi", "Tidak ada pekerjaan yang cocok.")
                 return
             
             self.current_matches = hasil
             fav = get_favorit()
             fav_link = fav.get("Link_Lowongan") if fav else None
-            self.match_results.set_data(hasil, selected_skills, fav_link=fav_link)
+            
+            # Ambil semua link yang sudah tersimpan untuk update status tombol Simpan
+            saved_links = get_all_saved_links()
+            
+            self.match_results.set_data(hasil, selected_skills, fav_link=fav_link, saved_links=saved_links)
             self.main_stack.setCurrentWidget(self.table_panel)
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Gagal mencari kecocokan: {e}")
+            show_message(self, "Error", f"Gagal mencari kecocokan: {e}")
 
     def _show_job_detail(self, item):
         row = item.row()
@@ -489,29 +496,33 @@ class LiveDiscoveryPage(QWidget):
             
         path = simpan_ke_database_permanen(job_data, self.last_scraped_file)
         if path == "DUPLICATE":
-            QMessageBox.information(
+            show_message(
                 self, "Informasi", 
                 f"Lowongan '{job_data.get('Judul_Pekerjaan')}' sudah ada di Job Archive."
             )
         elif path:
-            QMessageBox.information(
+            show_message(
                 self, "Berhasil", 
                 f"Lowongan '{job_data.get('Judul_Pekerjaan')}' berhasil disimpan secara permanen ke Job Archive!"
             )
+            # Refresh tabel agar tombol Simpan berubah jadi Tersimpan
+            fav = get_favorit()
+            fav_link = fav.get("Link_Lowongan") if fav else None
+            saved_links = get_all_saved_links()
+            self.match_results.set_data(self.current_matches, self.user_selected_skills, fav_link=fav_link, saved_links=saved_links)
             catat_aktivitas(f"<b>Lowongan disimpan</b><br>{job_data.get('Nama_Perusahaan')}")
             self.favorite_changed.emit()
         else:
-            QMessageBox.warning(self, "Gagal", "Gagal menyimpan lowongan secara permanen.")
+            show_message(self, "Gagal", "Gagal menyimpan lowongan secara permanen.")
 
     def _on_favorite_clicked(self, job_data):
         """Menangani klik tombol favorit."""
         # 1. Cek apakah sudah ada favorit sebelumnya
         existing_fav = get_favorit()
         if existing_fav:
-            res = QMessageBox.question(
+            res = show_question(
                 self, "Konfirmasi Favorit",
-                "Pekerjaan sebelumnya yang ditandai favorit akan hilang dari dashboard, apakah kamu yakin?",
-                QMessageBox.Yes | QMessageBox.No
+                "Pekerjaan sebelumnya yang ditandai favorit akan hilang dari dashboard, apakah kamu yakin?"
             )
             if res == QMessageBox.No:
                 return
@@ -523,7 +534,7 @@ class LiveDiscoveryPage(QWidget):
 
         # 3. Set sebagai favorit utama
         if set_favorit(job_data):
-            QMessageBox.information(self, "Berhasil", f"'{job_data.get('Judul_Pekerjaan')}' sekarang menjadi favorit utama Anda!")
+            show_message(self, "Berhasil", f"'{job_data.get('Judul_Pekerjaan')}' sekarang menjadi favorit utama Anda!")
             
             catat_aktivitas(f"<b>Pekerjaan Favorit Diganti</b><br>{job_data.get('Judul_Pekerjaan')}")
             self.favorite_changed.emit()
@@ -535,7 +546,7 @@ class LiveDiscoveryPage(QWidget):
                 fav_link=job_data.get("Link_Lowongan")
             )
         else:
-            QMessageBox.warning(self, "Gagal", "Gagal menetapkan favorit.")
+            show_message(self, "Gagal", "Gagal menetapkan favorit.")
 
     def _back_to_results(self):
         self.main_stack.setCurrentWidget(self.table_panel)
