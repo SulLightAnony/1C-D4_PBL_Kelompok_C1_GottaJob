@@ -42,8 +42,13 @@ from dashboard import DashboardPage
 class Dashboard(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("GottaJob Dashboard")
+        self.setWindowTitle("Gottajob")
         self.resize(1280, 800)
+
+        # Set window icon dari assets/logo.png
+        logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "logo.png")
+        if os.path.exists(logo_path):
+            self.setWindowIcon(QIcon(logo_path))
 
         # Kerangka Utama
         self.main_widget = QWidget()
