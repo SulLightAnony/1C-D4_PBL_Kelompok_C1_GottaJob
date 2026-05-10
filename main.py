@@ -33,10 +33,8 @@ from modul_database import bersihkan_database_sementara, sinkronisasi_folder_kat
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pages", "Job Posting"))
 from job_posting import JobPostingPage
 
-#Path untuk modul pengolahan_data
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pages", "Modul"))
-from modul_pengolahan_data import hitung_persentase_skill
-
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pages", "Skill Manager"))
+from skill_manager import SkillManagerPage
 
 from dashboard import DashboardPage
 class Dashboard(QMainWindow):
@@ -101,6 +99,7 @@ class Dashboard(QMainWindow):
         self.btn_archive   = self.create_menu_btn("  Job Archive", 2, "Job Archive", "folder.png")
         self.btn_directory = self.create_menu_btn("  Job Posting", 3, "Job Posting", "post.png")
         self.btn_toolkit   = self.create_menu_btn("  Career Toolkit", 4, "Career Toolkit", "toolbox.png")
+        self.btn_skill_manager = self.create_menu_btn("  Skill Manager", 5, "Skill Manager", "settings.png")
 
         self.btn_dashboard.setObjectName("ActiveMenu")
 
@@ -120,14 +119,15 @@ class Dashboard(QMainWindow):
         self.halaman_archive.favorite_changed.connect(self.halaman_dashboard.load_data)
         
         self.toolkit_page = CareerToolkitPage()
-        
         self.job_posting_page = JobPostingPage()
+        self.skill_manager_page = SkillManagerPage()
 
         self.content_stack.addWidget(self.halaman_dashboard)         # Index 0
         self.content_stack.addWidget(self.halaman_discovery)         # Index 1
-        self.content_stack.addWidget(self.halaman_archive)           # Index 2 (Sudah dibuat)
-        self.content_stack.addWidget(self.job_posting_page)          # Index 3 (Job Posting)
+        self.content_stack.addWidget(self.halaman_archive)           # Index 2
+        self.content_stack.addWidget(self.job_posting_page)          # Index 3
         self.content_stack.addWidget(self.toolkit_page)              # Index 4
+        self.content_stack.addWidget(self.skill_manager_page)        # Index 5
 
         self.layout_utama.addWidget(self.sidebar)
         self.layout_utama.addWidget(self.content_stack)
