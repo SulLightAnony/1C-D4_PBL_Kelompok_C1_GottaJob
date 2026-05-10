@@ -1,48 +1,43 @@
+import os
+from dotenv import load_dotenv
 from google import genai
 
-# API Key Anda
-API_KEY = ""
+# 1. Load Environment Variables dari file .env
+load_dotenv()
+API_KEY = os.getenv("GEMINI_API_KEY")
 
-# Inisialisasi client baru (SDK google-genai)
 client = genai.Client(api_key=API_KEY)
 
 def perbagus_teks_cv(job_data, cv_text):
-    """
-    Menggunakan Gemini 2.0 Flash untuk memoles teks CV berdasarkan target lowongan.
-    """
     try:
-        # Update ke model terbaru 2026: gemini-2.0-flash
         model_id = "gemini-3-flash-preview" 
         
-        # Ekstrak data konteks
-        judul = job_data.get("Judul_Pekerjaan", "profesional") if job_data else "profesional"
-        perusahaan = job_data.get("Nama_Perusahaan", "perusahaan target") if job_data else "perusahaan target"
+        judul = job_data.get("Judul_Pekerjaan", "Profesional") if job_data else "Profesional"
+        perusahaan = job_data.get("Nama_Perusahaan", "Perusahaan") if job_data else "Perusahaan"
         kualifikasi = job_data.get("Kualifikasi_Persyaratan", "-") if job_data else "-"
         
+        # 5. PROMPT EKSTRA KETAT (Tanpa Markdown sama sekali)
         prompt = f"""
-        Tindak sebagai pakar rekrutmen profesional. 
-        Saya sedang menyusun CV untuk posisi {judul} di {perusahaan}.
-        Persyaratan mereka: {kualifikasi}.
+        Tindak sebagai pakar rekrutmen senior. Perbagus draf profil saya untuk melamar posisi {judul} di {perusahaan}.
+        Kriteria yang dicari perusahaan: {kualifikasi}.
         
-        Tugas: Perbagus teks CV saya agar lebih profesional, menggunakan kata kerja aksi, 
-        dan ramah ATS (sesuaikan dengan persyaratan di atas).
+        ATURAN MUTLAK & WAJIB DIIKUTI:
+        1. JANGAN mengarang atau menambah fakta fiktif.
+        2. DILARANG KERAS menggunakan format Markdown seperti bintang (**teks** atau *teks*), pagar (#), atau strip (-).
+        3. Tulis murni dalam paragraf Plain Text biasa (Teks mentah tanpa pemformatan).
+        4. Berikan HANYA teks perbaikan, tanpa basa-basi pembuka atau penutup.
         
-        ATURAN:
-        1. JANGAN mengarang data atau pengalaman baru.
-        2. Berikan HANYA teks hasil perbaikannya saja.
-        3. Gunakan format plain text (JANGAN gunakan markdown seperti **bold**).
-        
-        Teks Asli:
+        Draf Asli:
         "{cv_text}"
         """
         
-        # Cara panggil baru di SDK google-genai
-        response = client.models.generate_content(
-            model=model_id,
-            contents=prompt
-        )
+        response = client.models.generate_content(model=model_id, contents=prompt)
         
-        return response.text.strip()
-        
+        if response and response.text:
+            return response.text.strip()
+        return "[Error] Respons AI kosong."
+            
     except Exception as e:
-        return f"[ERROR AI] Gagal memproses: {str(e)}"
+        if "429" in str(e):
+            return "[Server Sibuk] Terlalu banyak request. Tunggu beberapa saat."
+        return f"[Error AI] {str(e)}"

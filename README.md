@@ -2,4 +2,6 @@
 # pip install PyQt5 fpdf matplotlib playwright
 # playwright install
 
-# LIBRARY BARU: Gemini AI - pip install google-genai
+# LIBRARY BARU:
+# Gemini AI - pip install google-genai
+# ENV Reader - pip install python-dotenv

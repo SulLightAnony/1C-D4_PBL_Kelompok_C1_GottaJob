@@ -1,4 +1,8 @@
 import os
+from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtWidgets import QPushButton, QDialog, QVBoxLayout, QLabel
+from gemini_api import perbagus_teks_cv
+
 from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
                              QPushButton, QStackedWidget, QScrollArea, 
                              QGridLayout, QFrame, QLineEdit, QTextEdit, 
@@ -13,6 +17,19 @@ from ui_components import (CVCard, ExperienceInputWidget, EducationInputWidget,
                            PhotoUploaderWidget, TemplateCard, CVPreviewWidget,
                            CompactInputWidget)
 from pdf_generator import CVRenderer
+
+class AIWorker(QThread):
+    finished_signal = pyqtSignal(str)
+    
+    def __init__(self, job_data, text_to_fix):
+        super().__init__()
+        self.job_data = job_data
+        self.text_to_fix = text_to_fix
+        
+    def run(self):
+        # API dipanggil di latar belakang (Background Thread)
+        hasil = perbagus_teks_cv(self.job_data, self.text_to_fix)
+        self.finished_signal.emit(hasil)
 
 class CareerToolkitPage(QWidget):
     def __init__(self, parent=None):
@@ -395,64 +412,106 @@ class CareerToolkitPage(QWidget):
         if QMessageBox.question(self, 'Konfirmasi', 'Hapus CV ini?', QMessageBox.Yes | QMessageBox.No) == QMessageBox.Yes:
             self.manager.delete_cv(cv_id); self.refresh_dashboard()
 
-    def handle_ai_enhance(self, target_section):
+    def handle_ai_enhance(self, target_widget, clicked_button):
         """
-        Mengeksekusi polesan AI pada bagian yang dipilih (summary/experience).
+        clicked_button: Tombol yang diklik user agar kita tahu mana yang harus jadi 'Memperbagus...'
         """
-        # Tentukan widget target
-        if target_section == "summary":
-            target_widget = self.input_summary
-        else:
-            # Jika dari pengalaman kerja, biasanya widget dikirim langsung 
-            # atau dicari yang sedang aktif
-            target_widget = target_section if not isinstance(target_section, str) else None
-
         if not target_widget: return
-
-        text_to_fix = target_widget.toPlainText()
-        if not text_to_fix.strip():
-            QMessageBox.warning(self, "Kosong", "Ketik drafnya dulu ya!")
+        teks_asli = target_widget.toPlainText()
+        
+        if not teks_asli.strip():
+            QMessageBox.warning(self, "Kosong", "Ketik drafnya dulu!")
             return
 
-        # Panggil API
-        from gemini_api import perbagus_teks_cv
+        # Simpan teks asli ke widget (Persiapan untuk Langkah 4: Toggle)
+        target_widget.original_text = teks_asli 
+        
+        # Cari semua tombol di halaman ini yang punya kata "Perbagus"
+        semua_tombol_ai = []
+        for btn in self.findChildren(QPushButton):
+            if "Perbagus" in btn.text() or "Memperbagus" in btn.text() or "Menunggu" in btn.text():
+                semua_tombol_ai.append(btn)
+
+        # Ubah State Tombol
+        for btn in semua_tombol_ai:
+            btn.setEnabled(False)
+            if btn == clicked_button:
+                btn.setText("Memperbagus...")
+            else:
+                btn.setText("Menunggu...")
+
+        # Jalankan AI di Background Thread
         job_info = getattr(self, 'target_job', None)
-
-        try:
-            QApplication.setOverrideCursor(Qt.WaitCursor)
-            hasil_ai = perbagus_teks_cv(job_info, text_to_fix)
-            target_widget.setPlainText(hasil_ai)
-        finally:
-            QApplication.restoreOverrideCursor()
+        self.ai_thread = AIWorker(job_info, teks_asli)
         
+        # Saat selesai, kembalikan tombol & timpa teks
+        def on_ai_finished(hasil):
+            target_widget.ai_text = hasil # Simpan hasil AI (Untuk Langkah 4)
+            target_widget.setPlainText(hasil)
+            
+            # Kembalikan semua tombol ke kondisi semula
+            for btn in semua_tombol_ai:
+                btn.setEnabled(True)
+                btn.setText("✨ Perbagus")
+                
+        self.ai_thread.finished_signal.connect(on_ai_finished)
+        self.ai_thread.start()
+        
+class LoadingAIDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Memproses Data")
+        self.setFixedSize(300, 150)
+        self.setModal(True) # Cegah klik sembarangan di belakang popup
+        
+        layout = QVBoxLayout(self)
+        self.lbl = QLabel("✨ Sedang membuat CV khusus untuk Anda...\nMohon tunggu sebentar.", self)
+        self.lbl.setAlignment(Qt.AlignCenter)
+        
+        self.btn_batal = QPushButton("Batalkan", self)
+        
+        layout.addWidget(self.lbl)
+        layout.addWidget(self.btn_batal)
+
+# --- Di dalam class CareerToolkitPage ---
+
     def apply_ai_enhancement(self, job_data):
-        """
-        Dijalankan saat user datang dari Job Archive.
-        """
-        # 1. Simpan target loker untuk referensi AI nanti
         self.target_job = job_data
-        
-        # 2. Ambil data penting
         judul = job_data.get("Judul_Pekerjaan", "")
-        perusahaan = job_data.get("Nama_Perusahaan", "")
         kualifikasi = job_data.get("Kualifikasi_Persyaratan", "").replace("|", ", ")
-
-        # 3. Langsung arahkan ke Halaman Form (Index 1)
-        self.stack.setCurrentIndex(1)
         
-        # 4. Auto-fill data ke form
-        # Kita isi nama user (jika kosong) atau tambahkan info loker ke summary sebagai draf
-        draf_summary = (
-            f"Seorang profesional yang berdedikasi untuk posisi {judul} di {perusahaan}. "
-            f"Memiliki kompetensi dalam: {kualifikasi}."
-        )
-        self.input_summary.setPlainText(draf_summary)
+        # 1. Pindah Halaman ke Form
+        self.main_stack.setCurrentIndex(1)
         
-        # Opsional: Jika ada input nama CV/File, bisa diisi juga
-        # self.input_cv_name.setText(f"CV - {judul} - {perusahaan}")
-
-        QMessageBox.information(
-            self, "AI Matcher Siap ✨", 
-            f"Sistem telah menyesuaikan draf CV Anda untuk posisi {judul}.\n\n"
-            "Gunakan tombol 'Perbagus' pada tiap bagian untuk hasil yang lebih maksimal!"
-        )
+        # 2. Siapkan Draf Kasar Otomatis
+        draf_kasar = f"Berdedikasi untuk posisi {judul}. Memiliki kemampuan: {kualifikasi}."
+        
+        # 3. Munculkan Popup Loading
+        self.loading_dialog = LoadingAIDialog(self)
+        
+        # Fungsi Batal (Kembali ke halaman utama / Job Archive)
+        def batalkan_proses():
+            if hasattr(self, 'auto_ai_thread'):
+                self.auto_ai_thread.terminate() # Hentikan paksa API
+            self.loading_dialog.reject()
+            # Asumsi: Index 0 adalah Job Archive atau Dashboard utama Anda
+            self.window().main_stack.setCurrentIndex(0) 
+            
+        self.loading_dialog.btn_batal.clicked.connect(batalkan_proses)
+        
+        # 4. Jalankan AI Langsung
+        self.auto_ai_thread = AIWorker(self.target_job, draf_kasar)
+        
+        def on_auto_ai_finished(hasil):
+            self.loading_dialog.accept() # Tutup popup
+            self.input_summary.setPlainText(hasil)
+            
+            # Simpan state untuk toggle (Langkah 4)
+            self.input_summary.original_text = draf_kasar
+            self.input_summary.ai_text = hasil
+            
+        self.auto_ai_thread.finished_signal.connect(on_auto_ai_finished)
+        self.auto_ai_thread.start()
+        
+        # Tampilkan popup (kode di bawah ini akan memblokir UI ringan sampai accept/reject dipanggil)
+        self.loading_dialog.exec_()
