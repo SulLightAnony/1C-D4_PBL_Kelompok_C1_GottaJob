@@ -1,0 +1,89 @@
+[
+    {
+        "Judul_Pekerjaan": "Sales Representative",
+        "Jenis_Pekerjaan": "Penuh Waktu",
+        "Nama_Perusahaan": "PT. Amanah Tirta Jogja",
+        "Lokasi": "Jl. Turgo No.km 0.5, Potro, Purwobinangun, Kec. Pakem, Kabupaten Sleman, Daerah Istimewa Yogyakarta",
+        "Rentang_Gaji": "Rp2.360.000 - 3.540.000/Bulan",
+        "Bonus": "-",
+        "Kategori_Utama": "Business Development & Sales",
+        "Sub_Kategori": "Sales Representative",
+        "Skills": "Communication Skills | Sales and Marketing | B2B Sales | Sales Strategy | B2C Sales",
+        "Benefit_Pekerjaan": "Meal Allowance | Career Path | Work Insurance | THR | Health Insurance",
+        "Kualifikasi_Persyaratan": "Pendidikan minimal SMA/D3/S1 (diutamakan Pemasaran, Manajemen, atau Bisnis). | Memiliki pengalaman minimal 1 tahun sebagai Sales, Area Development, atau Marketing, diutamakan industri AMDK / FMCG. | Memahami sistem distribusi produk air minum (distributor, agen, retail). | Memiliki kemampuan komunikasi, negosiasi, dan selling yang baik. | Terbiasa bekerja dengan target penjualan dan sistem lapangan. | Bersedia melakukan kunjungan lapangan dan perjalanan dinas sesuai area penugasan. | Memiliki SIM C/A dan kendaraan pribadi (lebih diutamakan). | Memiliki jaringan distributor/toko air minum menjadi nilai tambah. | Jujur, disiplin, dan memiliki motivasi kerja tinggi.",
+        "Deskripsi_Pekerjaan": "Melakukan pengembangan area/wilayah penjualan baru produk air minum perusahaan.\nMencari, menyeleksi, dan merekrut distributor, agen, atau sub-distributor di area yang menjadi tanggung jawabnya.\nMelakukan pemetaan potensi pasar (outlet, agen, grosir, toko, dll) di wilayah yang ditugaskan.\nMelakukan presentasi produk dan negosiasi kerja sama dengan calon distributor.\nMembina dan menjaga hubungan baik dengan distributor agar penjualan berjalan berkelanjutan.\nMemastikan ketersediaan produk, distribusi lancar, dan pencapaian target penjualan area.\nMelakukan monitoring dan evaluasi kinerja distributor secara berkala.\nBerkoordinasi dengan tim internal (Sales, Marketing, Produksi, dan Logistik).\nMenyusun dan menyampaikan laporan perkembangan area dan penjualan kepada atasan.",
+        "Link_Lowongan": "https://glints.com/id/opportunities/jobs/sales-representative/a7af4b18-0aa8-40f4-983b-075828ba747e",
+        "match_percentage": 80.0,
+        "matched_categorized": {
+            "hard_skills": [
+                "sales and marketing",
+                "b2b sales",
+                "sales strategy",
+                "b2c sales"
+            ],
+            "soft_skills": [],
+            "positions": []
+        },
+        "all_categorized": {
+            "hard_skills": [
+                "Sales and Marketing",
+                "B2B Sales",
+                "Sales Strategy",
+                "B2C Sales"
+            ],
+            "soft_skills": [
+                "Communication Skills"
+            ],
+            "positions": []
+        },
+        "matched_skills": [
+            "sales and marketing",
+            "b2b sales",
+            "sales strategy",
+            "b2c sales"
+        ],
+        "is_type_match": false
+    },
+    {
+        "Judul_Pekerjaan": "Sales Representative Bandung",
+        "Jenis_Pekerjaan": "Kontrak",
+        "Nama_Perusahaan": "SwipeRx",
+        "Lokasi": "-",
+        "Rentang_Gaji": "-",
+        "Bonus": "-",
+        "Kategori_Utama": "Business Development & Sales",
+        "Sub_Kategori": "Sales Representative",
+        "Skills": "B2B Sales | Sales and Marketing | Communication Skills | Sales Strategy",
+        "Benefit_Pekerjaan": "Work Insurance | Perform Bonus | THR | Career Path | Health Insurance | Annual Leave | Transport Money",
+        "Kualifikasi_Persyaratan": "Memiiki pengetahuan yang tinggi terhadap dunia teknologi (aplikasi mobile). | Diutamakan memiliki pengalaman sebagai di industri farmasi | Wajib memiliki kendaraan pribadi disertai SIM. | Minimum 2 tahun pengalaman di bidang sales B2B. | Memahami proses pengadaan obat di apotek menjadi nilai tambah. | Mampu bekerja dengan orientasi target.",
+        "Deskripsi_Pekerjaan": "Seorang sales representative akan ditugaskan untuk menjalankan pekerjaannya di suatu area tertentu berdasarkan domisili terdekat.\nMemulai dan mengembangkan hubungan baik dengan apoteker dan atau pemilik apotek.\nMemberikan pelatihan kepada apoteker dan atau pemilik apotek tentang cara menggunakan aplikasi SwipeRx.\nIdentifikasi masalah yang sering terjadi terkait penggunaan aplikasi.\nMenyelesaikan masalah tersebut sesuai SOP guna mencapai target penjualan\nMelakukan tugas dan tanggung jawab tersebut dengan orientasi target penjualan",
+        "Link_Lowongan": "https://glints.com/id/opportunities/jobs/sales-representative-bandung/76321e59-5da0-4998-8391-566d84a0dd96",
+        "match_percentage": 75.0,
+        "matched_categorized": {
+            "hard_skills": [
+                "b2b sales",
+                "sales and marketing",
+                "sales strategy"
+            ],
+            "soft_skills": [],
+            "positions": []
+        },
+        "all_categorized": {
+            "hard_skills": [
+                "B2B Sales",
+                "Sales and Marketing",
+                "Sales Strategy"
+            ],
+            "soft_skills": [
+                "Communication Skills"
+            ],
+            "positions": []
+        },
+        "matched_skills": [
+            "b2b sales",
+            "sales and marketing",
+            "sales strategy"
+        ],
+        "is_type_match": false
+    }
+]

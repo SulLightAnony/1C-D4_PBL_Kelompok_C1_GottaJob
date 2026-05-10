@@ -278,6 +278,8 @@ class GlintsScraper:
                 skills          = "-"
                 benefits        = "-"
                 persyaratan_tag = "-"
+                kategori_utama  = "-"
+                sub_kategori    = "-"
 
                 try:
                     self.page.goto(job_url, wait_until="domcontentloaded")
@@ -328,6 +330,35 @@ class GlintsScraper:
                         benefits_bonus = bonus_salary
                     else:
                         benefits_bonus = "-"
+
+                    # --- Kategori Utama & Sub Kategori ---
+                    # Glints menyimpan kategori dalam link dengan href /id/job-category/...
+                    # Kategori utama: /id/job-category/SLUG          (1 segmen setelah prefix)
+                    # Sub kategori:   /id/job-category/SLUG/SLUG/... (lebih dari 1 segmen)
+                    # Meskipun class HTML sama, dibedakan lewat panjang path di href.
+                    # CATATAN: URL Glints pakai tanda hubung (-), BUKAN underscore (_).
+                    kategori_links = self.page.locator("a[href*='/id/job-category/']")
+                    for i in range(kategori_links.count()):
+                        try:
+                            href_kat = kategori_links.nth(i).get_attribute("href") or ""
+                            # Normalisasi: hapus query string, ambil path saja
+                            path_kat = href_kat.split("?")[0].rstrip("/")
+                            # Potong prefix /id/job-category/ untuk hitung segmen
+                            prefix = "/id/job-category/"
+                            if prefix in path_kat:
+                                after_prefix = path_kat.split(prefix, 1)[1]
+                                segmen = [s for s in after_prefix.split("/") if s]
+                                teks_kat = kategori_links.nth(i).inner_text().strip()
+                                if not teks_kat:
+                                    continue
+                                if len(segmen) == 1:
+                                    # Satu segmen = kategori utama
+                                    kategori_utama = teks_kat
+                                elif len(segmen) > 1:
+                                    # Lebih dari satu segmen = sub kategori
+                                    sub_kategori = teks_kat
+                        except:
+                            pass
 
                     # --- Jenis Pekerjaan ---
                     html_penuh = self.page.content()
@@ -441,6 +472,8 @@ class GlintsScraper:
                     "Lokasi":                  lokasi,
                     "Rentang_Gaji":            gaji,
                     "Bonus":                   benefits_bonus,
+                    "Kategori_Utama":          kategori_utama,
+                    "Sub_Kategori":            sub_kategori,
                     "Skills":                  skills,
                     "Benefit_Pekerjaan":       benefits,
                     "Kualifikasi_Persyaratan": kualifikasi,
