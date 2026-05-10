@@ -400,7 +400,7 @@ class JobArchivePage(QWidget):
             selected_path = self.combo_file.currentData()
             msg = ""
             if selected_path:
-                file_name = os.path.basename(selected_path)
+                file_name = os.path.splitext(os.path.basename(selected_path))[0].replace('_', ' ')
                 msg = f"Apakah Anda ingin mengecek lowongan kadaluarsa pada file '{file_name}'?"
                 target = selected_path
             else:
@@ -490,7 +490,7 @@ class JobArchivePage(QWidget):
             
         file_paths = sorted(glob.glob(search_path))
         for fp in file_paths:
-            name = os.path.basename(fp)
+            name = os.path.splitext(os.path.basename(fp))[0].replace('_', ' ')
             self.combo_file.addItem(name, fp)
             
         # Kembalikan pilihan file jika masih ada
