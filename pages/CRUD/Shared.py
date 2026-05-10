@@ -12,6 +12,7 @@ _SIMPAN_LOCK = threading.Lock()
 # Root project = 2 level di atas file ini (pages/CRUD/Shared.py → root)
 _ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 JOB_ARCHIVE_DIR = os.path.join(_ROOT, "database", "Database Permanen", "Job Archive")
+JOB_POSTING_FILE = os.path.join(_ROOT, "database", "Database Permanen", "Job Posting", "Data_Upload_Job.JSON")
 
 FIELDS = [
     ("Judul_Pekerjaan",         "Judul Pekerjaan         "),
@@ -34,68 +35,135 @@ def _get_category_file(judul: str) -> str:
     if "game" in j: return "game_developer.json"
     if "python" in j: return "python_developer.json"
     if "penetration" in j or "pentest" in j or "security" in j or "cyber" in j: return "penetration_tester.json"
-    return "it_programmer.json"
+    return None # Tidak ada kategori khusus
 
 # ─────────────────────────────────────────────
 # UTILITAS FILE
 # ─────────────────────────────────────────────
 def muat_data() -> list:
-    """Membaca data dari seluruh file di Job Archive yang memiliki penanda source='job_posting'."""
+    """Membaca data dari seluruh file di Job Archive (rekursif) yang memiliki penanda source='job_posting'."""
     if not os.path.exists(JOB_ARCHIVE_DIR):
         os.makedirs(JOB_ARCHIVE_DIR)
         
     hasil = []
-    for file_path in glob.glob(os.path.join(JOB_ARCHIVE_DIR, "*.json")):
+    # 1. Baca dari Job Archive secara rekursif
+    for root, dirs, files in os.walk(JOB_ARCHIVE_DIR):
+        for file in files:
+            if file.endswith(".json"):
+                path = os.path.join(root, file)
+                try:
+                    with open(path, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                        if isinstance(data, list):
+                            for job in data:
+                                if job.get("source") == "job_posting":
+                                    hasil.append(job)
+                except Exception: pass
+
+    # 2. Baca dari Data_Upload_Job.JSON (Backup/Legacy)
+    if os.path.exists(JOB_POSTING_FILE):
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(JOB_POSTING_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
                 if isinstance(data, list):
                     for job in data:
-                        # Hanya memuat data yang berasal dari Job Posting
-                        if job.get("source") == "job_posting":
-                            hasil.append(job)
-        except Exception:
-            pass
+                        job["source"] = "job_posting"
+                        hasil.append(job)
+        except Exception: pass
+        
     return hasil
 
 def simpan_data(data: list) -> None:
-    """Menyimpan data job posting ke dalam file-file di Job Archive dengan penanda source='job_posting'."""
-    with _SIMPAN_LOCK:
-        if not os.path.exists(JOB_ARCHIVE_DIR):
-            os.makedirs(JOB_ARCHIVE_DIR)
+    """Menyimpan data job posting ke dalam folder kategori di Job Archive dengan pengecekan kemiripan file."""
+    # 1. Kumpulkan semua data non-posting dari seluruh file .json di Job Archive (rekursif)
+    files_to_update = {} # path -> list of non-posting jobs
+    if not os.path.exists(JOB_ARCHIVE_DIR):
+        os.makedirs(JOB_ARCHIVE_DIR)
 
-    # 1. Baca semua file di Job Archive, hapus yang source == 'job_posting'
-    archive_data = {}
-    for file_path in glob.glob(os.path.join(JOB_ARCHIVE_DIR, "*.json")):
-        filename = os.path.basename(file_path)
-        try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                isi = json.load(f)
-                if isinstance(isi, list):
-                    # Simpan hanya data yang BUKAN dari Job Posting (agar data lama tidak hilang)
-                    isi_bersih = [job for job in isi if job.get("source") != "job_posting"]
-                    archive_data[filename] = isi_bersih
-                else:
-                    archive_data[filename] = []
-        except Exception:
-            archive_data[filename] = []
+    for root, dirs, files in os.walk(JOB_ARCHIVE_DIR):
+        for file in files:
+            if file.endswith(".json"):
+                path = os.path.join(root, file)
+                try:
+                    with open(path, "r", encoding="utf-8") as f:
+                        isi = json.load(f)
+                        if isinstance(isi, list):
+                            isi_bersih = [job for job in isi if job.get("source") != "job_posting"]
+                            files_to_update[path] = isi_bersih
+                except Exception:
+                    pass
 
-    # 2. Masukkan data job_posting yang baru ke dalam kategori yang sesuai
+    def slugify(text: str) -> str:
+        """Mengubah teks menjadi nama file yang aman."""
+        import re
+        text = text.lower()
+        text = re.sub(r'[^a-z0-9]+', '_', text).strip('_')
+        return text
+
+    def find_similar_in_folder(judul: str, folder_path: str) -> str:
+        """Mencari file .json di folder tertentu yang namanya mirip dengan judul."""
+        if not os.path.exists(folder_path):
+            return None
+        
+        j_slug = slugify(judul)
+        j_words = set(j_slug.split('_'))
+        
+        for file in os.listdir(folder_path):
+            if file.endswith(".json"):
+                f_name = file.lower().replace(".json", "")
+                f_words = set(f_name.split('_'))
+                
+                # Cek apakah ada kata yang cocok (minimal 1 kata panjang > 3)
+                overlap = j_words.intersection(f_words)
+                if any(len(w) > 3 for w in overlap):
+                    return os.path.join(folder_path, file)
+                
+                # Cek sebaliknya: apakah slug judul ada dalam nama file atau sebaliknya
+                if j_slug in f_name or f_name in j_slug:
+                    return os.path.join(folder_path, file)
+        return None
+
+    # 2. Distribusikan data baru
     for job in data:
-        job["source"] = "job_posting" # Berikan penanda
-        kategori_file = _get_category_file(job.get("Judul_Pekerjaan", ""))
-        if kategori_file not in archive_data:
-            archive_data[kategori_file] = []
-        archive_data[kategori_file].append(job)
+        job["source"] = "job_posting"
+        judul = job.get("Judul_Pekerjaan", "")
+        kat = job.get("Kategori", "").strip() or "Lainnya"
+        
+        # Tentukan folder kategori
+        kat_dir = os.path.join(JOB_ARCHIVE_DIR, kat)
+        if not os.path.exists(kat_dir):
+            os.makedirs(kat_dir)
+            
+        # Cari file yang mirip DI DALAM folder kategori tersebut
+        target_path = find_similar_in_folder(judul, kat_dir)
+        
+        if not target_path:
+            # Jika tidak ada yang mirip, buat file baru berdasarkan judul
+            fname = slugify(judul) or "lowongan_baru"
+            target_path = os.path.join(kat_dir, f"{fname}.json")
+            
+        if target_path not in files_to_update:
+            files_to_update[target_path] = []
+            
+        files_to_update[target_path].append(job)
 
-    # 3. Tulis ulang semua file yang ada di archive_data
-    for filename, isi in archive_data.items():
-        file_path = os.path.join(JOB_ARCHIVE_DIR, filename)
-        try:
-            with open(file_path, "w", encoding="utf-8") as f:
-                json.dump(isi, f, ensure_ascii=False, indent=4)
-        except Exception as e:
-            print(f"Gagal menyimpan ke {filename}: {e}")
+    # 3. Tulis ulang semua file yang terpengaruh
+    with _SIMPAN_LOCK:
+        for path, isi in files_to_update.items():
+            try:
+                os.makedirs(os.path.dirname(path), exist_ok=True)
+                with open(path, "w", encoding="utf-8") as f:
+                    json.dump(isi, f, ensure_ascii=False, indent=4)
+            except Exception as e:
+                print(f"Gagal menyimpan ke {path}: {e}")
+
+    # 4. Bersihkan Data_Upload_Job.JSON (karena data sudah pindah ke Archive)
+    try:
+        if os.path.exists(JOB_POSTING_FILE):
+            with open(JOB_POSTING_FILE, "w", encoding="utf-8") as f:
+                json.dump([], f, indent=4)
+    except Exception:
+        pass
 
 # ─────────────────────────────────────────────
 # UTILITAS TAMPILAN
