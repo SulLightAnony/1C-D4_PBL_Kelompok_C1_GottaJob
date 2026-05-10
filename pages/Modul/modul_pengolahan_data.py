@@ -304,7 +304,8 @@ def cari_archive_terdekat(judul_pekerjaan, folder_archive):
     if not os.path.exists(folder_archive):
         return None
         
-    semua_file = glob.glob(os.path.join(folder_archive, "*.json"))
+    # Cari secara rekursif ke dalam subfolder kategori
+    semua_file = glob.glob(os.path.join(folder_archive, "**", "*.json"), recursive=True)
     keywords = [k.lower() for k in judul_pekerjaan.split() if len(k) > 2]
     
     best_match_count = 0

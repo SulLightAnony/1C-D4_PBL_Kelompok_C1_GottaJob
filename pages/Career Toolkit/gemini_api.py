@@ -1,15 +1,20 @@
 import os
 from dotenv import load_dotenv
-from google import genai
+try:
+    from google import genai
+except ImportError:
+    genai = None
 
 # 1. Load Environment Variables dari file .env
 load_dotenv()
 API_KEY = os.getenv("GEMINI_API_KEY")
 
-client = genai.Client(api_key=API_KEY)
-
 def perbagus_teks_cv(job_data, cv_text):
+    if genai is None:
+        return "[Error] Library 'google-genai' belum terinstal. Jalankan: pip install google-genai"
+    
     try:
+        client = genai.Client(api_key=API_KEY)
         model_id = "gemini-3-flash-preview" 
         
         judul = job_data.get("Judul_Pekerjaan", "Profesional") if job_data else "Profesional"

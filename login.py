@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
-                             QLineEdit, QPushButton, QFrame, QMessageBox)
+                             QLineEdit, QPushButton, QFrame, QMessageBox, QSizePolicy)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QPixmap
 
@@ -7,6 +7,7 @@ class LoginPage(QWidget):
     def __init__(self, parent_window):
         super().__init__()
         self.parent_window = parent_window 
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding) # Pastikan mengembang penuh
         self.init_ui()
 
     def init_ui(self):
@@ -18,7 +19,7 @@ class LoginPage(QWidget):
 
         # Kartu Login
         self.card = QFrame()
-        self.card.setFixedSize(450, 550)
+        self.card.setFixedSize(450, 500)
         self.card.setStyleSheet("""
             QFrame {
                 background-color: white;
@@ -28,8 +29,8 @@ class LoginPage(QWidget):
         """)
         
         card_layout = QVBoxLayout(self.card)
-        card_layout.setContentsMargins(50, 40, 50, 50)
-        card_layout.setSpacing(10)
+        card_layout.setContentsMargins(40, 30, 40, 30)
+        card_layout.setSpacing(8)
 
         # Logo GottaJob
         lbl_logo_img = QLabel()
@@ -41,11 +42,11 @@ class LoginPage(QWidget):
 
         # Title 
         lbl_title = QLabel("Welcome Back")
-        lbl_title.setStyleSheet("font-size: 28px; font-weight: bold; color: #2C687B; border: none;")
+        lbl_title.setStyleSheet("font-size: 24px; font-weight: bold; color: #2C687B; border: none;")
         lbl_title.setAlignment(Qt.AlignCenter)
-
+        
         lbl_subtitle = QLabel("Please enter your details")
-        lbl_subtitle.setStyleSheet("color: #7F8C8D; font-size: 14px; border: none; margin-bottom: 20px;")
+        lbl_subtitle.setStyleSheet("color: #7F8C8D; font-size: 13px; border: none; margin-bottom: 10px;")
         lbl_subtitle.setAlignment(Qt.AlignCenter)
 
         # Input Fields Styling
@@ -95,7 +96,10 @@ class LoginPage(QWidget):
         card_layout.addStretch()
         card_layout.addWidget(btn_login)
 
+        # Memaksa ke tengah secara vertikal
+        layout_utama.addStretch(1)
         layout_utama.addWidget(self.card)
+        layout_utama.addStretch(1)
 
     def apply_input_style(self, widget):
         widget.setStyleSheet("""
@@ -120,7 +124,14 @@ class LoginPage(QWidget):
         elif user == "user" and pw == "user123":
             self.parent_window.show_user_dashboard()
         else:
-            QMessageBox.warning(self, "Login Failed", "Username atau password salah!")
+            try:
+                from pages.Modul.modul_antarmuka_pengguna import show_message
+                show_message(self, "Login Failed", "Username atau password salah!")
+            except Exception:
+                # Fallback jika gagal import
+                from PyQt5.QtWidgets import QMessageBox
+                QMessageBox.warning(self, "Login Failed", "Username atau password salah!")
+            
             self.input_user.clear()
             self.input_pass.clear()
             self.input_user.setFocus()

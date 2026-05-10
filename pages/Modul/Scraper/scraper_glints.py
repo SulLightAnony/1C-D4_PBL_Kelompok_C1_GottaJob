@@ -47,7 +47,14 @@ class GlintsScraper:
         try:
             if locator.count() > 0:
                 t = locator.first.inner_text().strip()
-                return t if t else "-"
+                if t:
+                    # Lokalisasi istilah waktu
+                    t = t.replace("/month", "/Bulan").replace("/year", "/Tahun").replace("/day", "/Hari")
+                    t = t.replace(" month", " Bulan").replace(" year", " Tahun").replace(" day", " Hari")
+                    # Normalisasi casing (Opsional tapi bagus untuk konsistensi)
+                    t = t.replace("/Month", "/Bulan").replace("/Year", "/Tahun")
+                    return t
+                return "-"
         except:
             pass
         return "-"
@@ -326,8 +333,12 @@ class GlintsScraper:
                         if gaji_raw != "-" and "tidak menampilkan" not in gaji_raw.lower():
                             gaji = gaji_raw
                             
-                    if bonus_salary != "-" and bonus_salary.lower() != "bonus":
-                        benefits_bonus = bonus_salary
+                    if bonus_salary != "-" and "tidak menampilkan" not in bonus_salary.lower():
+                        # Hapus kata "Bonus" di awal jika ada (agar tidak "+ Bonus: Bonus")
+                        clean_bonus = re.sub(r'^bonus\s*:?\s*', '', bonus_salary, flags=re.IGNORECASE).strip()
+                        # Ganti month menjadi Bulan
+                        clean_bonus = clean_bonus.replace("/month", "/Bulan").replace("month", "Bulan")
+                        benefits_bonus = clean_bonus if clean_bonus else "-"
                     else:
                         benefits_bonus = "-"
 

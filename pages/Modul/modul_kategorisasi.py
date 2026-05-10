@@ -52,6 +52,8 @@ class KategorisasiSkill:
         # Data containers
         self.alias_map = {}
         self.soft_skill_keywords = set()
+        self.hard_skill_keywords = set() # Hard skills dari folder kategori
+        self.position_keywords = set()   # Posisi spesifik dari folder kategori
         self.ambiguous_keywords = {}
         self.position_patterns = []
         self._compiled_positions = []
@@ -59,6 +61,7 @@ class KategorisasiSkill:
         # Muat data dari JSON
         self._load_alias()
         self._load_universal()
+        self._load_category_skills()
 
     # ------------------------------------------------------------------
     # Loader: Alias
@@ -101,6 +104,27 @@ class KategorisasiSkill:
                 "soft_indicators": set(rules.get("soft_indicators", [])),
                 "default": rules.get("default", "hard_skill"),
             }
+
+    # ------------------------------------------------------------------
+    # Loader: Category-specific Skills
+    # ------------------------------------------------------------------
+
+    def _load_category_skills(self):
+        """Memuat hard_skills dan positions dari subfolder kategori."""
+        if not os.path.exists(self.dict_dir):
+            return
+            
+        for entry in os.scandir(self.dict_dir):
+            if entry.is_dir():
+                path = os.path.join(entry.path, "skills.json")
+                if os.path.exists(path):
+                    try:
+                        with open(path, "r", encoding="utf-8") as f:
+                            data = json.load(f)
+                        self.hard_skill_keywords.update([s.lower() for s in data.get("hard_skills", [])])
+                        self.position_keywords.update([s.lower() for s in data.get("positions", [])])
+                    except:
+                        continue
 
     # ------------------------------------------------------------------
     # Normalisasi
@@ -172,12 +196,28 @@ class KategorisasiSkill:
                 alasan=f"Kata ambigu, diselesaikan via konteks → {resolved}"
             )
 
-        # Prioritas 3: Posisi
+        # Prioritas 3: Posisi (Pola Regex)
         if self._is_position(tl):
             return HasilKlasifikasi(
                 skill_asli=skill_clean, skill_normal=skill_normal,
                 kategori="position", confidence="high",
                 alasan="Cocok dengan pola jabatan"
+            )
+
+        # Prioritas 4: Hard Skill (Kamus Terkategori)
+        if tl in self.hard_skill_keywords:
+            return HasilKlasifikasi(
+                skill_asli=skill_clean, skill_normal=skill_normal,
+                kategori="hard_skill", confidence="high",
+                alasan="Ditemukan di kamus hard skill terkategori"
+            )
+
+        # Prioritas 5: Position (Kamus Terkategori - Exact Match)
+        if tl in self.position_keywords:
+            return HasilKlasifikasi(
+                skill_asli=skill_clean, skill_normal=skill_normal,
+                kategori="position", confidence="high",
+                alasan="Ditemukan di kamus posisi terkategori"
             )
 
         # Fallback
@@ -261,41 +301,3 @@ def pisahkan_skill(skill_list: list) -> dict:
     """Shortcut kompatibel dengan versi sebelumnya."""
     return categorizer.kategorikan(skill_list)
 
-
-# ---------------------------------------------------------------------------
-# Demo / test
-# ---------------------------------------------------------------------------
-
-if __name__ == "__main__":
-    contoh = [
-        # Hard skills jelas
-        "Python", "React.js", "MySQL", "Docker", "Microsoft Excel",
-        "Machine Learning", "REST API", "Figma",
-
-        # Soft skills jelas
-        "Komunikasi", "Kepemimpinan", "Kemampuan Komunikasi",
-        "Teamwork", "Berpikir Kritis", "Manajemen Waktu",
-
-        # Posisi
-        "Senior Backend Engineer", "Data Analyst",
-        "Product Manager", "UI/UX Designer", "Staff Akuntansi",
-
-        # Kasus ambigu
-        "Database Management",
-        "Project Management Tools",
-        "Stress Management",
-        "Detail Engineering Drawing",
-        "Detail Oriented",
-        "Supply Chain Management",
-        "Data Analysis",
-        "IT Administration",
-
-        # Edge cases
-        "Customer Support Skills",
-        "Self Development",
-        "Software Development Lifecycle",
-        "Network Troubleshooting",
-        "Attention to Detail",
-    ]
-
-    categorizer.debug(contoh)
