@@ -1,0 +1,17 @@
+[
+    {
+        "id": "141a6545-39da-4a47-9e64-b4c86ac5c07c",
+        "Judul_Pekerjaan": "Receptionist Hotel",
+        "Nama_Perusahaan": "Sunset Resort",
+        "Jenis_Pekerjaan": "Paruh Waktu",
+        "Lokasi": "Bali",
+        "Rentang_Gaji": "4.000.000 - 5.500.000",
+        "Skills": "Communication|Hospitality",
+        "Kategori": "Hotel & Travel",
+        "Tanggal_Kadaluarsa": "20/06/2026",
+        "Deskripsi_Pekerjaan": "Melayani tamu hotel di meja depan.",
+        "Link_Lowongan": "https://example.com/hotel",
+        "source": "job_posting",
+        "Is_lamar": false
+    }
+]

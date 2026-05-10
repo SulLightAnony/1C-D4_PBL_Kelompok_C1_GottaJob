@@ -1,0 +1,17 @@
+[
+    {
+        "id": "134968ff-c3c6-488f-bdad-9203373b0fea",
+        "Judul_Pekerjaan": "Junior Auditor",
+        "Nama_Perusahaan": "PT Global Finance",
+        "Jenis_Pekerjaan": "Penuh Waktu",
+        "Lokasi": "Jakarta Pusat",
+        "Rentang_Gaji": "7.000.000 - 9.000.000",
+        "Skills": "Auditing|Excel|Accounting",
+        "Kategori": "Akuntansi",
+        "Tanggal_Kadaluarsa": "10/06/2026",
+        "Deskripsi_Pekerjaan": "Melakukan audit internal rutin.",
+        "Link_Lowongan": "https://example.com/audit",
+        "source": "job_posting",
+        "Is_lamar": true
+    }
+]

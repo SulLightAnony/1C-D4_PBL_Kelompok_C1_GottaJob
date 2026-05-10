@@ -1,0 +1,17 @@
+[
+    {
+        "id": "25c6ae68-4a60-43cf-affa-ad524b02b7ca",
+        "Judul_Pekerjaan": "Legal Corporate",
+        "Nama_Perusahaan": "Law Firm Abadi",
+        "Jenis_Pekerjaan": "Penuh Waktu",
+        "Lokasi": "Jakarta Selatan",
+        "Rentang_Gaji": "15.000.000 - 25.000.000",
+        "Skills": "Corporate Law|Contract Drafting",
+        "Kategori": "Legal",
+        "Tanggal_Kadaluarsa": "05/06/2026",
+        "Deskripsi_Pekerjaan": "Menangani masalah hukum perusahaan.",
+        "Link_Lowongan": "https://example.com/legal",
+        "source": "job_posting",
+        "Is_lamar": false
+    }
+]
