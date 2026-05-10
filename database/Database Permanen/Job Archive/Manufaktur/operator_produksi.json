@@ -1,0 +1,17 @@
+[
+    {
+        "id": "174b4dd3-d89e-4231-8fe2-d5588d16f912",
+        "Judul_Pekerjaan": "Operator Produksi",
+        "Nama_Perusahaan": "Pabrik Tekstil",
+        "Jenis_Pekerjaan": "Penuh Waktu",
+        "Lokasi": "Semarang",
+        "Rentang_Gaji": "4.500.000 - 5.500.000",
+        "Skills": "Machine Operation|Safety First",
+        "Kategori": "Manufaktur",
+        "Tanggal_Kadaluarsa": "30/06/2026",
+        "Deskripsi_Pekerjaan": "Mengoperasikan mesin produksi kain.",
+        "Link_Lowongan": "https://example.com/factory",
+        "source": "job_posting",
+        "Is_lamar": false
+    }
+]

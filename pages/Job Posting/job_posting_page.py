@@ -1018,6 +1018,7 @@ class JobPostingPage(QWidget):
             "desc": self.f_desc.toPlainText().strip(),
             "benefit": "|".join(self.f_benefit.get_skills()),
             "kualifikasi": "|".join(self.f_kualifikasi.get_skills()),
+            "kategori": self.f_kategori.currentText().strip(),
             "date": self.f_date.date()
         }
 
@@ -1107,6 +1108,9 @@ class JobPostingPage(QWidget):
         
         raw_kualifikasi = job_data.get("Kualifikasi_Persyaratan", "")
         self.f_kualifikasi.load_skills([s.strip() for s in raw_kualifikasi.split('|') if s.strip()] if raw_kualifikasi else [])
+        
+        kat = job_data.get("Kategori", "")
+        self.f_kategori.setEditText(kat)
         
         date_str = job_data.get("Tanggal_Kadaluarsa", "")
         try:
