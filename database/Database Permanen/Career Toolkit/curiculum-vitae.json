@@ -1,5 +1,67 @@
 [
     {
+        "cv_id": "ad3e1931",
+        "cv_name": "CV Robert Johnson",
+        "photo": {
+            "path": "D:/Download/Pictures/Open Peeps - Avatar (2).png",
+            "ratio": "3x4"
+        },
+        "full_name": "Robert Johnson",
+        "email": "robert.johnson@gmail.com",
+        "phone": "xxxx-xxxx-xxxx",
+        "linkedin": "linkedin.com",
+        "summary": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        "skills": [
+            "Python",
+            "SQL",
+            "HTML"
+        ],
+        "languages": [
+            "Bahasa Indonesia (Aktif)",
+            "Bahasa Inggris"
+        ],
+        "education": [
+            {
+                "institution": "Insitusi Alam Raya Sejahtera",
+                "degree": "S1",
+                "year": "2022",
+                "gpa": "3.6"
+            }
+        ],
+        "experience": [
+            {
+                "company": "PT Alam Sejahtera",
+                "role": "CEO",
+                "start_date": "05/2026",
+                "end_date": "05/2026",
+                "description": [
+                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum"
+                ]
+            }
+        ],
+        "organizations": [
+            {
+                "organization": "Himpunan",
+                "role": "Ketua Himpunan",
+                "start_date": "05/2026",
+                "end_date": "05/2026",
+                "description": [
+                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum"
+                ]
+            }
+        ],
+        "certifications": [
+            {
+                "name": "Sertifikasi XXX",
+                "issuer": "Badan Kepemerintahan",
+                "year": "2026",
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+            }
+        ],
+        "last_updated": "2026-05-10 20:30",
+        "template_id": "ats_minimalist"
+    },
+    {
         "cv_id": "873813c5",
         "cv_name": "CV sahla",
         "full_name": "sahla",
