@@ -3,6 +3,36 @@ import json
 import glob
 import threading
 
+# -----------------------------------------------------------------------
+# Daftar resmi kategori pekerjaan dari Glints Indonesia.
+# Digunakan untuk normalisasi nama folder agar konsisten.
+# -----------------------------------------------------------------------
+KATEGORI_GLINTS = [
+    "Akuntansi",
+    "Administrasi & HRD",
+    "Seni, Media, & Komunikasi",
+    "Konstruksi & Real Estate",
+    "Business Development & Sales",
+    "Komputer & Perangkat Lunak",
+    "Konsultan",
+    "Desain",
+    "Pendidikan & Pelatihan",
+    "Keuangan",
+    "Perangkat Keras & Elektronik",
+    "Kesehatan",
+    "Hotel & Travel",
+    "Manajemen Leadership & Senior",
+    "Legal",
+    "Manufaktur",
+    "Marketing",
+    "Operasional & Pelayanan Pelanggan",
+    "Lainnya",
+    "Product Management & Project Management",
+    "Sains & Penelitian",
+    "Industri Jasa",
+    "Supply Chain, Logistik & Transportasi",
+]
+
 def get_root_dir():
     """Mendapatkan path root proyek."""
     # Karena file ini ada di /pages/Modul/modul_database.py
@@ -102,37 +132,158 @@ def bersihkan_database_sementara():
             except Exception as e:
                 print(f"Gagal menghapus file sementara {f}: {e}")
 
+def _normalisasi_nama_kategori(nama_kategori_raw):
+    """
+    Mencocokkan nama kategori hasil scraping ke nama resmi dalam KATEGORI_GLINTS.
+    Pencocokan dilakukan secara case-insensitive dan mengabaikan spasi berlebih.
+    Mengembalikan nama resmi jika cocok, atau nama asli jika tidak ada yang cocok.
+    """
+    if not nama_kategori_raw or nama_kategori_raw == "-":
+        return None
+
+    nama_bersih = nama_kategori_raw.strip().lower()
+    for resmi in KATEGORI_GLINTS:
+        if resmi.lower() == nama_bersih:
+            return resmi
+
+    # Fallback: kembalikan nama asli jika tidak ada yang cocok
+    return nama_kategori_raw.strip()
+
+
+def sinkronisasi_folder_kategori():
+    """
+    Memindahkan item dari file JSON di root Job Archive ke subfolder kategori
+    berdasarkan field Kategori_Utama pada setiap item.
+
+    Aturan:
+    - Item ber-kategori valid  → dipindah ke subfolder kategori, dihapus dari root.
+    - Item tanpa kategori ("-") → tetap di root.
+    - File root dihapus jika semua itemnya sudah dipindahkan.
+    - Folder kategori kosong   → dihapus.
+    """
+    import shutil
+
+    db_dir = get_database_permanen_dir()
+    if not os.path.exists(db_dir):
+        return
+
+    # ── Langkah 1: Migrasi setiap file di root ke subfolder kategori ──
+    for file_path in glob.glob(os.path.join(db_dir, "*.json")):
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if not isinstance(data, list) or not data:
+                continue
+
+            items_per_kat  = {}   # { nama_resmi: [item, ...] }
+            items_tanpa_kat = []  # item tanpa kategori valid
+
+            for item in data:
+                kat = item.get("Kategori_Utama", "-")
+                nama_resmi = _normalisasi_nama_kategori(kat)
+                if nama_resmi:
+                    items_per_kat.setdefault(nama_resmi, []).append(item)
+                else:
+                    items_tanpa_kat.append(item)
+
+            if not items_per_kat:
+                continue  # Tidak ada item ber-kategori, lewati
+
+            base_name = os.path.basename(file_path)
+
+            # Tulis item ke masing-masing subfolder kategori
+            for kat_name, items in items_per_kat.items():
+                folder_kat = os.path.join(db_dir, kat_name)
+                os.makedirs(folder_kat, exist_ok=True)
+                dst = os.path.join(folder_kat, base_name)
+
+                # Baca data lama di subfolder (hindari duplikat)
+                existing_kat = []
+                if os.path.exists(dst):
+                    try:
+                        with open(dst, "r", encoding="utf-8") as f:
+                            existing_kat = json.load(f)
+                    except Exception:
+                        existing_kat = []
+
+                seen = {j.get("Link_Lowongan") for j in existing_kat
+                        if j.get("Link_Lowongan") and j.get("Link_Lowongan") != "-"}
+                for item in items:
+                    lnk = item.get("Link_Lowongan", "-")
+                    if lnk == "-" or lnk not in seen:
+                        existing_kat.append(item)
+                        if lnk != "-":
+                            seen.add(lnk)
+
+                with open(dst, "w", encoding="utf-8") as f:
+                    json.dump(existing_kat, f, ensure_ascii=False, indent=4)
+                print(f"  [Migrasi] {len(items)} item → '{kat_name}/{base_name}'")
+
+            # Perbarui file root: hanya simpan item tanpa kategori
+            if items_tanpa_kat:
+                with open(file_path, "w", encoding="utf-8") as f:
+                    json.dump(items_tanpa_kat, f, ensure_ascii=False, indent=4)
+                print(f"  [Migrasi] '{base_name}' diperbarui: {len(items_tanpa_kat)} item tanpa kategori")
+            else:
+                os.remove(file_path)
+                print(f"  [Migrasi] '{base_name}' dipindahkan sepenuhnya → dihapus dari root")
+
+        except Exception as e:
+            print(f"  [Migrasi] Error '{os.path.basename(file_path)}': {e}")
+
+    # ── Langkah 2: Hapus folder kategori yang tidak punya file JSON ──
+    for nama_resmi in KATEGORI_GLINTS:
+        folder_kat = os.path.join(db_dir, nama_resmi)
+        if os.path.exists(folder_kat) and os.path.isdir(folder_kat):
+            isi_json = glob.glob(os.path.join(folder_kat, "*.json"))
+            if not isi_json:
+                try:
+                    shutil.rmtree(folder_kat)
+                    print(f"  [Kategori] Folder kosong dihapus: '{nama_resmi}'")
+                except Exception as e:
+                    print(f"  [Kategori] Gagal menghapus folder '{nama_resmi}': {e}")
+
+
 def simpan_ke_database_permanen(job_data, source_filename):
     """
     Menyimpan data lowongan ke file koleksi permanen di folder 'Database Permanen'.
-    Data akan ditambahkan (append) ke file yang sudah ada jika filenya sudah ada.
+    Jika job_data memiliki Kategori_Utama yang valid, file disimpan langsung ke
+    subfolder kategori. Jika tidak, file disimpan di root Job Archive.
     """
-    root = get_root_dir()
     db_dir = get_database_permanen_dir()
-    
+
     if not os.path.exists(db_dir):
         os.makedirs(db_dir)
 
     # Bersihkan nama file (buang prefix temp_ jika ada)
     base_name = os.path.basename(source_filename)
     if base_name.startswith("temp_"):
-        base_name = base_name[5:] # Buang 'temp_'
-    
-    full_path = os.path.join(db_dir, base_name)
-    
+        base_name = base_name[5:]  # Buang 'temp_'
+
+    # Tentukan folder tujuan berdasarkan Kategori_Utama
+    kategori = _normalisasi_nama_kategori(job_data.get("Kategori_Utama", "-"))
+    if kategori:
+        target_dir = os.path.join(db_dir, kategori)
+        if not os.path.exists(target_dir):
+            os.makedirs(target_dir)
+    else:
+        target_dir = db_dir  # Tanpa kategori → simpan di root
+
+    full_path = os.path.join(target_dir, base_name)
+
     # Baca data lama jika ada
     existing_data = []
     if os.path.exists(full_path):
         try:
             with open(full_path, "r", encoding="utf-8") as f:
                 existing_data = json.load(f)
-        except:
+        except Exception:
             existing_data = []
 
-    # Cek duplikat berdasarkan link agar tidak menyimpan lowongan yang sama berkali-kali
+    # Cek duplikat berdasarkan link
     new_link = job_data.get("Link_Lowongan", "")
     is_duplicate = any(item.get("Link_Lowongan") == new_link for item in existing_data)
-    
+
     if not is_duplicate:
         existing_data.append(job_data)
         try:
