@@ -242,8 +242,6 @@ class DashboardPage(QWidget):
         right_col_layout.addStretch()
 
         # Aktivitas Terkini
-        
-
         body_layout.addWidget(right_col_widget, 2)
         body_outer_layout.addStretch()
 
@@ -311,7 +309,13 @@ class DashboardPage(QWidget):
 
             # Render Matched Skills Tags
             # --- RENDER TAG SKILL (Dikelompokkan) ---
-            tags_layout = QHBoxLayout()
+            # container utama
+            owned_tags_container = QWidget()
+            owned_tags_container.setStyleSheet("background: transparent; border: none;")
+            owned_tags_layout = QVBoxLayout(owned_tags_container)
+            owned_tags_layout.setContentsMargins(0, 5, 0, 5)
+            owned_tags_layout.setSpacing(10)
+
             owned_cat = job_data.get("matched_categorized")
             if not owned_cat:
                 owned_skills = job_data.get("matched_skills", [])
@@ -320,24 +324,136 @@ class DashboardPage(QWidget):
             # Gabungkan semua untuk ditampilkan (atau bisa dipisah per baris jika mau)
             # Untuk dashboard, kita tampilkan dalam satu baris tapi teratur
             from modul_antarmuka_pengguna import SkillTag
+
+            current_row_owned = QHBoxLayout()
+            current_row_owned.setSpacing(8)
+            line_width_owned = 0
+            max_width_owned = 550
+
             for category in ["hard_skills", "soft_skills", "positions"]:
                 for s in owned_cat.get(category, []):
                     tag = SkillTag(s, category, font_size=16)
-                    tags_layout.addWidget(tag)
+                    tag_w = tag.fontMetrics().boundingRect(s).width() + 45
             
-            tags_layout.addStretch()
-            self.dev_layout.addLayout(tags_layout)
+            # Cek jika baris sudah penuh
+                    if line_width_owned + tag_w > max_width_owned:
+                        current_row_owned.addStretch()
+                        owned_tags_layout.addLayout(current_row_owned)
+                        current_row_owned = QHBoxLayout()
+                        current_row_owned.setSpacing(8)
+                        line_width_owned = 0
+                    
+                    current_row_owned.addWidget(tag)
+                    line_width_owned += tag_w
+
+            # Tambahkan baris terakhir
+            current_row_owned.addStretch()
+            owned_tags_layout.addLayout(current_row_owned)
+            
+            # Masukkan ke layout utama kartu (dev_layout)
+            self.dev_layout.addWidget(owned_tags_container)
 
             # Match Progress & Button
             match_btn_layout = QHBoxLayout()
             match_btn_layout.addWidget(SkillProgress("Kecocokan skill", match_val), 4)
             btn_gap = QPushButton("Lihat Gap Skill")
-            btn_gap.setStyleSheet("background-color: #2C687B; color: white; border-radius: 8px; padding: 8px 15px; font-weight: bold;")
-            btn_gap.clicked.connect(self.buka_gap_skill)
+            btn_gap.setStyleSheet("""
+                QPushButton {
+                    background-color: #2C687B; 
+                    color: white; 
+                    border-radius: 8px; 
+                    padding: 8px 15px; 
+                    font-weight: bold;
+                }
+                QPushButton:hover {
+                    background-color: #1e4653;
+                }
+            """)
+            btn_gap.clicked.connect(self.toggle_gap_skill)
             match_btn_layout.addWidget(btn_gap, 1)
             self.dev_layout.addLayout(match_btn_layout)
 
-        # 3. RENDER TREN SKILL MINGGU INI (Gunakan modul kamu)
+            #buat container gap skill
+            self.container_gap_skill = QFrame()
+            self.container_gap_skill.setStyleSheet("""
+                QFrame {
+                    background-color: #FFF5F5; 
+                    border-radius: 12px; 
+                    margin-top: 10px;
+                }
+            """)
+            self.container_gap_skill.hide()
+
+            #layout dalam container
+            layout_expand = QVBoxLayout(self.container_gap_skill)
+            layout_expand.setContentsMargins(15, 15, 15, 15)
+            layout_expand.setSpacing(10)
+
+            # Header Label di dalam box expand
+            label_judul_gap = QLabel("Skill yang Perlu Kamu Pelajari:")
+            label_judul_gap.setStyleSheet("color: #C0392B; font-weight: bold; font-size: 15px; border: none; background: transparent;")
+            layout_expand.addWidget(label_judul_gap)
+
+            tags_widget = QWidget()
+            tags_widget.setStyleSheet("background: transparent; border: none;")
+
+            tags_flow_layout = QHBoxLayout(tags_widget)
+            tags_flow_layout.setContentsMargins(0, 0, 0, 0)
+            tags_flow_layout.setSpacing(8)
+
+            gap_list = hitung_gap_skill(job_data) # Mengambil list skill yang belum dimiliki
+
+            from modul_antarmuka_pengguna import SkillTag
+
+            if gap_list:
+                container_tags = QWidget()
+                container_tags.setStyleSheet("background: transparent; border: none;")
+                layout_tags = QVBoxLayout(container_tags)
+                layout_tags.setContentsMargins(0, 0, 0, 0)
+                layout_tags.setSpacing(10)
+
+                current_row = QHBoxLayout()
+                current_row.setSpacing(8)
+                line_width = 0
+                max_width = 450
+
+                for s in gap_list:
+                    tag = SkillTag(s, "missing", font_size=16)
+
+                    tag.setStyleSheet("""
+                        background-color: white; 
+                        color: #C0392B; 
+                        border: 1px solid #E6B0AA; 
+                        border-radius: 15px; 
+                        padding: 5px 12px;
+                        font-weight: 600;
+                    """)
+
+                    # Hitung lebar tag secara otomatis
+                    tag_width = tag.fontMetrics().boundingRect(s).width() + 40
+                    
+                    # Jika sudah mentok ke kanan, buat baris baru
+                    if line_width + tag_width > max_width:
+                        current_row.addStretch() # Geser ke kiri
+                        layout_tags.addLayout(current_row)
+                        current_row = QHBoxLayout()
+                        current_row.setSpacing(8)
+                        line_width = 0
+                    
+                    current_row.addWidget(tag)
+                    line_width += tag_width
+                
+                # Tambahkan baris terakhir
+                current_row.addStretch()
+                layout_tags.addLayout(current_row)
+                
+                layout_expand.addWidget(container_tags)
+            else:
+                layout_expand.addWidget(QLabel("Semua skill sudah terpenuhi!"))
+
+            self.dev_layout.addWidget(self.container_gap_skill)
+
+        # 3. RENDER TREN SKILL MINGGU INI 
         trend_title = QLabel("TREN SKILL MINGGU INI")
         trend_title.setStyleSheet("font-weight: bold; color: #555; margin-bottom: 10px;")
         self.trend_layout.addWidget(trend_title)
@@ -349,7 +465,7 @@ class DashboardPage(QWidget):
         else:
             self.trend_layout.addWidget(QLabel("Data pendukung tidak ditemukan."))
 
-        # 4. RENDER INSIGHT PASAR (Gunakan modul kamu)
+        # 4. RENDER INSIGHT PASAR 
         ins_title = QLabel("INSIGHT PASAR")
         ins_title.setStyleSheet("font-weight: bold; color: #555; margin-top: 5px;")
         self.ins_card_layout.addWidget(ins_title)
@@ -431,3 +547,9 @@ class DashboardPage(QWidget):
         self.modal = ModalGapSkill(self, gap_list)
         self.modal.show()
 
+    def toggle_gap_skill(self):
+        if self.container_gap_skill:
+            if self.container_gap_skill.isVisible():
+                self.container_gap_skill.hide()
+            else:
+                self.container_gap_skill.show()
