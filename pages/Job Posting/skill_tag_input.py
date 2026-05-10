@@ -31,7 +31,7 @@ class SkillTagInput(QWidget):
 
         # ── Row 1: Container untuk Tags (Pills) ──
         self.tags_widget = QWidget()
-        self.tags_layout = FlowLayout(self.tags_widget, margin=0, spacing=8)
+        self.tags_layout = FlowLayout(self.tags_widget, margin=0, spacing=8, uniform_width=False)
         self.main_layout.addWidget(self.tags_widget)
         self.tags_widget.hide()
 

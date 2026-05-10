@@ -24,3 +24,6 @@ search_icon_path = os.path.join(_root_dir, "assets", "Job Posting", "search.png"
 plus_icon_path = os.path.join(_root_dir, "assets", "Job Posting", "plus.png")
 send_icon_path = os.path.join(_root_dir, "assets", "Job Posting", "send.png")
 checked_icon_path = os.path.join(_root_dir, "assets", "Job Posting", "checked.png")
+calendar_icon_path = os.path.join(_root_dir, "assets", "Job Posting", "calendar.png")
+link_icon_path = os.path.join(_root_dir, "assets", "Job Posting", "link.png")
+suitcase_icon_path = os.path.join(_root_dir, "assets", "Job Posting", "suitcase.png")

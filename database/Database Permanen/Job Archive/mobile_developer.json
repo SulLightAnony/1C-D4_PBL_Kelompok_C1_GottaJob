@@ -146,21 +146,5 @@
             "mobile development"
         ],
         "is_type_match": true
-    },
-    {
-        "id": "2026-05-10 11:10:05",
-        "Judul_Pekerjaan": "Mobile Developer (Flutter)",
-        "Nama_Perusahaan": "App Ventures",
-        "Jenis_Pekerjaan": "Kontrak",
-        "Lokasi": "Surabaya",
-        "Rentang_Gaji": "10.000.000-15.000.000",
-        "Skills": "Flutter|Dart|Firebase|Git",
-        "Link_Lowongan": "https://appventures.com/hiring",
-        "Deskripsi_Pekerjaan": "Building cross-platform mobile applications.",
-        "Benefit_Pekerjaan": "Project Bonus|Flexible Hours",
-        "Kualifikasi_Persyaratan": "Published apps on Play Store/App Store",
-        "Tanggal_Kadaluarsa": "25/06/2026",
-        "source": "job_posting",
-        "Is_lamar": true
     }
 ]

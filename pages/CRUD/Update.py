@@ -53,6 +53,7 @@ def proses_update_job(job_id, form_data, current_data):
         "Deskripsi_Pekerjaan": form_data.get('desc', '').strip(),
         "Benefit_Pekerjaan": form_data.get('benefit', '').strip(),
         "Kualifikasi_Persyaratan": form_data.get('kualifikasi', '').strip(),
+        "Kategori": form_data.get('kategori', '').strip(),
         "Tanggal_Kadaluarsa": f"{selected_date.day():02d}/{selected_date.month():02d}/{selected_date.year()}",
         "Is_lamar": old_job.get("Is_lamar", False)
     }

@@ -8,9 +8,10 @@ from PyQt5.QtCore import Qt, QSize, QRect
 
 
 class FlowLayout(QLayout):
-    def __init__(self, parent=None, margin=0, spacing=-1):
+    def __init__(self, parent=None, margin=0, spacing=-1, uniform_width=True):
         super(FlowLayout, self).__init__(parent)
         self.itemList = []
+        self.uniform_width = uniform_width
         if parent is not None:
             self.setContentsMargins(margin, margin, margin, margin)
         self.setSpacing(spacing)
@@ -64,40 +65,56 @@ class FlowLayout(QLayout):
         if not self.itemList:
             return 0
 
-        ref_min_w = self.itemList[0].minimumSize().width()
-        if ref_min_w <= 0:
-            ref_min_w = 320
-
+        # Parameter untuk layouting
         spaceX = self.spacing()
         spaceY = self.spacing()
-        available_width = rect.width()
-
-        if available_width < ref_min_w:
-            cols = 1
-        else:
-            cols = max(1, (available_width + spaceX) // (ref_min_w + spaceX))
-
-        item_w = (available_width - (cols - 1) * spaceX) // cols
-
         x = rect.x()
         y = rect.y()
         lineHeight = 0
+        available_width = rect.width()
 
-        for i, item in enumerate(self.itemList):
-            item_h = item.sizeHint().height()
+        if self.uniform_width:
+            # Mode A: Lebar Seragam (untuk grid kartu)
+            ref_min_w = self.itemList[0].minimumSize().width()
+            if ref_min_w <= 0: ref_min_w = 320
+            
+            cols = max(1, (available_width + spaceX) // (ref_min_w + spaceX))
+            item_w = (available_width - (cols - 1) * spaceX) // cols
 
-            if not testOnly:
-                item.setGeometry(QRect(x, y, item_w, item_h))
+            for i, item in enumerate(self.itemList):
+                item_h = item.sizeHint().height()
+                if not testOnly:
+                    item.setGeometry(QRect(x, y, item_w, item_h))
 
-            x += item_w + spaceX
-            lineHeight = max(lineHeight, item_h)
+                x += item_w + spaceX
+                lineHeight = max(lineHeight, item_h)
 
-            if (i + 1) % cols == 0:
-                x = rect.x()
-                y += lineHeight + spaceY
-                lineHeight = 0
-
-        if len(self.itemList) % cols != 0:
-            return y + lineHeight - rect.y()
+                if (i + 1) % cols == 0:
+                    x = rect.x()
+                    y += lineHeight + spaceY
+                    lineHeight = 0
+            
+            # Kembalikan tinggi total
+            if len(self.itemList) % cols != 0:
+                return y + lineHeight - rect.y()
+            else:
+                return y - rect.y() - spaceY if y > rect.y() else 0
+        
         else:
-            return y - rect.y() - spaceY if y > rect.y() else 0
+            # Mode B: Lebar Sesuai Isi (untuk tag/pills)
+            for item in self.itemList:
+                item_w = item.sizeHint().width()
+                item_h = item.sizeHint().height()
+
+                if x + item_w > rect.right() and lineHeight > 0:
+                    x = rect.x()
+                    y = y + lineHeight + spaceY
+                    lineHeight = 0
+
+                if not testOnly:
+                    item.setGeometry(QRect(x, y, item_w, item_h))
+
+                x += item_w + spaceX
+                lineHeight = max(lineHeight, item_h)
+
+            return y + lineHeight - rect.y()
