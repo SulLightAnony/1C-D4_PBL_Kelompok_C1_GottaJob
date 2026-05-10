@@ -1,5 +1,9 @@
 import os
-from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
+from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtWidgets import QPushButton, QDialog, QVBoxLayout, QLabel
+from gemini_api import perbagus_teks_cv
+
+from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
                              QPushButton, QStackedWidget, QScrollArea, 
                              QGridLayout, QFrame, QLineEdit, QTextEdit, 
                              QMessageBox, QFileDialog)
@@ -13,6 +17,32 @@ from ui_components import (CVCard, ExperienceInputWidget, EducationInputWidget,
                            PhotoUploaderWidget, TemplateCard, CVPreviewWidget,
                            CompactInputWidget)
 from pdf_generator import CVRenderer
+from flow_layout import FlowLayout
+
+class AIWorker(QThread):
+    finished_signal = pyqtSignal(str)
+    def __init__(self, job_data, text_to_fix):
+        super().__init__()
+        self.job_data = job_data
+        self.text_to_fix = text_to_fix
+        
+    def run(self):
+        hasil = perbagus_teks_cv(self.job_data, self.text_to_fix)
+        self.finished_signal.emit(hasil)
+
+class LoadingAIDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Sistem AI Aktif")
+        self.setFixedSize(320, 150)
+        self.setModal(True) # Cegah user klik apapun
+        
+        layout = QVBoxLayout(self)
+        self.lbl = QLabel("✨ Mengkalibrasi CV Anda...\nMohon tunggu sebentar.", self)
+        self.lbl.setAlignment(Qt.AlignCenter)
+        self.btn_batal = QPushButton("Batalkan", self)
+        layout.addWidget(self.lbl)
+        layout.addWidget(self.btn_batal)
 
 class CareerToolkitPage(QWidget):
     def __init__(self, parent=None):
@@ -72,9 +102,8 @@ class CareerToolkitPage(QWidget):
         scroll.setStyleSheet("border: none; background-color: transparent;")
         
         self.grid_container = QWidget()
-        self.grid_layout = QGridLayout(self.grid_container)
-        self.grid_layout.setAlignment(Qt.AlignTop | Qt.AlignLeft)
-        self.grid_layout.setSpacing(25)
+        self.grid_layout = FlowLayout(self.grid_container)
+        self.grid_layout.setSpacing(20)
         self.grid_layout.setContentsMargins(20, 20, 20, 20)
         
         scroll.setWidget(self.grid_container)
@@ -96,11 +125,11 @@ class CareerToolkitPage(QWidget):
             QPushButton:hover { background-color: #e2e8f0; border: 2px dashed #2C687B; }
         """)
         btn_add.clicked.connect(lambda: self.open_form_editor())
-        self.grid_layout.addWidget(btn_add, 0, 0)
+        self.grid_layout.addWidget(btn_add)
 
         # Load CV dari Database
         all_cv = self.manager.get_all_cv()
-        row, col = 0, 1
+        
         for cv_data in all_cv:
             card = CVCard(cv_data)
             card.edit_clicked.connect(self.open_form_editor)
@@ -108,9 +137,7 @@ class CareerToolkitPage(QWidget):
             card.duplicate_clicked.connect(self.handle_duplicate)
             card.delete_clicked.connect(self.handle_delete)
             
-            self.grid_layout.addWidget(card, row, col)
-            col += 1
-            if col > 3: col = 0; row += 1
+            self.grid_layout.addWidget(card)
 
     # ==========================================
     # 2. UI FORM EDITOR 
@@ -141,14 +168,39 @@ class CareerToolkitPage(QWidget):
         sections = [
             ("RINGKASAN PROFESIONAL", "summary", self.handle_ai_enhance),
             ("PENGALAMAN KERJA", "experience", self.handle_ai_enhance),
-            ("PENGALAMAN ORGANISASI / VOLUNTEER", "organization", self.handle_ai_enhance)
+            ("PENGALAMAN ORGANISASI / VOLUNTEER", "organization", self.handle_ai_enhance),
+            ("SERTIFIKASI & PENGHARGAAN", "certification", self.handle_ai_enhance)
         ]
+        
+        self.ai_buttons = {}
+        self.toggle_buttons = {}
 
         for title, target, func in sections:
-            h_header = QHBoxLayout(); h_header.addWidget(QLabel(f"<br><b>{title}</b>")); h_header.addStretch()
-            btn_ai = QPushButton("Perbagus"); btn_ai.setCursor(QCursor(Qt.PointingHandCursor)); btn_ai.setStyleSheet(style_ai_btn)
-            btn_ai.clicked.connect(lambda checked, t=target: func(t))
-            h_header.addWidget(btn_ai); self.form_layout.addLayout(h_header)
+            h_header = QHBoxLayout()
+            h_header.addWidget(QLabel(f"<br><b>{title}</b>"))
+            h_header.addStretch()
+            
+            # --- TOMBOL TOGGLE (Langkah 4) ---
+            # Kita buat tersembunyi dulu, baru muncul kalau AI selesai dipakai
+            btn_toggle = QPushButton("Lihat Teks Asli")
+            btn_toggle.setVisible(False) 
+            btn_toggle.setStyleSheet("background-color: #6c757d; color: white; border-radius: 5px; padding: 5px 10px;")
+            self.toggle_buttons[target] = btn_toggle
+            h_header.addWidget(btn_toggle)
+
+            # --- TOMBOL AI ---
+            btn_ai = QPushButton("Perbagus")
+            btn_ai.setCursor(QCursor(Qt.PointingHandCursor))
+            # Gunakan style_ai_btn milikmu
+            btn_ai.setStyleSheet("background-color: #2980B9; color: white; border-radius: 5px; padding: 5px 10px;") 
+            self.ai_buttons[target] = btn_ai
+            h_header.addWidget(btn_ai)
+            
+            self.form_layout.addLayout(h_header)
+            
+            # Koneksikan tombol ke fungsinya masing-masing
+            btn_ai.clicked.connect(lambda checked, t=target: self.handle_ai_enhance(t))
+            btn_toggle.clicked.connect(lambda checked, t=target: self.handle_toggle_teks(t))
             
             if target == "summary":
                 self.input_summary = QTextEdit(); self.input_summary.setFixedHeight(100)
@@ -166,17 +218,18 @@ class CareerToolkitPage(QWidget):
                 btn_add.setStyleSheet("padding: 8px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 5px;")
                 btn_add.clicked.connect(lambda: self.add_dynamic_block("organization"))
                 self.form_layout.addWidget(btn_add)
+            elif target == "certification":
+                self.cert_container = QVBoxLayout(); self.form_layout.addLayout(self.cert_container)
+                btn_add = QPushButton("+ Tambah Sertifikasi"); btn_add.setCursor(QCursor(Qt.PointingHandCursor))
+                btn_add.setStyleSheet("padding: 8px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 5px;")
+                btn_add.clicked.connect(lambda: self.add_dynamic_block("certification"))
+                self.form_layout.addWidget(btn_add)
 
         # --- PENDIDIKAN, SERTIFIKASI, SKILLS, BAHASA ---
         self.form_layout.addWidget(QLabel("<br><b>RIWAYAT PENDIDIKAN</b>"))
         self.edu_container = QVBoxLayout(); self.form_layout.addLayout(self.edu_container)
         btn_add_edu = QPushButton("+ Tambah Pendidikan"); btn_add_edu.clicked.connect(lambda: self.add_dynamic_block("education"))
         self.form_layout.addWidget(btn_add_edu)
-
-        self.form_layout.addWidget(QLabel("<br><b>SERTIFIKASI & PENGHARGAAN</b>"))
-        self.cert_container = QVBoxLayout(); self.form_layout.addLayout(self.cert_container)
-        btn_add_cert = QPushButton("+ Tambah Sertifikasi"); btn_add_cert.clicked.connect(lambda: self.add_dynamic_block("certification"))
-        self.form_layout.addWidget(btn_add_cert)
 
         self.form_layout.addWidget(QLabel("<br><b>KEAHLIAN / ALAT</b>"))
         self.skills_container = QVBoxLayout(); self.form_layout.addLayout(self.skills_container)
@@ -235,7 +288,8 @@ class CareerToolkitPage(QWidget):
         self.input_name.clear(); self.input_email.clear(); self.input_phone.clear()
         self.input_linkedin.clear(); self.input_summary.clear()
         self.photo_uploader.remove_image()
-
+        self.reset_ai_states()
+        
         if cv_id:
             all_cv = self.manager.get_all_cv()
             data = next((item for item in all_cv if item["cv_id"] == cv_id), {})
@@ -396,4 +450,172 @@ class CareerToolkitPage(QWidget):
             self.manager.delete_cv(cv_id); self.refresh_dashboard()
 
     def handle_ai_enhance(self, target_section):
-        QMessageBox.information(self, "Persiapan AI", f"Mempersiapkan AI untuk memoles bagian: {target_section.upper()}.")
+        # 1. TEMUKAN WIDGET YANG TEPAT
+        widget_target = self.get_target_widget(target_section)
+        if not widget_target:
+            QMessageBox.warning(self, "Data Kosong", f"Silakan isi data {target_section} terlebih dahulu!")
+            return
+
+        if target_section == "summary":
+            widget_target = self.input_summary
+        elif target_section == "experience":
+            if not self.experience_widgets:
+                QMessageBox.warning(self, "Kosong", "Tambahkan pengalaman kerja dulu!")
+                return
+            widget_target = self.experience_widgets[0].input_desc # Mengambil pengalaman teratas
+        elif target_section == "organization":
+            if not self.organization_widgets:
+                QMessageBox.warning(self, "Kosong", "Tambahkan organisasi dulu!")
+                return
+            widget_target = self.organization_widgets[0].input_desc
+
+        teks_asli = widget_target.toPlainText().strip()
+        if not teks_asli:
+            QMessageBox.warning(self, "Teks Kosong", "Ketik draf kasarnya dulu ya!")
+            return
+
+        # 2. SIMPAN TEKS ASLI UNTUK FITUR TOGGLE
+        if not hasattr(widget_target, 'teks_orisinal'):
+            widget_target.teks_orisinal = teks_asli
+        
+        # 3. KUNCI SEMUA TOMBOL (Anti Spam)
+        btn_ai_aktif = self.ai_buttons[target_section]
+        btn_ai_aktif.setText("Memperbagus...")
+        
+        for btn in self.ai_buttons.values():
+            btn.setEnabled(False) # Matikan semua tombol AI
+
+        # 4. JALANKAN AI DI BACKGROUND THREAD
+        job_info = getattr(self, 'target_job', None)
+        self.ai_thread = AIWorker(job_info, teks_asli)
+        
+        def on_ai_finished(hasil):
+            # Timpa teks dengan hasil AI
+            widget_target.setPlainText(hasil)
+            widget_target.teks_hasil_ai = hasil # Simpan data hasil AI untuk toggle
+            
+            # Munculkan Tombol Toggle
+            btn_toggle = self.toggle_buttons[target_section]
+            btn_toggle.setVisible(True)
+            btn_toggle.setText("Lihat Teks Asli")
+            btn_toggle.is_showing_ai = True
+            
+            # Buka kembali kunci tombol AI
+            for btn in self.ai_buttons.values():
+                btn.setEnabled(True)
+            btn_ai_aktif.setText("Perbagus")
+
+        self.ai_thread.finished_signal.connect(on_ai_finished)
+        self.ai_thread.start()
+
+    def handle_toggle_teks(self, target_section):
+        widget_target = self.get_target_widget(target_section)
+        btn_toggle = self.toggle_buttons.get(target_section)
+        
+        if not widget_target or not btn_toggle:
+            return
+
+        # Validasi ketat: Cegah eksekusi jika atribut belum dibuat oleh AI
+        if not hasattr(widget_target, 'teks_orisinal') or not hasattr(widget_target, 'teks_hasil_ai'):
+            btn_toggle.setVisible(False)
+            return
+
+        # Gunakan getattr untuk menghindari error jika status is_showing_ai belum diset
+        if getattr(btn_toggle, 'is_showing_ai', True):
+            widget_target.setPlainText(widget_target.teks_orisinal)
+            btn_toggle.setText("Lihat Hasil")
+            btn_toggle.setStyleSheet("background-color: #27AE60; color: white; border-radius: 5px; padding: 5px 10px;")
+            btn_toggle.is_showing_ai = False
+        else:
+            widget_target.setPlainText(widget_target.teks_hasil_ai)
+            btn_toggle.setText("Lihat Teks Asli")
+            btn_toggle.setStyleSheet("background-color: #6c757d; color: white; border-radius: 5px; padding: 5px 10px;")
+            btn_toggle.is_showing_ai = True
+            
+    def apply_ai_enhancement(self, job_data):
+        self.target_job = job_data
+        judul = job_data.get("Judul_Pekerjaan", "Pekerjaan")
+        kualifikasi = job_data.get("Kualifikasi_Persyaratan", "").replace("|", ", ")
+        
+        self.reset_ai_states()
+        self.input_summary.clear()
+        
+        # Reset state untuk summary agar tidak ada teks hantu
+        self.input_summary.clear()
+        if hasattr(self.input_summary, 'teks_orisinal'):
+            delattr(self.input_summary, 'teks_orisinal')
+        self.toggle_buttons["summary"].setVisible(False)
+        
+        self.stack.setCurrentIndex(1)
+        
+        draf_awal = f"Berpengalaman dalam bidang {judul}. Memiliki keahlian utama dalam: {kualifikasi}."
+        
+        self.loading_dialog = LoadingAIDialog(self)
+        
+        def batalkan_proses():
+            if hasattr(self, 'auto_ai_thread'):
+                self.auto_ai_thread.terminate()
+            self.loading_dialog.reject()
+            # Gunakan variabel stack yang sudah Anda perbaiki di main.py
+            self.window().stack.setCurrentIndex(0) 
+            
+        self.loading_dialog.btn_batal.clicked.connect(batalkan_proses)
+        
+        self.auto_ai_thread = AIWorker(self.target_job, draf_awal)
+        
+        def on_auto_ai_finished(hasil):
+            self.loading_dialog.accept()
+            self.input_summary.setPlainText(hasil)
+            
+            # Simpan data untuk fitur toggle
+            self.input_summary.teks_orisinal = draf_awal
+            self.input_summary.teks_hasil_ai = hasil
+            
+            btn_toggle = self.toggle_buttons["summary"]
+            btn_toggle.setVisible(True)
+            btn_toggle.setText("Lihat Teks Asli")
+            btn_toggle.is_showing_ai = True
+
+        self.auto_ai_thread.finished_signal.connect(on_auto_ai_finished)
+        self.auto_ai_thread.start()
+        self.loading_dialog.exec_()
+        
+    def get_target_widget(self, target_section):
+        """Fungsi pembantu agar tidak menulis ulang logika pencarian widget"""
+        if target_section == "summary":
+            return self.input_summary
+        elif target_section == "experience":
+            return self.experience_widgets[0].input_desc if self.experience_widgets else None
+        elif target_section == "organization":
+            return self.organization_widgets[0].input_desc if self.organization_widgets else None
+        elif target_section == "certification":
+            # Menargetkan input deskripsi pada sertifikasi pertama
+            return self.certification_widgets[0].input_desc if self.certification_widgets else None
+        return None
+    
+    def reset_ai_states(self):
+        """Menyembunyikan semua tombol toggle dan menghapus riwayat teks AI sebelumnya."""
+        for section, btn in getattr(self, 'toggle_buttons', {}).items():
+            btn.setVisible(False)
+            widget = self.get_target_widget(section)
+            if widget:
+                if hasattr(widget, 'teks_orisinal'):
+                    delattr(widget, 'teks_orisinal')
+                if hasattr(widget, 'teks_hasil_ai'):
+                    delattr(widget, 'teks_hasil_ai')
+        
+class LoadingAIDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Memproses Data")
+        self.setFixedSize(300, 150)
+        self.setModal(True) # Cegah klik sembarangan di belakang popup
+        
+        layout = QVBoxLayout(self)
+        self.lbl = QLabel("Sedang membuat CV...", self)
+        self.lbl.setAlignment(Qt.AlignCenter)
+        
+        self.btn_batal = QPushButton("Batalkan", self)
+        
+        layout.addWidget(self.lbl)
+        layout.addWidget(self.btn_batal)

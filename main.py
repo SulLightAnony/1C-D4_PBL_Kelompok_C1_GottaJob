@@ -2,9 +2,9 @@ import sys
 import os
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, 
                              QVBoxLayout, QPushButton, QFrame, QLabel, 
-                             QStackedWidget)
+                             QStackedWidget, QShortcut)
 from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtGui import QFont, QPixmap, QIcon
+from PyQt5.QtGui import QFont, QPixmap, QIcon, QKeySequence
 
 # IMPORT file menu
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -113,6 +113,14 @@ class Dashboard(QMainWindow):
         self.btn_archive   = self.create_menu_btn("  Job Archive", 2, "Job Archive", "folder.png")
         self.btn_directory = self.create_menu_btn("  Job Posting", 3, "Job Posting", "post.png")
         self.btn_toolkit   = self.create_menu_btn("  Career Toolkit", 4, "Career Toolkit", "toolbox.png")
+        
+        self.nav_buttons = [
+            self.btn_dashboard,
+            self.btn_discovery,
+            self.btn_archive,
+            self.btn_directory,
+            self.btn_toolkit
+        ]
 
         self.btn_dashboard.setObjectName("ActiveMenu")
 
@@ -132,6 +140,7 @@ class Dashboard(QMainWindow):
         self.halaman_archive = JobArchivePage()
         # Koneksi signal refresh dashboard
         self.halaman_archive.favorite_changed.connect(self.halaman_dashboard.load_data)
+        self.halaman_archive.build_cv_requested.connect(self.go_to_toolkit_for_ai)
         
         self.toolkit_page = CareerToolkitPage()
         
@@ -166,6 +175,13 @@ class Dashboard(QMainWindow):
         # Sinkronisasi folder kategori di background saat aplikasi pertama dibuka
         import threading
         threading.Thread(target=sinkronisasi_folder_kategori, daemon=True).start()
+        
+        # Registrasi shortcut keyboard global
+        self.shortcut_up = QShortcut(QKeySequence(Qt.Key_Up), self)
+        self.shortcut_up.activated.connect(self.navigasi_ke_atas)
+        
+        self.shortcut_down = QShortcut(QKeySequence(Qt.Key_Down), self)
+        self.shortcut_down.activated.connect(self.navigasi_ke_bawah)
 
     def setup_logo(self):
         container = QWidget()
@@ -226,6 +242,45 @@ class Dashboard(QMainWindow):
         except:
             pass
         event.accept()
+        
+    def go_to_toolkit_for_ai(self, job_data):
+        """
+        Fungsi ini memindahkan halaman ke Career Toolkit dan menyinkronkan 
+        tampilan sidebar agar highlight berpindah ke tombol yang benar.
+        """
+        # 1. Pastikan indeks halaman Career Toolkit benar (asumsi indeks 4)
+        # Ganti angka 4 jika indeks Career Toolkit di StackedWidget kamu berbeda
+        toolkit_index = 4 
+        self.content_stack.setCurrentIndex(toolkit_index)
+
+        # 2. SINKRONISASI SIDEBAR (Solusi Bug)
+        # Kita panggil fungsi navigasi yang biasa digunakan saat tombol diklik.
+        # Asumsi: Kamu punya tombol bernama self.btn_toolkit atau sejenisnya.
+        if hasattr(self, 'btn_toolkit'):
+            # Panggil fungsi yang mengatur gaya visual sidebar
+            # Pastikan nama fungsi 'pindah_halaman' sesuai dengan yang ada di kodemu
+            self.pindah_halaman(self.btn_toolkit, toolkit_index)
+        
+        # 3. Kirim data ke halaman Career Toolkit untuk diproses AI
+        # Pastikan self.toolkit_page merujuk pada instance CareerToolkitPage
+        if hasattr(self, 'toolkit_page'):
+            self.toolkit_page.apply_ai_enhancement(job_data)
+            
+    def navigasi_ke_atas(self):
+        current_index = self.content_stack.currentIndex()
+        next_index = current_index - 1
+        
+        # Cegah indeks melampaui batas atas
+        if 0 <= next_index < len(self.nav_buttons):
+            self.nav_buttons[next_index].click()
+
+    def navigasi_ke_bawah(self):
+        current_index = self.content_stack.currentIndex()
+        next_index = current_index + 1
+        
+        # Cegah indeks melampaui batas bawah
+        if 0 <= next_index < len(self.nav_buttons):
+            self.nav_buttons[next_index].click()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

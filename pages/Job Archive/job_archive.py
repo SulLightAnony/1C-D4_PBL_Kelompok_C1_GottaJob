@@ -226,6 +226,7 @@ QPushButton:hover {
 
 class JobArchivePage(QWidget):
     favorite_changed = pyqtSignal()
+    build_cv_requested = pyqtSignal(dict)
 
     def __init__(self):
         super().__init__()
@@ -344,6 +345,7 @@ class JobArchivePage(QWidget):
         self.match_results.itemDoubleClicked.connect(self._show_job_detail)
         self.match_results.favorite_clicked.connect(self._on_favorite_clicked)
         self.match_results.delete_clicked.connect(self._on_delete_clicked)
+        self.match_results.build_cv_clicked.connect(self.build_cv_requested.emit) 
         table_lay.addWidget(self.match_results)
 
         # 3. VIEW DETAIL
@@ -581,7 +583,15 @@ class JobArchivePage(QWidget):
         fav_link = fav.get("Link_Lowongan") if fav else None
         
         # Tampilkan Favorit & Hapus (show_save=False)
-        self.match_results.set_data(hasil, selected, show_save=False, show_favorite=True, show_delete=True, fav_link=fav_link)
+        # Tampilkan Favorit & Hapus (show_save=False), dan tampilkan tombol Bangun CV AI
+        self.match_results.set_data(
+            hasil, selected, 
+            show_save=False, 
+            show_favorite=True, 
+            show_delete=True, 
+            show_ai_cv=True,
+            fav_link=fav_link
+        )
         self.main_stack.setCurrentWidget(self.table_view)
 
     def _show_job_detail(self, item):
@@ -619,6 +629,7 @@ class JobArchivePage(QWidget):
                 show_save=False, 
                 show_favorite=True, 
                 show_delete=True,
+                show_ai_cv=True,
                 fav_link=job_data.get("Link_Lowongan")
             )
         else:
@@ -681,6 +692,7 @@ class JobArchivePage(QWidget):
                         show_save=False, 
                         show_favorite=True, 
                         show_delete=True,
+                        show_ai_cv=True,
                         fav_link=fav_link
                     )
         except Exception as e:

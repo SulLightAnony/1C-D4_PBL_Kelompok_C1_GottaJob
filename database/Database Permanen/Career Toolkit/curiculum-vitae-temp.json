@@ -1,36 +1,32 @@
 {
-    "cv_id": "90249a7b",
-    "cv_name": "CV Sulthan Faazaa Akbar Riyandoro",
+    "cv_id": "873813c5",
+    "cv_name": "CV sahla",
     "photo": {
-        "path": "D:/Download/Pictures/Almusayid Char.jpg",
+        "path": "",
         "ratio": "3x4"
     },
-    "full_name": "Sulthan Faazaa Akbar Riyandoro",
-    "email": "sulthanfaaz@gmail.com",
-    "phone": "0838-9360-6988",
-    "linkedin": "google.com",
-    "summary": "Aku orang hebat",
-    "skills": [
-        "Fullstack Web Development"
-    ],
+    "full_name": "sahla",
+    "email": "sa@gmail.com",
+    "phone": "08888098438",
+    "linkedin": "",
+    "summary": "saya lulusan jtk polban",
+    "skills": [],
     "languages": [],
     "education": [
         {
-            "institution": "POLBAN",
-            "degree": "Teknik Informatika D4",
-            "year": "2026",
-            "gpa": "4"
+            "institution": "politeknik negeri bandung",
+            "degree": "S.Tr.Kom.",
+            "year": "2029",
+            "gpa": "3.95"
         }
     ],
     "experience": [
         {
-            "company": "MOBOID",
-            "role": "Senior Programmer",
+            "company": "",
+            "role": "",
             "start_date": "05/2026",
             "end_date": "05/2026",
-            "description": [
-                "Fullstack Website Developer"
-            ]
+            "description": []
         }
     ],
     "organizations": [],
