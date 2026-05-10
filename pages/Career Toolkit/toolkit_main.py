@@ -17,6 +17,7 @@ from ui_components import (CVCard, ExperienceInputWidget, EducationInputWidget,
                            PhotoUploaderWidget, TemplateCard, CVPreviewWidget,
                            CompactInputWidget)
 from pdf_generator import CVRenderer
+from flow_layout import FlowLayout
 
 class AIWorker(QThread):
     finished_signal = pyqtSignal(str)
@@ -101,9 +102,8 @@ class CareerToolkitPage(QWidget):
         scroll.setStyleSheet("border: none; background-color: transparent;")
         
         self.grid_container = QWidget()
-        self.grid_layout = QGridLayout(self.grid_container)
-        self.grid_layout.setAlignment(Qt.AlignTop | Qt.AlignLeft)
-        self.grid_layout.setSpacing(25)
+        self.grid_layout = FlowLayout(self.grid_container)
+        self.grid_layout.setSpacing(20)
         self.grid_layout.setContentsMargins(20, 20, 20, 20)
         
         scroll.setWidget(self.grid_container)
@@ -125,11 +125,11 @@ class CareerToolkitPage(QWidget):
             QPushButton:hover { background-color: #e2e8f0; border: 2px dashed #2C687B; }
         """)
         btn_add.clicked.connect(lambda: self.open_form_editor())
-        self.grid_layout.addWidget(btn_add, 0, 0)
+        self.grid_layout.addWidget(btn_add)
 
         # Load CV dari Database
         all_cv = self.manager.get_all_cv()
-        row, col = 0, 1
+        
         for cv_data in all_cv:
             card = CVCard(cv_data)
             card.edit_clicked.connect(self.open_form_editor)
@@ -137,9 +137,7 @@ class CareerToolkitPage(QWidget):
             card.duplicate_clicked.connect(self.handle_duplicate)
             card.delete_clicked.connect(self.handle_delete)
             
-            self.grid_layout.addWidget(card, row, col)
-            col += 1
-            if col > 3: col = 0; row += 1
+            self.grid_layout.addWidget(card)
 
     # ==========================================
     # 2. UI FORM EDITOR 
