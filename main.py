@@ -13,8 +13,19 @@ pages_path = os.path.join(base_dir, "pages")
 if pages_path not in sys.path:
     sys.path.insert(0, pages_path)
 
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "Login"))
+from login import LoginPage
+try:
+    from login import LoginPage
+except ImportError:
+    # Jika file login_page.py:
+    from login_page import LoginPage
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pages", "Dashboard"))
 from dashboard import DashboardPage
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pages", "Dashboard Admin"))
+from dashboard_admin import AdminDashboardPage
 
 # Live Discovery ada di folder dengan spasi → gunakan sys.path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pages", "Live Discovery"))
@@ -97,6 +108,7 @@ class Dashboard(QMainWindow):
         self.menu_buttons = []
         
         self.btn_dashboard = self.create_menu_btn("  Dashboard", 0, "Dashboard", "dashboard.png")
+        self.btn_admin     = self.create_menu_btn("Dashboard admin", 5, "Dashboard Admin", "dahboard.png")
         self.btn_discovery = self.create_menu_btn("  Live Discovery", 1, "Live Discovery", "search.png")
         self.btn_archive   = self.create_menu_btn("  Job Archive", 2, "Job Archive", "folder.png")
         self.btn_directory = self.create_menu_btn("  Job Posting", 3, "Job Posting", "post.png")
@@ -110,10 +122,12 @@ class Dashboard(QMainWindow):
 
         # MENU
         self.halaman_dashboard = DashboardPage() # <--- PENTING: Membuat objek halaman
-        
+        self.halaman_dashboard_admin = AdminDashboardPage()
+
         self.halaman_discovery = LiveDiscoveryPage()
         # Koneksi signal refresh dashboard dari Live Discovery
         self.halaman_discovery.favorite_changed.connect(self.halaman_dashboard.load_data)
+        self.halaman_discovery.favorite_changed.connect(self.halaman_dashboard_admin.load_data)
         
         self.halaman_archive = JobArchivePage()
         # Koneksi signal refresh dashboard
@@ -128,10 +142,27 @@ class Dashboard(QMainWindow):
         self.content_stack.addWidget(self.halaman_archive)           # Index 2 (Sudah dibuat)
         self.content_stack.addWidget(self.job_posting_page)          # Index 3 (Job Posting)
         self.content_stack.addWidget(self.toolkit_page)              # Index 4
+        self.content_stack.addWidget(self.halaman_dashboard_admin)   # Index 5
+
+        self.halaman_login = LoginPage(self)
+        self.content_stack.addWidget(self.halaman_login)
+
+        # hide sidebar
+        self.sidebar.hide()
+        self.content_stack.setCurrentWidget(self.halaman_login)
 
         self.layout_utama.addWidget(self.sidebar)
         self.layout_utama.addWidget(self.content_stack)
 
+    def show_admin_dashboard(self):
+        self.sidebar.show() # Munculkan lagi sidebar
+        self.btn_dashboard.hide() # Sembunyikan menu user jika perlu
+        self.pindah_halaman(self.btn_admin, 5) # Paksa pindah ke halaman admin (index 5)
+
+    def show_user_dashboard(self):
+        self.sidebar.show() # Munculkan lagi sidebarnya
+        self.btn_admin.hide() # Sembunyikan menu admin untuk user biasa
+        self.pindah_halaman(self.btn_dashboard, 0) # Paksa pindah ke dashboard user (index 0)
         # Sinkronisasi folder kategori di background saat aplikasi pertama dibuka
         import threading
         threading.Thread(target=sinkronisasi_folder_kategori, daemon=True).start()
