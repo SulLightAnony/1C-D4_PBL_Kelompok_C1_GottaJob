@@ -31,7 +31,7 @@ if _pages_dir not in sys.path:
     sys.path.insert(0, _pages_dir)
 
 from CRUD.Shared import muat_data, simpan_data
-from modul_antarmuka_pengguna import KeyboardScrollArea, show_message, show_question, MODERN_BUTTON_STYLE, ActionButton
+from modul_antarmuka_pengguna import KeyboardScrollArea, show_message, show_question, MODERN_BUTTON_STYLE, ActionButton, SkillTag
 from Modul.modul_database import catat_aktivitas
 from CRUD.Read import JobDetailDialog
 
@@ -122,11 +122,19 @@ class JobDetailPage(QWidget):
 
         add_divider()
 
-        # Skills
-        c_lay.addWidget(self._create_section_lbl("SKILLS"))
-        self.skills_container = QWidget()
-        self.skills_flow = FlowLayout(self.skills_container, margin=0, spacing=8, uniform_width=False)
-        c_lay.addWidget(self.skills_container)
+        # Hard Skills
+        c_lay.addWidget(self._create_section_lbl("HARD SKILLS"))
+        self.h_skills_container = QWidget()
+        self.h_skills_flow = FlowLayout(self.h_skills_container, margin=0, spacing=8, uniform_width=False)
+        c_lay.addWidget(self.h_skills_container)
+
+        c_lay.addSpacing(10)
+
+        # Soft Skills
+        c_lay.addWidget(self._create_section_lbl("SOFT SKILLS"))
+        self.s_skills_container = QWidget()
+        self.s_skills_flow = FlowLayout(self.s_skills_container, margin=0, spacing=8, uniform_width=False)
+        c_lay.addWidget(self.s_skills_container)
 
         add_divider()
 
@@ -223,7 +231,7 @@ class JobDetailPage(QWidget):
         v.addWidget(l_lbl)
 
         v_lbl = QLabel(str(value))
-        color = "#0F6E56" if "Gaji" in label else "#1E293B"
+        color = "#F39C12" if "Gaji" in label else "#1E293B"
         v_lbl.setStyleSheet(f"color: {color}; font-size: 16px; font-weight: 700; border: none; background: transparent;")
         
         if is_link and value != "-":
@@ -258,7 +266,7 @@ class JobDetailPage(QWidget):
             row = QHBoxLayout()
             row.setSpacing(10)
             check = QLabel("✓")
-            check.setStyleSheet("color: #1D9E75; font-weight: bold; font-size: 16px; border: none;")
+            check.setStyleSheet("color: #2C687B; font-weight: bold; font-size: 16px; border: none;")
             row.addWidget(check, 0, Qt.AlignTop)
             
             t_lbl = QLabel(text)
@@ -298,16 +306,37 @@ class JobDetailPage(QWidget):
         desc = data.get("Deskripsi_Pekerjaan", "").strip()
         self.lbl_desc.setText(desc if desc else "Tidak ada deskripsi tersedia untuk lowongan ini.")
 
-        # Skills
-        while self.skills_flow.count():
-            it = self.skills_flow.takeAt(0)
+        # Hard Skills
+        while self.h_skills_flow.count():
+            it = self.h_skills_flow.takeAt(0)
             if it.widget(): it.widget().deleteLater()
         
-        skills = [s.strip() for s in data.get("Skills", "").split("|") if s.strip()]
-        for s in skills:
-            pill = QLabel(s)
-            pill.setStyleSheet("background-color: #F1F5F9; color: #475569; border-radius: 15px; padding: 6px 15px; font-size: 16px; font-weight: 500; border: 1px solid #E2E8F0;")
-            self.skills_flow.addWidget(pill)
+        h_skills_raw = data.get("Hard_Skills", "")
+        # Fallback untuk data lama
+        if not h_skills_raw and data.get("Skills"):
+            parts = data.get("Skills", "").split("||")
+            h_skills_raw = parts[0] if len(parts) > 0 else ""
+            
+        h_skills = [s.strip() for s in h_skills_raw.replace(",", "|").replace(";", "|").split("|") if s.strip()]
+        for s in h_skills:
+            pill = SkillTag(s, "hard_skills", font_size=14)
+            self.h_skills_flow.addWidget(pill)
+
+        # Soft Skills
+        while self.s_skills_flow.count():
+            it = self.s_skills_flow.takeAt(0)
+            if it.widget(): it.widget().deleteLater()
+            
+        s_skills_raw = data.get("Soft_Skills", "")
+        # Fallback untuk data lama
+        if not s_skills_raw and data.get("Skills"):
+            parts = data.get("Skills", "").split("||")
+            s_skills_raw = parts[1] if len(parts) > 1 else ""
+
+        s_skills = [s.strip() for s in s_skills_raw.replace(",", "|").replace(";", "|").split("|") if s.strip()]
+        for s in s_skills:
+            pill = SkillTag(s, "soft_skills", font_size=14)
+            self.s_skills_flow.addWidget(pill)
 
         # Populate Checklist
         self._populate_list(self.lay_benefit, data.get("Benefit_Pekerjaan", ""))

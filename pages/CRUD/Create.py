@@ -157,10 +157,18 @@ class JobDialog(QDialog):
 
         create_field("Tanggal Kadaluarsa", self.date_edit, 2, 1)
 
-        # Baris 4: Skills (Full Width)
+        # Baris 4: Hard Skills & Soft Skills
+        self.inputs['Hard_Skills'] = QLineEdit()
+        self.inputs['Hard_Skills'].setPlaceholderText("cth. Python, SQL, Project Management")
+        create_field("Hard Skills", self.inputs['Hard_Skills'], 3, 0)
+
+        self.inputs['Soft_Skills'] = QLineEdit()
+        self.inputs['Soft_Skills'].setPlaceholderText("cth. Komunikasi, Kerjasama Tim")
+        create_field("Soft Skills", self.inputs['Soft_Skills'], 3, 1)
+
+        # Field 'Skills' tetap ada namun disembunyikan untuk kompatibilitas data lama
         self.inputs['Skills'] = QLineEdit()
-        self.inputs['Skills'].setPlaceholderText("cth. React, Node.js, SQL")
-        create_field("Skills (pisah koma)", self.inputs['Skills'], 3, 0, 1, 2)
+        self.inputs['Skills'].hide()
 
         # Baris 5: Link Lowongan (Full Width)
         self.inputs['Link_Lowongan'] = QLineEdit()
@@ -276,6 +284,11 @@ class JobDialog(QDialog):
                 data[key] = widget.toPlainText().strip()
             elif isinstance(widget, QComboBox):
                 data[key] = widget.currentText()
+
+        # Gabungkan Hard Skills dan Soft Skills ke field 'Skills' utama untuk kompatibilitas
+        h_skills = data.get("Hard_Skills", "")
+        s_skills = data.get("Soft_Skills", "")
+        data["Skills"] = f"{h_skills}||{s_skills}"
                 
         dt = self.date_edit.date()
         data["Tanggal_Kadaluarsa"] = f"{dt.day():02d}/{dt.month():02d}/{dt.year()}"
