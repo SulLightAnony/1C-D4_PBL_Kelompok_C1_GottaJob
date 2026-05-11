@@ -1133,7 +1133,7 @@ class JobPostingPage(QWidget):
 
         self.data = new_data
         action_msg = "Diperbarui" if self.editing_job_id else "Ditambah"
-        catat_aktivitas(f"<b>Lowongan {action_msg}</b><br>{form_data['judul']}")
+        catat_aktivitas(f"<b>Lowongan {action_msg}</b><br>{form_data['judul']}", role="admin")
         self.simpan_data_async()
 
         self.editing_job_id = None
@@ -1227,7 +1227,7 @@ class JobPostingPage(QWidget):
             if success:
                 self.data = new_data
                 self.simpan_data_async()
-                catat_aktivitas(msg)
+                catat_aktivitas(msg, role="admin")
                 self.refresh_ui_only()
                 if self.page_stack.currentIndex() == 2:
                     self.page_stack.setCurrentIndex(0)
@@ -1240,7 +1240,7 @@ class JobPostingPage(QWidget):
             if success:
                 self.data = new_data
                 self.simpan_data_async()
-                catat_aktivitas(msg)
+                catat_aktivitas(msg, role="admin")
                 self.selected_ids = set()
                 self.refresh_ui_only()
 

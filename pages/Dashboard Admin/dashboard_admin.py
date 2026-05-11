@@ -1,8 +1,10 @@
 import os
-from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
+from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                              QPushButton, QFrame, QProgressBar, QSpacerItem, QSizePolicy)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor
+
+from Modul.modul_antarmuka_pengguna import AktivitasTerkiniWidget
 
 # --- REUSABLE COMPONENTS ---
 
@@ -87,10 +89,12 @@ class AdminDashboardPage(QWidget):
         self.stat_job = StatCard("LOWONGAN AKTIF", 0, "#27AE60")
         self.stat_company = StatCard("PERUSAHAAN TERDAFTAR", 124, "#2980B9")
         self.stat_skill = StatCard("SKILL TIDAK TERKLASIFIKASI", 78, "#E74C3C")
+        self.stat_user = StatCard("USER TERDAFTAR", 450, "#9B59B6")
         
         stats_layout.addWidget(self.stat_job)
         stats_layout.addWidget(self.stat_company)
         stats_layout.addWidget(self.stat_skill)
+        stats_layout.addWidget(self.stat_user)
         
         self.main_layout.addLayout(stats_layout)
 
@@ -178,6 +182,10 @@ class AdminDashboardPage(QWidget):
 
         self.main_layout.addLayout(lower_layout)
 
+        # 4. AKTIVITAS TERKINI ADMIN
+        self.aktivitas_widget = AktivitasTerkiniWidget(role="admin")
+        self.main_layout.addWidget(self.aktivitas_widget)
+
         # PANGGIL LOAD DATA PERTAMA KALI
         self.load_data()
 
@@ -186,10 +194,13 @@ class AdminDashboardPage(QWidget):
         try:
             # 1. Hitung total lowongan dari folder Job Archive
             total_fav = self.hitung_file_json("database/Database Permanen/Job Archive")
-            
+
             # 2. Update Label Angka
             self.stat_job.lbl_value.setText(str(total_fav))
-            
+
+            # 3. Refresh widget aktivitas admin
+            self.aktivitas_widget.refresh()
+
             print(f"Admin Dashboard Updated: {total_fav} lowongan ditemukan.")
         except Exception as e:
             print(f"Gagal update dashboard admin: {e}")

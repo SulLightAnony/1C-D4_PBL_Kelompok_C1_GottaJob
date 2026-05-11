@@ -1178,3 +1178,138 @@ class JobDetailPanel(QFrame):
         while layout.count():
             item = layout.takeAt(0)
             if item.widget(): item.widget().deleteLater()
+
+
+class AktivitasTerkiniWidget(QFrame):
+    """
+    Widget reusable untuk menampilkan aktivitas terkini.
+    Digunakan oleh DashboardPage (user) maupun AdminDashboardPage (admin).
+
+    role     : 'user' (tema teal) | 'admin' (tema dark blue)
+    max_items: jumlah maksimal aktivitas yang ditampilkan (default 4)
+    """
+
+    _THEME = {
+        "user":  {"accent": "#2C687B", "dot": "#52B788", "bg": "white"},
+        "admin": {"accent": "#1E3A5F", "dot": "#2980B9", "bg": "white"},
+    }
+
+    def __init__(self, role="user", max_items=4, parent=None):
+        super().__init__(parent)
+        self.role      = role
+        self.max_items = max_items
+
+        t = self._THEME.get(role, self._THEME["user"])
+        self._accent = t["accent"]
+        self._dot    = t["dot"]
+
+        self.setObjectName("AktivitasCard")
+        self.setStyleSheet("""
+            QFrame#AktivitasCard {
+                background-color: white;
+                border-radius: 16px;
+                border: none;
+            }
+            QLabel { border: none; background: transparent; }
+        """)
+
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(25, 20, 25, 20)
+        outer.setSpacing(0)
+
+        # --- Header ---
+        lbl_title = QLabel("AKTIVITAS TERKINI")
+        lbl_title.setStyleSheet(
+            f"font-weight: bold; color: {self._accent}; "
+            "font-size: 13px; letter-spacing: 1px;"
+        )
+        outer.addWidget(lbl_title)
+        outer.addSpacing(12)
+
+        # --- Container item (dikosongkan & diisi ulang saat refresh) ---
+        self._items_container = QWidget()
+        self._items_container.setStyleSheet("background: transparent;")
+        self._items_layout = QVBoxLayout(self._items_container)
+        self._items_layout.setContentsMargins(0, 0, 0, 0)
+        self._items_layout.setSpacing(0)
+        outer.addWidget(self._items_container)
+        outer.addStretch()
+
+        self.refresh()
+
+    # ------------------------------------------------------------------
+    def refresh(self):
+        """Muat ulang daftar aktivitas dari database."""
+        # Import lazy untuk menghindari circular import
+        from Modul.modul_database import get_aktivitas
+
+        # Bersihkan item lama
+        while self._items_layout.count():
+            child = self._items_layout.takeAt(0)
+            if child.widget():
+                child.widget().deleteLater()
+
+        logs = get_aktivitas(role=self.role)
+
+        if logs:
+            for i, log in enumerate(logs[: self.max_items]):
+                self._items_layout.addWidget(
+                    self._buat_item(log, show_divider=(i > 0))
+                )
+        else:
+            lbl = QLabel("Belum ada aktivitas.")
+            lbl.setStyleSheet("color: #95A5A6; font-size: 14px; padding: 10px 0;")
+            self._items_layout.addWidget(lbl)
+
+    # ------------------------------------------------------------------
+    def _buat_item(self, log, show_divider=True):
+        """Membuat satu widget baris aktivitas."""
+        wrapper = QWidget()
+        wrapper.setStyleSheet("background: transparent;")
+        wrap_lay = QVBoxLayout(wrapper)
+        wrap_lay.setContentsMargins(0, 0, 0, 0)
+        wrap_lay.setSpacing(0)
+
+        # Garis pemisah tipis antar item
+        if show_divider:
+            line = QFrame()
+            line.setFrameShape(QFrame.HLine)
+            line.setFixedHeight(1)
+            line.setStyleSheet("background-color: #F0F4F8; border: none;")
+            wrap_lay.addWidget(line)
+
+        content = QWidget()
+        content.setStyleSheet("background: transparent;")
+        c_lay = QVBoxLayout(content)
+        c_lay.setContentsMargins(0, 10, 0, 10)
+        c_lay.setSpacing(3)
+
+        pesan = log.get("pesan", "")
+        parts  = pesan.split("\n")
+        header = parts[0] if parts else "Aktivitas"
+        body   = parts[1] if len(parts) > 1 else ""
+
+        # Dot indikator + teks header
+        h_row = QHBoxLayout()
+        h_row.setSpacing(8)
+
+        dot = QLabel("●")
+        dot.setFixedWidth(14)
+        dot.setStyleSheet(f"color: {self._dot}; font-size: 10px;")
+
+        hdr_lbl = QLabel(header)
+        hdr_lbl.setStyleSheet("font-weight: 700; color: #2D3436; font-size: 14px;")
+        hdr_lbl.setWordWrap(True)
+
+        h_row.addWidget(dot, alignment=Qt.AlignTop)
+        h_row.addWidget(hdr_lbl, stretch=1)
+        c_lay.addLayout(h_row)
+
+        if body:
+            det = QLabel(body)
+            det.setStyleSheet("color: #636E72; font-size: 13px; margin-left: 22px;")
+            det.setWordWrap(True)
+            c_lay.addWidget(det)
+
+        wrap_lay.addWidget(content)
+        return wrapper
