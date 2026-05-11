@@ -11,7 +11,8 @@ import re
 #import modul pengolahan data
 from Modul.modul_pengolahan_data import hitung_persentase_skill, ambil_insight_pasar, ambil_top_skills, hitung_gap_skill, cari_archive_terdekat
 from Modul.modul_kategorisasi import pisahkan_skill
-from Modul.modul_database import get_database_permanen_dir, get_favorit, get_aktivitas
+from Modul.modul_database import get_database_permanen_dir, get_favorit
+from Modul.modul_antarmuka_pengguna import AktivitasTerkiniWidget
 
 class Card(QFrame):
     def __init__(self, parent=None, border_color="#AAD9B7"):
@@ -234,12 +235,11 @@ class DashboardPage(QWidget):
         self.ins_card_layout.setContentsMargins(20, 20, 20, 20)
         self.ins_card_layout.setSpacing(15)
         
-        self.act_card = Card(border_color="transparent")
-        self.act_lay = QVBoxLayout(self.act_card)
-        self.act_lay.setContentsMargins(25, 25, 25, 25)
-        
+        # Widget aktivitas terkini (reusable, sudah handle layout & data sendiri)
+        self.aktivitas_widget = AktivitasTerkiniWidget(role="user")
+
         right_col_layout.addWidget(self.insight_card)
-        right_col_layout.addWidget(self.act_card)
+        right_col_layout.addWidget(self.aktivitas_widget)
         right_col_layout.addStretch()
 
         # Aktivitas Terkini
@@ -264,7 +264,6 @@ class DashboardPage(QWidget):
         self.clear_layout(self.dev_layout)
         self.clear_layout(self.trend_layout)
         self.clear_layout(self.ins_card_layout)
-        self.clear_layout(self.act_lay)
 
         # 2. Penentuan Path Dasar
         current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -483,59 +482,8 @@ class DashboardPage(QWidget):
         else:
             self.ins_card_layout.addWidget(QLabel("Pilih lowongan untuk melihat insight."))
 
-        # 5. RENDER AKTIVITAS TERKINI (Clean & Modern UI)
-        act_lbl = QLabel("AKTIVITAS TERKINI")
-        act_lbl.setStyleSheet("font-weight: bold; color: #555; margin-bottom: 15px; font-size: 13px; letter-spacing: 1px;")
-        self.act_lay.addWidget(act_lbl)
-
-        logs = get_aktivitas()
-        if logs:
-            try:
-                for log in logs[:4]:
-                    pesan_teks = log.get("pesan", "")
-                    parts = pesan_teks.split("\n")
-                    header = parts[0] if len(parts) > 0 else "Aktivitas"
-                    body = parts[1] if len(parts) > 1 else ""
-                    
-                    # Container Utama per Item
-                    item_widget = QWidget()
-                    item_widget.setStyleSheet("background: transparent; border: none;")
-                    
-                    item_layout = QVBoxLayout(item_widget)
-                    item_layout.setContentsMargins(0, 5, 0, 12)
-                    item_layout.setSpacing(3)
-
-                    # Label Judul
-                    header_label = QLabel(header)
-                    header_label.setStyleSheet("""
-                            font-weight: 700; 
-                            color: #2D3436; 
-                            font-size: 16px; 
-                            background: transparent;
-                    """)
-                    header_label.setWordWrap(True)
-                    
-                    # Label Detail
-                    detail_label = QLabel(body if body else pesan_teks)
-                    detail_label.setStyleSheet("""
-                            color: #636E72; 
-                            font-size: 14px; 
-                            background: transparent;
-                            margin-top: 2px;
-                    """)
-                    detail_label.setWordWrap(True)
-
-                    if not body:
-                        item_layout.addWidget(header_label)
-                    else:
-                        item_layout.addWidget(header_label)
-                        item_layout.addWidget(detail_label)
-
-                    self.act_lay.addWidget(item_widget)
-            except Exception as e:
-                self.act_lay.addWidget(QLabel("Gagal memuat riwayat."))
-        else:
-            self.act_lay.addWidget(QLabel("Belum ada aktivitas."))
+        # 5. AKTIVITAS TERKINI — didelegasikan ke widget reusable
+        self.aktivitas_widget.refresh()
 
     #gap_skill
     def buka_gap_skill(self):

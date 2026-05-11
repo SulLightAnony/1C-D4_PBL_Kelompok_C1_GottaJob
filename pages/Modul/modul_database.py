@@ -304,8 +304,11 @@ def pindahkan_ke_database_permanen(nama_file):
     src = os.path.join(root, "database", "Database Sementara", nama_file)
     dst = os.path.join(root, "database", "Database Permanen", nama_file)
     
-def catat_aktivitas(pesan):
-    """Mencatat aktivitas user ke database/Database Permanen/Dashboard/aktivitas.json tanpa memblokir UI."""
+def catat_aktivitas(pesan, role="user"):
+    """
+    Mencatat aktivitas ke database/Database Permanen/Dashboard/aktivitas.json tanpa memblokir UI.
+    role: 'user' (default) untuk aktivitas pengguna, 'admin' untuk aktivitas administrator.
+    """
     def _catat():
         root = get_root_dir()
         dir_path = os.path.join(root, "database", "Database Permanen", "Dashboard")
@@ -324,11 +327,12 @@ def catat_aktivitas(pesan):
         # Tambahkan di awal agar yang terbaru muncul pertama
         aktivitas.insert(0, {
             "pesan": pesan,
-            "waktu": "" # Bisa ditambah timestamp jika perlu, tapi pesan sudah cukup untuk saat ini
+            "waktu": "",
+            "role": role
         })
         
-        # Batasi maksimal 6 aktivitas
-        aktivitas = aktivitas[:6]
+        # Batasi maksimal 20 entri (cukup untuk kedua role)
+        aktivitas = aktivitas[:20]
         
         try:
             with open(path, "w", encoding="utf-8") as f:
@@ -338,14 +342,18 @@ def catat_aktivitas(pesan):
 
     threading.Thread(target=_catat, daemon=True).start()
 
-def get_aktivitas():
-    """Mengambil daftar aktivitas terbaru."""
+def get_aktivitas(role="user"):
+    """
+    Mengambil daftar aktivitas terbaru berdasarkan role.
+    Entri lama yang tidak memiliki field 'role' dianggap milik 'user' (backward compatible).
+    """
     root = get_root_dir()
     path = os.path.join(root, "database", "Database Permanen", "Dashboard", "aktivitas.json")
     if os.path.exists(path):
         try:
             with open(path, "r", encoding="utf-8") as f:
-                return json.load(f)
+                semua = json.load(f)
+            return [a for a in semua if a.get("role", "user") == role]
         except:
             return []
     return []
