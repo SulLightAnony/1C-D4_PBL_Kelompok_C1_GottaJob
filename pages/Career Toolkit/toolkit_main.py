@@ -137,6 +137,9 @@ class CareerToolkitPage(QWidget):
             card.duplicate_clicked.connect(self.handle_duplicate)
             card.delete_clicked.connect(self.handle_delete)
             
+            if hasattr(card, 'preview_clicked'):
+                card.preview_clicked.connect(self.handle_dashboard_preview)
+            
             self.grid_layout.addWidget(card)
 
     # ==========================================
@@ -420,17 +423,69 @@ class CareerToolkitPage(QWidget):
 
     def setup_preview_ui(self):
         layout = QVBoxLayout(self.view_preview)
-        header = QLabel("Pratinjau CV"); header.setFont(QFont("Segoe UI", 18, QFont.Bold)); layout.addWidget(header)
-        self.preview_widget = CVPreviewWidget(); layout.addWidget(self.preview_widget)
-        footer = QHBoxLayout(); btn_back = QPushButton("← Kembali Pilih Desain"); btn_back.clicked.connect(lambda: self.stack.setCurrentIndex(2))
+        header = QLabel("Pratinjau CV")
+        header.setFont(QFont("Segoe UI", 18, QFont.Bold))
+        layout.addWidget(header)
         
-        # --- PERUBAHAN TEKS TOMBOL ---
-        btn_save = QPushButton("Simpan")
-        btn_save.setStyleSheet("background-color: #E28F41; color: white; padding: 10px 20px; border-radius: 6px; font-weight: bold;")
-        btn_save.clicked.connect(self.finalize_and_save)
+        self.preview_widget = CVPreviewWidget()
+        layout.addWidget(self.preview_widget)
         
-        footer.addWidget(btn_back); footer.addStretch(); footer.addWidget(btn_save); layout.addLayout(footer)
+        footer = QHBoxLayout()
+        
+        # --- PERUBAHAN: Jadikan tombol sebagai variabel instance (pakai self.) ---
+        self.btn_back_preview = QPushButton("← Kembali Pilih Desain")
+        self.btn_back_preview.clicked.connect(self.handle_preview_back) # Hubungkan ke fungsi cerdas
+        
+        self.btn_save_preview = QPushButton("Simpan")
+        self.btn_save_preview.setStyleSheet("background-color: #E28F41; color: white; padding: 10px 20px; border-radius: 6px; font-weight: bold;")
+        self.btn_save_preview.clicked.connect(self.finalize_and_save)
+        
+        footer.addWidget(self.btn_back_preview)
+        footer.addStretch()
+        footer.addWidget(self.btn_save_preview)
+        layout.addLayout(footer)
 
+    # --- TAMBAHKAN FUNGSI CERDAS INI ---
+    def handle_preview_back(self):
+        """Menentukan tujuan tombol kembali berdasarkan darimana asalnya"""
+        # Jika mode 'Lihat dari Dashboard' aktif
+        if getattr(self, 'preview_from_dashboard', False):
+            self.stack.setCurrentIndex(0) # Pulang ke Dashboard
+        else:
+            self.stack.setCurrentIndex(2) # Pulang ke halaman Pilih Template
+            
+    def handle_dashboard_preview(self, cv_id):
+        """Dijalankan khusus saat gambar CV di Dashboard diklik"""
+        all_cv = self.manager.get_all_cv()
+        data = next((item for item in all_cv if item["cv_id"] == cv_id), None)
+        
+        if data:
+            # Nyalakan "Lampu Sein" mode Dashboard
+            self.preview_from_dashboard = True
+            
+            # Ubah teks tombol dan sembunyikan tombol simpan (karena ini cuma lihat-lihat)
+            self.btn_back_preview.setText("← Kembali ke Dashboard")
+            self.btn_save_preview.setVisible(False) 
+            
+            # Render UI dengan data database dan pindah ke halaman Preview (Index 3)
+            template_id = data.get("template_id", "ats_classic")
+            self.preview_widget.render_preview(data, template_id)
+            self.stack.setCurrentIndex(3)
+
+    def go_to_preview(self, template_id):
+        """Dijalankan saat alur NORMAL (Buat/Edit CV -> Pilih Template)"""
+        self.selected_template = template_id
+        
+        # Matikan "Lampu Sein" mode Dashboard
+        self.preview_from_dashboard = False
+        
+        # Kembalikan kondisi tombol seperti semula
+        self.btn_back_preview.setText("← Kembali Pilih Desain")
+        self.btn_save_preview.setVisible(True) 
+        
+        self.preview_widget.render_preview(self.temp_form_data, template_id)
+        self.stack.setCurrentIndex(3)
+            
     def go_to_preview(self, template_id):
         self.selected_template = template_id; self.preview_widget.render_preview(self.temp_form_data, template_id); self.stack.setCurrentIndex(3)
 
