@@ -26,17 +26,17 @@ def proses_update_job(job_id, form_data, current_data):
     if not perusahaan:
         return False, "Nama Perusahaan wajib diisi!", current_data
 
-    # Validasi Tanggal Kadaluarsa
     selected_date = form_data.get('date', QDate.currentDate())
-    if selected_date <= QDate.currentDate():
-        return False, "Tanggal Kadaluarsa tidak boleh hari ini atau di masa lalu!", current_data
-
     g_min = form_data.get('gaji_min', '').strip()
     g_max = form_data.get('gaji_max', '').strip()
     rentang_final = f"{g_min}-{g_max}" if g_min and g_max else (g_min or g_max or "-")
 
-    skills_list = form_data.get('skills', [])
-    skills_str = "|".join(skills_list)
+    h_raw = form_data.get('hard_skills', '')
+    s_raw = form_data.get('soft_skills', '')
+    if isinstance(h_raw, list): h_raw = ", ".join(h_raw)
+    if isinstance(s_raw, list): s_raw = ", ".join(s_raw)
+    
+    skills_str = f"{h_raw}||{s_raw}"
 
     # Cari data lama untuk mempertahankan field non-form (seperti Is_lamar)
     old_job = next((j for j in current_data if j.get("id") == job_id), {})
@@ -48,6 +48,8 @@ def proses_update_job(job_id, form_data, current_data):
         "Jenis_Pekerjaan": form_data.get('jenis', ''),
         "Lokasi": form_data.get('lokasi', '').strip(),
         "Rentang_Gaji": rentang_final,
+        "Hard_Skills": h_raw,
+        "Soft_Skills": s_raw,
         "Skills": skills_str,
         "Link_Lowongan": form_data.get('link', '').strip(),
         "Deskripsi_Pekerjaan": form_data.get('desc', '').strip(),

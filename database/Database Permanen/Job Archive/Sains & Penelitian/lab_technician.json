@@ -1,17 +1,1 @@
-[
-    {
-        "id": "1d2054a8-7f3d-4859-aad4-8b8bcf3557a9",
-        "Judul_Pekerjaan": "Lab Technician",
-        "Nama_Perusahaan": "BioLab Research",
-        "Jenis_Pekerjaan": "Penuh Waktu",
-        "Lokasi": "Yogyakarta",
-        "Rentang_Gaji": "6.000.000 - 8.000.000",
-        "Skills": "Laboratory|Biology|Chemistry",
-        "Kategori": "Sains & Penelitian",
-        "Tanggal_Kadaluarsa": "12/06/2026",
-        "Deskripsi_Pekerjaan": "Membantu penelitian biologi di lab.",
-        "Link_Lowongan": "https://example.com/lab",
-        "source": "job_posting",
-        "Is_lamar": false
-    }
-]
+[]

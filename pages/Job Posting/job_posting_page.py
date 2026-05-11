@@ -19,7 +19,8 @@ from constants import (
     plus_icon_path, search_icon_path, down_icon_path,
     send_icon_path, checked_icon_path, currency_icon_path,
     edit_icon_path, location_icon_path, calendar_icon_path,
-    link_icon_path, suitcase_icon_path
+    link_icon_path, suitcase_icon_path, company_icon_path,
+    location_detail_icon_path, green_check_icon_path
 )
 from flow_layout import FlowLayout
 from skill_tag_input import SkillTagInput
@@ -78,9 +79,35 @@ class JobDetailPage(QWidget):
         self.lbl_title.setWordWrap(True)
         h_layout.addWidget(self.lbl_title)
 
-        self.lbl_meta = QLabel("Company • Location")
-        self.lbl_meta.setStyleSheet("color: #9FE1CB; font-size: 14px; border: none; background: transparent;")
-        h_layout.addWidget(self.lbl_meta)
+        self.meta_info_layout = QHBoxLayout()
+        self.meta_info_layout.setSpacing(20)
+        
+        def create_meta_label(icon_path):
+            container = QWidget()
+            container.setStyleSheet("background: transparent; border: none;")
+            lay = QHBoxLayout(container)
+            lay.setContentsMargins(0, 0, 0, 0)
+            lay.setSpacing(8)
+            
+            icon_lbl = QLabel()
+            pix = QPixmap(icon_path)
+            if not pix.isNull():
+                icon_lbl.setPixmap(pix.scaled(18, 18, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            
+            text_lbl = QLabel("-")
+            text_lbl.setStyleSheet("color: #9FE1CB; font-size: 14px; font-weight: 500; border: none; background: transparent;")
+            
+            lay.addWidget(icon_lbl)
+            lay.addWidget(text_lbl)
+            return container, text_lbl
+
+        self.widget_perusahaan, self.lbl_perusahaan = create_meta_label(company_icon_path)
+        self.widget_lokasi, self.lbl_lokasi = create_meta_label(location_detail_icon_path)
+        
+        self.meta_info_layout.addWidget(self.widget_perusahaan)
+        self.meta_info_layout.addWidget(self.widget_lokasi)
+        self.meta_info_layout.addStretch()
+        h_layout.addLayout(self.meta_info_layout)
 
         # Badges
         self.badge_layout = QHBoxLayout()
@@ -141,14 +168,19 @@ class JobDetailPage(QWidget):
         # Benefit & Kualifikasi
         bk_row = QHBoxLayout()
         bk_row.setSpacing(40)
+        bk_row.setAlignment(Qt.AlignTop) # Tambahkan ini agar sejajar di atas
         
         self.lay_benefit = QVBoxLayout()
+        self.lay_benefit.setSpacing(12)
         self.lay_benefit.addWidget(self._create_section_lbl("BENEFIT PEKERJAAN"))
         bk_row.addLayout(self.lay_benefit, 1)
+        bk_row.setAlignment(self.lay_benefit, Qt.AlignTop) # Paksa sejajar atas
 
         self.lay_kual = QVBoxLayout()
+        self.lay_kual.setSpacing(12)
         self.lay_kual.addWidget(self._create_section_lbl("KUALIFIKASI & PERSYARATAN"))
         bk_row.addLayout(self.lay_kual, 1)
+        bk_row.setAlignment(self.lay_kual, Qt.AlignTop) # Paksa sejajar atas
 
         c_lay.addLayout(bk_row)
         c_lay.addStretch()
@@ -195,11 +227,7 @@ class JobDetailPage(QWidget):
         """)
         self.btn_lamar.clicked.connect(lambda: self.lamar_requested.emit(self.job_data))
         f_lay.addWidget(self.btn_lamar)
-        
         f_lay.addStretch()
-        self.lbl_sisa = QLabel("Sisa - hari")
-        self.lbl_sisa.setStyleSheet("color: #718096; font-size: 13px; font-weight: 500;")
-        f_lay.addWidget(self.lbl_sisa)
 
         layout.addWidget(footer)
 
@@ -246,14 +274,14 @@ class JobDetailPage(QWidget):
         return box
 
     def _populate_list(self, layout, items_str):
-        # Clear previous items except label
+        # Clear previous items except label (index 0)
         while layout.count() > 1:
-            it = layout.takeAt(1)
-            if it.widget(): it.widget().deleteLater()
-            elif it.layout():
-                while it.layout().count():
-                    w = it.layout().takeAt(0).widget()
-                    if w: w.deleteLater()
+            item = layout.takeAt(1)
+            if item.widget():
+                item.widget().deleteLater()
+            elif item.layout():
+                # Recursive clear for nested layouts
+                self._clear_layout(item.layout())
         
         items = [i.strip() for i in items_str.split("|") if i.strip()]
         if not items:
@@ -265,31 +293,62 @@ class JobDetailPage(QWidget):
         for text in items:
             row = QHBoxLayout()
             row.setSpacing(10)
-            check = QLabel("✓")
-            check.setStyleSheet("color: #2C687B; font-weight: bold; font-size: 16px; border: none;")
-            row.addWidget(check, 0, Qt.AlignTop)
+            check = QLabel()
+            pix = QPixmap(green_check_icon_path)
+            if not pix.isNull():
+                check.setPixmap(pix.scaled(16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            check.setStyleSheet("border: none; background: transparent; margin-top: 2px;")
+            row.addWidget(check, 0, Qt.AlignTop) # Tetap AlignTop tapi dengan margin-top agar sejajar baseline
             
             t_lbl = QLabel(text)
             t_lbl.setWordWrap(True)
-            t_lbl.setStyleSheet("color: #334155; font-size: 16px; line-height: 140%; border: none;")
+            t_lbl.setStyleSheet("color: #334155; font-size: 16px; line-height: 120%; border: none; padding: 0px;")
             row.addWidget(t_lbl, 1)
             layout.addLayout(row)
+        
+        layout.addStretch() # Push items to top
+    
+    def _clear_layout(self, layout):
+        while layout.count():
+            item = layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+            elif item.layout():
+                self._clear_layout(item.layout())
 
     def setData(self, data):
         self.job_data = data
         self.lbl_title.setText(data.get("Judul_Pekerjaan", "Detail Lowongan"))
-        self.lbl_meta.setText(f"{data.get('Nama_Perusahaan', '-')}  •  {data.get('Lokasi', '-')}")
+        self.lbl_perusahaan.setText(data.get("Nama_Perusahaan", "-"))
+        self.lbl_lokasi.setText(data.get("Lokasi", "-"))
 
         # Refresh Badges
         while self.badge_layout.count():
             item = self.badge_layout.takeAt(0)
             if item.widget(): item.widget().deleteLater()
         
+        # Style untuk Badge (Outlined & Bulat)
+        badge_style = "border: 1px solid rgba(255,255,255,0.4); background-color: transparent; color: white; border-radius: 20px; padding: 4px 16px; font-size: 11px; font-weight: 600;"
+        
         for b in [data.get("Jenis_Pekerjaan"), data.get("Kategori")]:
             if b:
                 lbl = QLabel(b)
-                lbl.setStyleSheet("background-color: rgba(255,255,255,0.15); color: white; border-radius: 12px; padding: 4px 14px; font-size: 11px; font-weight: 600; border: none;")
+                lbl.setStyleSheet(badge_style)
                 self.badge_layout.addWidget(lbl)
+
+        # Sisa Hari Badge (Disamakan gayanya)
+        try:
+            d_str = data.get("Tanggal_Kadaluarsa", "")
+            d = datetime.datetime.strptime(d_str, "%d/%m/%Y").date()
+            diff = (d - datetime.date.today()).days
+            sisa_text = f"Sisa {max(0, diff)} hari" if diff >= 0 else "Berakhir"
+        except:
+            sisa_text = "Sisa - hari"
+            
+        self.lbl_sisa_badge = QLabel(sisa_text)
+        self.lbl_sisa_badge.setStyleSheet(badge_style)
+        self.badge_layout.addWidget(self.lbl_sisa_badge)
+        
         self.badge_layout.addStretch()
 
         # Refresh Meta Grid
@@ -348,14 +407,8 @@ class JobDetailPage(QWidget):
         self.btn_lamar.setEnabled(not is_applied)
         self.btn_lamar.setIcon(QIcon(checked_icon_path if is_applied else send_icon_path))
 
-        # Remaining days
-        try:
-            d_str = data.get("Tanggal_Kadaluarsa", "")
-            d = datetime.datetime.strptime(d_str, "%d/%m/%Y").date()
-            diff = (d - datetime.date.today()).days
-            self.lbl_sisa.setText(f"Sisa {max(0, diff)} hari" if diff >= 0 else "Lowongan Berakhir")
-        except:
-            self.lbl_sisa.setText("Sisa - hari")
+        # Remaining days logic moved to badge layout
+        pass
 
 class SelectCVDialog(QDialog):
     def __init__(self, parent=None):
@@ -990,13 +1043,18 @@ class JobPostingPage(QWidget):
             }
         """)
 
-        self.skill_input = SkillTagInput(btn_text="Tambah")
-        lbl_skill_hint = QLabel('Ketik skill lalu tekan Enter atau klik Tambah')
-        lbl_skill_hint.setStyleSheet("color: #777; font-size: 11px; margin-top: 2px; margin-left: 2px; border: none; background: transparent;")
-        skills_group = QWidget()
-        skills_group_layout = QVBoxLayout(skills_group)
-        skills_group_layout.setContentsMargins(0, 0, 0, 0); skills_group_layout.setSpacing(4)
-        skills_group_layout.addWidget(self.skill_input); skills_group_layout.addWidget(lbl_skill_hint)
+        self.f_hard_skills = SkillTagInput(placeholder="Ketik hard skill & Enter...", btn_text="Tambah")
+        self.f_soft_skills = SkillTagInput(placeholder="Ketik soft skill & Enter...", btn_text="Tambah")
+
+        hard_group = QWidget(); hard_group.setStyleSheet("background: transparent;")
+        hard_lay = QVBoxLayout(hard_group); hard_lay.setContentsMargins(0,0,0,0); hard_lay.setSpacing(4)
+        hard_lay.addWidget(self.f_hard_skills)
+        hard_lay.addWidget(QLabel("<font color='#777' size='1'>Ketik hard skill lalu tekan Enter atau klik Tambah</font>"))
+
+        soft_group = QWidget(); soft_group.setStyleSheet("background: transparent;")
+        soft_lay = QVBoxLayout(soft_group); soft_lay.setContentsMargins(0,0,0,0); soft_lay.setSpacing(4)
+        soft_lay.addWidget(self.f_soft_skills)
+        soft_lay.addWidget(QLabel("<font color='#777' size='1'>Ketik soft skill lalu tekan Enter atau klik Tambah</font>"))
 
         self.f_kategori = QComboBox()
         self.f_kategori.setEditable(True)
@@ -1026,7 +1084,8 @@ class JobPostingPage(QWidget):
             (make_field("Lokasi", self.f_lokasi), False),
             (make_field("Rentang Gaji (Angka Saja)", gaji_container), False),
             (make_field("Tanggal Kadaluarsa", self.f_date), False),
-            (make_field("Skills", skills_group), True),
+            (make_field("Hard Skills", hard_group), False),
+            (make_field("Soft Skills", soft_group), False),
             (make_field("Kategori Pekerjaan", self.f_kategori), True),
             (make_field("Link Lowongan", self.f_link), True),
             (make_field("Deskripsi Pekerjaan", self.f_desc), True),
@@ -1111,7 +1170,8 @@ class JobPostingPage(QWidget):
             "lokasi": self.f_lokasi.text().strip(),
             "gaji_min": self.f_gaji_min.text().strip(),
             "gaji_max": self.f_gaji_max.text().strip(),
-            "skills": self.skill_input.get_skills(),
+            "hard_skills": self.f_hard_skills.get_skills(),
+            "soft_skills": self.f_soft_skills.get_skills(),
             "link": self.f_link.text().strip(),
             "desc": self.f_desc.toPlainText().strip(),
             "benefit": "|".join(self.f_benefit.get_skills()),
@@ -1143,7 +1203,8 @@ class JobPostingPage(QWidget):
             w.clear()
         self.f_kategori.setCurrentIndex(0)
         self.f_kategori.lineEdit().clear()
-        self.skill_input.clear_all()
+        self.f_hard_skills.clear_all()
+        self.f_soft_skills.clear_all()
         self.f_desc.clear()
         self.f_benefit.clear_all()
         self.f_kualifikasi.clear_all()
@@ -1161,7 +1222,8 @@ class JobPostingPage(QWidget):
             w.clear()
         self.f_kategori.setCurrentIndex(0)
         self.f_kategori.lineEdit().clear()
-        self.skill_input.clear_all()
+        self.f_hard_skills.clear_all()
+        self.f_soft_skills.clear_all()
         self.f_desc.clear()
         self.f_benefit.clear_all()
         self.f_kualifikasi.clear_all()
@@ -1194,10 +1256,17 @@ class JobPostingPage(QWidget):
             self.f_gaji_min.setText(raw_sal)
             self.f_gaji_max.clear()
             
-        # Muat ulang skills
-        raw_skills = job_data.get("Skills", "")
-        skills_list = [s.strip() for s in raw_skills.split('|') if s.strip()] if raw_skills else []
-        self.skill_input.load_skills(skills_list)
+        # Muat ulang skills (Hard & Soft)
+        h_raw = job_data.get("Hard_Skills", "")
+        s_raw = job_data.get("Soft_Skills", "")
+        if not h_raw and not s_raw and job_data.get("Skills"):
+            # Fallback data lama (||) atau split (|)
+            parts = job_data.get("Skills", "").split("||")
+            h_raw = parts[0] if len(parts) > 0 else ""
+            s_raw = parts[1] if len(parts) > 1 else ""
+            
+        self.f_hard_skills.load_skills([s.strip() for s in h_raw.replace(",", "|").split("|") if s.strip()])
+        self.f_soft_skills.load_skills([s.strip() for s in s_raw.replace(",", "|").split("|") if s.strip()])
         self.f_link.setText(job_data.get("Link_Lowongan", ""))
         self.f_desc.setPlainText(job_data.get("Deskripsi_Pekerjaan", ""))
         
