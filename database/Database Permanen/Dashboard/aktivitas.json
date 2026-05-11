@@ -1,5 +1,17 @@
 [
     {
+        "pesan": "<b>Lowongan disimpan</b><br>ALTHO Automation",
+        "waktu": ""
+    },
+    {
+        "pesan": "<b>Lowongan disimpan</b><br>Web Developer",
+        "waktu": ""
+    },
+    {
+        "pesan": "<b>Live Discovery Selesai</b><br>temp_game_developer · 3 hasil",
+        "waktu": ""
+    },
+    {
         "pesan": "<b>Lowongan Ditambah</b><br>jepang",
         "waktu": ""
     },
@@ -9,18 +21,6 @@
     },
     {
         "pesan": "<b>Lowongan Ditambah</b><br>jepang",
-        "waktu": ""
-    },
-    {
-        "pesan": "<b>Lowongan Dihapus</b><br>asda",
-        "waktu": ""
-    },
-    {
-        "pesan": "<b>Lowongan Ditambah</b><br>asda",
-        "waktu": ""
-    },
-    {
-        "pesan": "<b>Lowongan Dihapus</b><br>Staff Admin",
         "waktu": ""
     }
 ]

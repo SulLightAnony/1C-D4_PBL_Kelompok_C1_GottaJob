@@ -1,0 +1,88 @@
+[
+    {
+        "Judul_Pekerjaan": "Unity Game Developer (Mobile)",
+        "Jenis_Pekerjaan": "Freelance",
+        "Nama_Perusahaan": "Web Developer",
+        "Lokasi": "-",
+        "Rentang_Gaji": "Rp5.000.000 - 10.000.000/Bulan",
+        "Bonus": "-",
+        "Kategori_Utama": "Komputer & Perangkat Lunak",
+        "Sub_Kategori": "Game Developer",
+        "Skills": "C# | Unity NGUI | Unity3D",
+        "Benefit_Pekerjaan": "-",
+        "Kualifikasi_Persyaratan": "Mobile Track Record: At least 2+ years of experience specifically developing and deploying games for iOS and Android. | Tech Stack: Proficiency in C# and Unity, with specific experience in URP (Universal Render Pipeline) for mobile performance. | Input Systems: Experience with Unity’s Input System package for touch gestures and multi-touch functionality. | Portfolio: Mandatory. Must show mobile-specific projects. Bonus points for links to live games on the App Store or Google Play. | Optimization Skills: Knowledge of Draw Call Batching, Occlusion Culling, and Shader optimization for mobile GPUs. | Project Details | Type: Project-Based. | Location: Hybrid. | Duration: +/- 3 months.",
+        "Deskripsi_Pekerjaan": "We are looking for a Unity Game Developer with a focus on Mobile Platforms (iOS/Android) for a high-priority project.\nThis is a project-based role for a developer who understands that mobile development isn’t just about \"shrinking\" a PC game—it’s about performance, accessibility, and intuitive touch gameplay.\nMobile Gameplay: Implement responsive touch-based controls and mobile-friendly UI/UX.\nOptimization: Use the Unity Profiler to identify and fix bottlenecks in CPU, GPU, and memory usage to maintain a high FPS.\nAsset Management: Efficiently manage texture compression, draw calls, and build sizes for App Store and Google Play requirements.\nSystem Integration: Handle mobile-specific features such as push notifications, in-app purchases, or ad SDKs if required.",
+        "Link_Lowongan": "https://glints.com/id/opportunities/jobs/unity-game-developer-mobile/499d2935-2cd4-4452-bd4f-de2b836b1eef",
+        "match_percentage": 66.7,
+        "matched_categorized": {
+            "hard_skills": [
+                "c#",
+                "unity3d"
+            ],
+            "soft_skills": [],
+            "positions": []
+        },
+        "all_categorized": {
+            "hard_skills": [
+                "C#",
+                "Unity NGUI",
+                "Unity3D"
+            ],
+            "soft_skills": [],
+            "positions": []
+        },
+        "matched_skills": [
+            "c#",
+            "unity3d"
+        ],
+        "is_type_match": true
+    },
+    {
+        "Judul_Pekerjaan": "Unity Game Developer",
+        "Jenis_Pekerjaan": "Freelance",
+        "Nama_Perusahaan": "ALTHO Automation",
+        "Lokasi": "Jl. Manggala 2 Blok M1 No.8, RT.003/RW.008, Cipondoh Makmur, Kec. Cipondoh, Kota Tangerang, Banten 15148",
+        "Rentang_Gaji": "-",
+        "Bonus": "-",
+        "Kategori_Utama": "Komputer & Perangkat Lunak",
+        "Sub_Kategori": "Game Developer",
+        "Skills": "Redis | Game Design | Go / Golang | MongoDB | Unity3D | Game Development | Unreal Engine | C# | C++",
+        "Benefit_Pekerjaan": "Career Path",
+        "Kualifikasi_Persyaratan": "Pengalaman dengan Unity Engine (C#) | Memahami game object, scene, prefab, animation basic | Mampu membuat: | UI sederhana (menu, panel, dashboard) | interaction system (click-based / trigger) | Pengalaman build ke: | WebGL atau Android | Familiar dengan: | JSON / API (nilai plus) | Basic understanding: | game loop & state management | 🎮 Nice to Have (Nilai Plus) | Pernah membuat: | simulation game / serious game | Pengalaman: | Three.js / web 3D | Basic knowledge: | industrial process / manufacturing | Pengalaman integrasi: | dashboard / analytics | 🎯 Scope MVP (yang akan dikerjakan) | Developer akan membangun: | 🎮 3D Factory Simulation: | 1 area pabrik sederhana | 3–5 mesin (3D object) | Status mesin (normal / warning / breakdown) | 🧠 Gameplay: | Klik mesin → muncul info panel | Pilihan aksi: | repair | inspect | improve | Sistem score: | OEE naik/turun | 📊 UI: | Dashboard sederhana: | availability | performance | quality",
+        "Deskripsi_Pekerjaan": "🎯 Role Overview\nKami mencari Unity Game Developer untuk membangun Industrial Simulation Game (3D) yang digunakan sebagai media training untuk TPM, OEE, dan Continuous Improvement.\nProduk ini bukan game hiburan, melainkan interactive training simulator untuk industri\nMengembangkan 3D simulation game berbasis Unity\nMembangun environment sederhana (factory layout)\nMengintegrasikan game logic berbasis industri (TPM, OEE, dll)\nMembuat interaction system (click, event, decision-based gameplay)\nMenghubungkan UI dengan data & scoring system\nOptimasi performa untuk WebGL / Android\nIntegrasi asset dari Unity Asset Store\nBerkolaborasi dengan tim (product & domain expert)",
+        "Link_Lowongan": "https://glints.com/id/opportunities/jobs/unity-game-developer/070422b7-8fa3-449c-a15d-3a777c4c500a",
+        "match_percentage": 44.4,
+        "matched_categorized": {
+            "hard_skills": [
+                "game design",
+                "unity3d",
+                "c#",
+                "c++"
+            ],
+            "soft_skills": [],
+            "positions": []
+        },
+        "all_categorized": {
+            "hard_skills": [
+                "Redis",
+                "Game Design",
+                "Go / Golang",
+                "MongoDB",
+                "Unity3D",
+                "Game Development",
+                "Unreal Engine",
+                "C#",
+                "C++"
+            ],
+            "soft_skills": [],
+            "positions": []
+        },
+        "matched_skills": [
+            "game design",
+            "unity3d",
+            "c#",
+            "c++"
+        ],
+        "is_type_match": true
+    }
+]
