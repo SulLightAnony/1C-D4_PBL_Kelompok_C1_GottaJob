@@ -3,7 +3,7 @@
         "cv_id": "ad3e1931",
         "cv_name": "CV Robert Johnson",
         "photo": {
-            "path": "D:/Download/Pictures/Open Peeps - Avatar (2).png",
+            "path": "",
             "ratio": "3x4"
         },
         "full_name": "Robert Johnson",
@@ -58,7 +58,7 @@
                 "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
             }
         ],
-        "last_updated": "2026-05-10 20:30",
+        "last_updated": "2026-05-11 14:02",
         "template_id": "ats_minimalist"
     },
     {
