@@ -306,15 +306,17 @@ def pindahkan_ke_database_permanen(nama_file):
     
 def catat_aktivitas(pesan, role="user"):
     """
-    Mencatat aktivitas ke database/Database Permanen/Dashboard/aktivitas.json tanpa memblokir UI.
-    role: 'user' (default) untuk aktivitas pengguna, 'admin' untuk aktivitas administrator.
+    Mencatat aktivitas ke file terpisah berdasarkan role (user vs admin) tanpa memblokir UI.
     """
     def _catat():
         root = get_root_dir()
         dir_path = os.path.join(root, "database", "Database Permanen", "Dashboard")
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
-        path = os.path.join(dir_path, "aktivitas.json")
+            
+        # Pisah nama file berdasarkan role
+        file_name = "aktivitas_admin.json" if role == "admin" else "aktivitas_user.json"
+        path = os.path.join(dir_path, file_name)
         
         aktivitas = []
         if os.path.exists(path):
@@ -323,6 +325,16 @@ def catat_aktivitas(pesan, role="user"):
                     aktivitas = json.load(f)
             except:
                 aktivitas = []
+        else:
+            # Fallback backward compatibility: Coba migrasikan dari aktivitas.json lama jika ada
+            old_path = os.path.join(dir_path, "aktivitas.json")
+            if os.path.exists(old_path):
+                try:
+                    with open(old_path, "r", encoding="utf-8") as f:
+                        semua = json.load(f)
+                    aktivitas = [a for a in semua if a.get("role", "user") == role]
+                except:
+                    aktivitas = []
                 
         # Tambahkan di awal agar yang terbaru muncul pertama
         aktivitas.insert(0, {
@@ -331,7 +343,7 @@ def catat_aktivitas(pesan, role="user"):
             "role": role
         })
         
-        # Batasi maksimal 20 entri (cukup untuk kedua role)
+        # Batasi maksimal 20 entri per file
         aktivitas = aktivitas[:20]
         
         try:
@@ -344,18 +356,30 @@ def catat_aktivitas(pesan, role="user"):
 
 def get_aktivitas(role="user"):
     """
-    Mengambil daftar aktivitas terbaru berdasarkan role.
-    Entri lama yang tidak memiliki field 'role' dianggap milik 'user' (backward compatible).
+    Mengambil daftar aktivitas terbaru berdasarkan role dari file terpisah.
     """
     root = get_root_dir()
-    path = os.path.join(root, "database", "Database Permanen", "Dashboard", "aktivitas.json")
+    dir_path = os.path.join(root, "database", "Database Permanen", "Dashboard")
+    file_name = "aktivitas_admin.json" if role == "admin" else "aktivitas_user.json"
+    path = os.path.join(dir_path, file_name)
+    
     if os.path.exists(path):
         try:
             with open(path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except:
+            return []
+            
+    # Fallback backward compatibility: Coba baca dari aktivitas.json lama
+    old_path = os.path.join(dir_path, "aktivitas.json")
+    if os.path.exists(old_path):
+        try:
+            with open(old_path, "r", encoding="utf-8") as f:
                 semua = json.load(f)
             return [a for a in semua if a.get("role", "user") == role]
         except:
             return []
+            
     return []
 
 def get_all_saved_links():

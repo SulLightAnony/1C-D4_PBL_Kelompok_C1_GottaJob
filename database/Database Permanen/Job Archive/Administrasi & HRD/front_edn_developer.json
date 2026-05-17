@@ -16,6 +16,15 @@
         "Kategori": "Administrasi & HRD",
         "Tanggal_Kadaluarsa": "10/06/2026",
         "Is_lamar": false,
-        "source": "job_posting"
+        "source": "job_posting",
+        "all_categorized": {
+            "hard_skills": [
+                "Python, Javascript"
+            ],
+            "soft_skills": [
+                "Yapping"
+            ],
+            "positions": []
+        }
     }
 ]

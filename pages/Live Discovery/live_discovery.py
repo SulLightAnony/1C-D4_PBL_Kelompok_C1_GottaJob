@@ -28,7 +28,7 @@ if db_mod_dir not in sys.path:
 from modul_visualisasi_data import PieChartWidget
 from modul_antarmuka_pengguna import (
     JobMatchResultContainer, JobDetailPanel, JobDashboardWidget, 
-    show_message, show_question, ActionButton
+    show_message, show_question, ActionButton, buat_tombol_kembali
 )
 from modul_database import (simpan_ke_database_sementara, simpan_ke_database_permanen, 
                             bersihkan_database_sementara, set_favorit, get_favorit, catat_aktivitas, get_all_saved_links)
@@ -141,7 +141,7 @@ class ScraperWorker(QObject):
 # ─────────────────────────────────────────────────────────────
 STYLE = """
 QWidget#LiveDiscoveryPage {
-    background-color: #F3F4F6;
+    background-color: transparent;
 }
 
 /* ── Header bar ── */
@@ -214,6 +214,7 @@ class LiveDiscoveryPage(QWidget):
 
     def update_theme_mode(self, is_admin):
         """Memperbarui warna tombol di Live Discovery dan komponen dashboard anaknya."""
+        self.is_admin = is_admin
         theme = "admin" if is_admin else "user"
         if hasattr(self, 'btn_scrape'):
             self.btn_scrape.set_theme(theme)
@@ -222,6 +223,7 @@ class LiveDiscoveryPage(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.is_admin = False
         self.setObjectName("LiveDiscoveryPage")
         self.setStyleSheet(STYLE)
 
@@ -267,23 +269,8 @@ class LiveDiscoveryPage(QWidget):
         header_lay.addWidget(lbl_table_title)
         header_lay.addStretch()
         
-        self.btn_back = QPushButton("← Kembali")
-        self.btn_back.setCursor(Qt.PointingHandCursor)
+        self.btn_back = buat_tombol_kembali("← Kembali")
         self.btn_back.clicked.connect(self._back_to_dashboard)
-        self.btn_back.setStyleSheet("""
-            QPushButton {
-                background-color: transparent;
-                color: #2C687B;
-                font-size: 14px;
-                font-weight: bold;
-                border: 1px solid #2C687B;
-                border-radius: 6px;
-                padding: 5px 15px;
-            }
-            QPushButton:hover {
-                background-color: #E2EFF1;
-            }
-        """)
         header_lay.addWidget(self.btn_back)
         table_lay.addLayout(header_lay)
         table_lay.addSpacing(15)
@@ -412,7 +399,8 @@ class LiveDiscoveryPage(QWidget):
                 with open(file_path, "r", encoding="utf-8") as f:
                     total_jobs = len(json.load(f))
                 
-                catat_aktivitas(f"<b>Live Discovery Selesai</b><br>{os.path.basename(file_path).replace('.json', '')} · {total_jobs} hasil")
+                role = "admin" if getattr(self, 'is_admin', False) else "user"
+                catat_aktivitas(f"<b>Live Discovery Selesai</b><br>{os.path.basename(file_path).replace('.json', '')} · {total_jobs} hasil", role=role)
 
                 unique_types = ambil_jenis_pekerjaan_unik(file_path)
                 
@@ -517,7 +505,8 @@ class LiveDiscoveryPage(QWidget):
             fav_link = fav.get("Link_Lowongan") if fav else None
             saved_links = get_all_saved_links()
             self.match_results.set_data(self.current_matches, self.user_selected_skills, fav_link=fav_link, saved_links=saved_links)
-            catat_aktivitas(f"<b>Lowongan disimpan</b><br>{job_data.get('Nama_Perusahaan')}")
+            role = "admin" if getattr(self, 'is_admin', False) else "user"
+            catat_aktivitas(f"<b>Lowongan disimpan</b><br>{job_data.get('Nama_Perusahaan')}", role=role)
             self.favorite_changed.emit()
         else:
             show_message(self, "Gagal", "Gagal menyimpan lowongan secara permanen.")
@@ -543,7 +532,8 @@ class LiveDiscoveryPage(QWidget):
         if set_favorit(job_data):
             show_message(self, "Berhasil", f"'{job_data.get('Judul_Pekerjaan')}' sekarang menjadi favorit utama Anda!")
             
-            catat_aktivitas(f"<b>Pekerjaan Favorit Diganti</b><br>{job_data.get('Judul_Pekerjaan')}")
+            role = "admin" if getattr(self, 'is_admin', False) else "user"
+            catat_aktivitas(f"<b>Pekerjaan Favorit Diganti</b><br>{job_data.get('Judul_Pekerjaan')}", role=role)
             self.favorite_changed.emit()
 
             # 4. Refresh tabel untuk mengubah warna tombol

@@ -58,7 +58,7 @@ class AppRouter(QMainWindow):
         super().__init__()
         self.menu_texts = {
             "Dashboard": "  Dashboard",
-            "Dashboard Admin": "  Dashboard Admin",
+            "Dashboard Admin": "  Dashboard",
             "Skill Manager": "  Skill Manager",
             "Live Discovery": "  Live Discovery",
             "Job Archive": "  Job Archive",
@@ -113,6 +113,8 @@ class AppRouter(QMainWindow):
         """)
 
         self.layout_sidebar = QVBoxLayout(self.sidebar)
+        self.layout_sidebar.setContentsMargins(0, 0, 0, 0)
+        self.layout_sidebar.setSpacing(0)
         self.layout_sidebar.setAlignment(Qt.AlignTop)
 
         self.setup_logo()
@@ -127,7 +129,7 @@ class AppRouter(QMainWindow):
         self.menu_buttons = []
         
         self.btn_dashboard = self.create_menu_btn("  Dashboard", 0, "Dashboard", "dashboard.png")
-        self.btn_admin     = self.create_menu_btn("  Dashboard Admin", 5, "Dashboard Admin", "dahboard.png")
+        self.btn_admin     = self.create_menu_btn("  Dashboard", 5, "Dashboard Admin", "dahboard.png")
         self.btn_skill_manager = self.create_menu_btn("  Skill Manager", 6, "Skill Manager", "settings.png")
         self.btn_discovery = self.create_menu_btn("  Live Discovery", 1, "Live Discovery", "search.png")
         self.btn_archive   = self.create_menu_btn("  Job Archive", 2, "Job Archive", "folder.png")
@@ -200,7 +202,9 @@ class AppRouter(QMainWindow):
         self.halaman_discovery.favorite_changed.connect(self.halaman_dashboard.load_data)
         self.halaman_discovery.favorite_changed.connect(self.halaman_dashboard_admin.load_data)
         self.halaman_archive.favorite_changed.connect(self.halaman_dashboard.load_data)
+        self.halaman_archive.favorite_changed.connect(self.halaman_dashboard_admin.load_data)
         self.halaman_archive.build_cv_requested.connect(self.go_to_toolkit_for_ai)
+        self.halaman_dashboard_admin.manage_skill_requested.connect(self.go_to_skill_manager_with_filter)
         
         # Tambahkan ke Stack
         self.content_stack.addWidget(self.halaman_dashboard)         # Index 0
@@ -222,16 +226,10 @@ class AppRouter(QMainWindow):
         # Sinkronisasi folder kategori
         import threading
         threading.Thread(target=sinkronisasi_folder_kategori, daemon=True).start()
-        
-        # Shortcut Navigasi
-        self.shortcut_up = QShortcut(QKeySequence(Qt.Key_Up), self)
-        self.shortcut_up.activated.connect(self.navigasi_ke_atas)
-        self.shortcut_down = QShortcut(QKeySequence(Qt.Key_Down), self)
-        self.shortcut_down.activated.connect(self.navigasi_ke_bawah)
 
     def show_admin_dashboard(self):
         """Dijalankan setelah login admin berhasil."""
-        self.update_sidebar_theme(is_admin=True)
+        self.update_theme(is_admin=True)
         self.job_posting_page.update_theme_mode(is_admin=True)
         self.halaman_discovery.update_theme_mode(is_admin=True)
         self.halaman_archive.update_theme_mode(is_admin=True)
@@ -242,11 +240,21 @@ class AppRouter(QMainWindow):
         self.btn_admin.show()
         self.btn_skill_manager.show()
         self.lbl_admin_badge.show()
+        
+        # Batasi navigasi tombol hanya untuk admin (mencegah akses halaman user)
+        self.nav_buttons = [
+            self.btn_admin,
+            self.btn_skill_manager,
+            self.btn_discovery,
+            self.btn_archive,
+            self.btn_directory
+        ]
+        
         self.pindah_halaman(self.btn_admin, 5)
 
     def show_user_dashboard(self):
         """Dijalankan setelah login user biasa berhasil."""
-        self.update_sidebar_theme(is_admin=False)
+        self.update_theme(is_admin=False)
         self.job_posting_page.update_theme_mode(is_admin=False)
         self.halaman_discovery.update_theme_mode(is_admin=False)
         self.halaman_archive.update_theme_mode(is_admin=False)
@@ -256,6 +264,16 @@ class AppRouter(QMainWindow):
         self.lbl_admin_badge.hide()
         self.btn_dashboard.show()
         self.btn_toolkit.show() # Tampilkan jika sebelumnya disembunyikan oleh admin
+        
+        # Batasi navigasi tombol hanya untuk user
+        self.nav_buttons = [
+            self.btn_dashboard,
+            self.btn_discovery,
+            self.btn_archive,
+            self.btn_directory,
+            self.btn_toolkit
+        ]
+        
         self.pindah_halaman(self.btn_dashboard, 0)
 
     def proses_logout(self):
@@ -263,13 +281,27 @@ class AppRouter(QMainWindow):
         self.sidebar.hide()
         self.halaman_login.input_user.clear()
         self.halaman_login.input_pass.clear()
+        self.update_theme(is_admin=False) # Reset background to clean gray (#F3F4F6)
         self.content_stack.setCurrentWidget(self.halaman_login)
 
-    def update_sidebar_theme(self, is_admin):
+    def update_theme(self, is_admin):
+        """Mengatur tema umum aplikasi (background window, sidebar, dan halaman) tergantung sisi user/admin."""
+        # 1. Tentukan warna background dasar aplikasi
+        bg_app = "#F0FFFF" if is_admin else "#F3F4F6"
+        
+        # Terapkan background ke QMainWindow, main_widget, dan content_stack
+        self.setStyleSheet(f"QMainWindow {{ background-color: {bg_app}; }}")
+        self.main_widget.setStyleSheet(f"background-color: {bg_app};")
+        self.content_stack.setStyleSheet(f"background-color: {bg_app};")
+        
+        # 2. Logika Sidebar Theme
         bg_color = "#1E3A5F" if is_admin else "#2C687B"
         hover_color = "#295180" if is_admin else "#408699"
         active_color = "#386D9E" if is_admin else "#8CC7C4"
         line_color = "#295180" if is_admin else "#4A8799"
+        
+        self.sidebar_hover_color = hover_color
+        self.sidebar_active_color = active_color
         
         if hasattr(self, 'sidebar_line'):
             self.sidebar_line.setStyleSheet(f"background-color: {line_color}; margin: 0 15px;")
@@ -293,25 +325,51 @@ class AppRouter(QMainWindow):
                 font-weight: bold;
             }}
         """)
+        
+        self.update_btn_toggle_style()
+
+    def update_btn_toggle_style(self):
+        """Update style of btn_toggle to match page buttons dynamically"""
+        hover_color = getattr(self, "sidebar_hover_color", "#408699")
+        active_color = getattr(self, "sidebar_active_color", "#8CC7C4")
+        
+        self.btn_toggle.setStyleSheet(f"""
+            QPushButton {{
+                background-color: transparent;
+                border: none;
+                border-radius: 12px;
+                padding: 0px;
+                margin: 0px;
+                text-align: center;
+            }}
+            QPushButton:hover {{
+                background-color: {hover_color};
+            }}
+            QPushButton:pressed {{
+                background-color: {active_color};
+            }}
+        """)
 
     def setup_logo(self):
         container = QWidget()
+        container.setObjectName("LogoContainer")
         container.setFixedHeight(80)
         container.setStyleSheet("""
-            QWidget {
+            QWidget#LogoContainer {
                 background-color: transparent;
                 border: none;
             }
         """)
 
-        layout = QHBoxLayout(container)
-        layout.setContentsMargins(10, 10, 10, 10)
-        layout.setSpacing(10)
+        self.logo_layout = QHBoxLayout(container)
+        self.logo_layout.setContentsMargins(15, 10, 20, 10)
+        self.logo_layout.setSpacing(10)
 
         # =========================
         # LOGO IMAGE
         # =========================
         self.label_img = QLabel()
+        self.label_img.setStyleSheet("background: transparent; border: none;")
         current_dir = os.path.dirname(os.path.abspath(__file__))
         # Pastikan path ke assets selalu dihitung dari root proyek (naik satu tingkat)
         base_path = os.path.dirname(current_dir)
@@ -332,6 +390,7 @@ class AppRouter(QMainWindow):
         # TEXT LOGO
         # =========================
         self.container_text_logo = QWidget()
+        self.container_text_logo.setStyleSheet("background: transparent; border: none;")
         text_layout = QVBoxLayout(self.container_text_logo)
         text_layout.setContentsMargins(0, 0, 0, 0)
         text_layout.setSpacing(0)
@@ -359,7 +418,7 @@ class AppRouter(QMainWindow):
         # TOGGLE BUTTON (Pindah ke Kanan)
         # =========================
         self.btn_toggle = QPushButton()
-        self.btn_toggle.setFixedSize(40, 40)
+        self.btn_toggle.setFixedSize(55, 55)
         self.btn_toggle.setCursor(Qt.PointingHandCursor)
 
         icon_path = os.path.join(base_path, 'assets', 'burger-bar.png')
@@ -372,31 +431,18 @@ class AppRouter(QMainWindow):
         else:
             self.btn_toggle.setText("☰")
 
-        self.btn_toggle.setStyleSheet("""
-            QPushButton {
-                background-color: rgba(255, 255, 255, 0.12);
-                border: none;
-                border-radius: 8px;
-                color: #FFFFFF; 
-                font-size: 22px;
-                font-weight: bold;
-                text-align: center;
-            }
-            QPushButton:hover {
-                background-color: rgba(255,255,255,0.2);
-            }
-        """)
+        self.update_btn_toggle_style()
         self.btn_toggle.clicked.connect(self.toggle_sidebar)
 
         # =========================
         # ADD WIDGET (Urutan diubah agar Burger di Kanan)
         # =========================
-        layout.addWidget(self.label_img)
-        layout.addWidget(self.container_text_logo)
+        self.logo_layout.addWidget(self.label_img)
+        self.logo_layout.addWidget(self.container_text_logo)
         
         # Dorong tombol burger ke ujung kanan menggunakan Stretch
-        layout.addStretch() 
-        layout.addWidget(self.btn_toggle)
+        self.logo_layout.addStretch() 
+        self.logo_layout.addWidget(self.btn_toggle)
 
         self.layout_sidebar.addWidget(container)
 
@@ -432,6 +478,10 @@ class AppRouter(QMainWindow):
             self.container_text_logo.hide()
             self.label_img.hide() # Sembunyikan logo utama agar tersisa tombol burger saja di atas
 
+            # Set size and margins of toggle button to match collapsed page buttons exactly!
+            self.btn_toggle.setFixedSize(73, 55)
+            self.logo_layout.setContentsMargins(6, 12, 6, 12)
+
             self.btn_logout.setText("")
 
             for btn in self.menu_buttons:
@@ -454,6 +504,10 @@ class AppRouter(QMainWindow):
         else:
             self.container_text_logo.show()
             self.label_img.show() # Munculkan kembali logo utama
+
+            # Reset size and margins to expanded state
+            self.btn_toggle.setFixedSize(55, 55)
+            self.logo_layout.setContentsMargins(15, 12, 20, 12)
 
             self.btn_dashboard.setText(self.menu_texts["Dashboard"])
             self.btn_admin.setText(self.menu_texts["Dashboard Admin"])
@@ -491,6 +545,12 @@ class AppRouter(QMainWindow):
             btn.setObjectName("")
         clicked_btn.setObjectName("ActiveMenu")
         self.sidebar.setStyleSheet(self.sidebar.styleSheet())
+        
+        # Auto-reload dashboards on transition
+        if index == 0 and hasattr(self, 'halaman_dashboard'):
+            self.halaman_dashboard.load_data()
+        elif index == 5 and hasattr(self, 'halaman_dashboard_admin'):
+            self.halaman_dashboard_admin.load_data()
 
     def go_to_toolkit_for_ai(self, job_data):
         toolkit_index = 4 
@@ -500,15 +560,74 @@ class AppRouter(QMainWindow):
         if hasattr(self, 'toolkit_page'):
             self.toolkit_page.apply_ai_enhancement(job_data)
             
-    def navigasi_ke_atas(self):
-        curr = self.content_stack.currentIndex()
-        if 0 < curr < 5: # Navigasi hanya di menu utama user
-            self.nav_buttons[curr-1].click()
+    def go_to_skill_manager_with_filter(self, skill_name, category_name):
+        skill_manager_index = 6
+        self.content_stack.setCurrentIndex(skill_manager_index)
+        if hasattr(self, 'btn_skill_manager'):
+            self.pindah_halaman(self.btn_skill_manager, skill_manager_index)
+        if hasattr(self, 'skill_manager_page'):
+            self.skill_manager_page.set_search_filter(skill_name, category_name)
+            
+    def get_current_nav_index(self):
+        """Mencari indeks tombol navigasi aktif dalam daftar self.nav_buttons"""
+        for i, btn in enumerate(self.nav_buttons):
+            if btn.objectName() == "ActiveMenu":
+                return i
+        return -1
 
-    def navigasi_ke_bawah(self):
-        curr = self.content_stack.currentIndex()
-        if 0 <= curr < 4:
-            self.nav_buttons[curr+1].click()
+    def keyPressEvent(self, event):
+        key = event.key()
+        if key in (Qt.Key_Up, Qt.Key_Down):
+            # 1. Tentukan arah navigasi
+            is_up = (key == Qt.Key_Up)
+            
+            # 2. Cegah navigasi jika berada di sub-halaman tabel hasil atau detail di Job Archive
+            # (Pada halaman dalam ini, arrow key didedikasikan sepenuhnya untuk menggerakkan scroll)
+            current_page = self.content_stack.currentWidget()
+            if current_page == self.halaman_archive:
+                sub_page = self.halaman_archive.main_stack.currentWidget()
+                if sub_page in (self.halaman_archive.table_view, self.halaman_archive.detail_view):
+                    # Redireksi event secara langsung ke tabel atau scroll detail
+                    if sub_page == self.halaman_archive.table_view:
+                        self.halaman_archive.match_results.table.setFocus()
+                        QApplication.sendEvent(self.halaman_archive.match_results.table, event)
+                    else:
+                        self.halaman_archive.detail_view.scroll.setFocus()
+                        QApplication.sendEvent(self.halaman_archive.detail_view.scroll, event)
+                    event.accept()
+                    return
+
+            # 3. Cegah navigasi jika fokus sedang di dalam input, combobox, atau scroll area
+            # (Menjamin navigasi keyboard widget tidak terinterupsi jika widget sedang aktif)
+            focused = QApplication.focusWidget()
+            if focused:
+                from PyQt5.QtWidgets import QLineEdit, QComboBox, QAbstractScrollArea
+                if isinstance(focused, (QLineEdit, QComboBox, QAbstractScrollArea)):
+                    super().keyPressEvent(event)
+                    return
+                parent = focused.parent()
+                while parent:
+                    if isinstance(parent, QAbstractScrollArea):
+                        super().keyPressEvent(event)
+                        return
+                    parent = parent.parent()
+
+            # 4. Jika sidebar tidak aktif, biarkan penekanan tombol normal
+            if not self.sidebar.isVisible():
+                super().keyPressEvent(event)
+                return
+
+            # 5. Jalankan navigasi sidebar page-switching
+            curr_idx = self.get_current_nav_index()
+            if is_up:
+                if curr_idx > 0:
+                    self.nav_buttons[curr_idx - 1].click()
+            else:
+                if 0 <= curr_idx < len(self.nav_buttons) - 1:
+                    self.nav_buttons[curr_idx + 1].click()
+            event.accept()
+        else:
+            super().keyPressEvent(event)
 
     def closeEvent(self, event):
         try:

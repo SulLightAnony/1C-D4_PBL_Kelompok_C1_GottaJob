@@ -4,10 +4,37 @@ from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
     QFrame, QTableWidget, QTableWidgetItem, QHeaderView, QScrollArea,
     QPushButton, QListWidget, QStackedWidget, QDialog, QMessageBox,
-    QComboBox
+    QComboBox, QGraphicsDropShadowEffect
 )
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from PyQt5.QtGui import QColor, QPixmap, QIcon, QFont
+
+def terapkan_soft_shadow(widget, blur_radius=24, offset_x=0, offset_y=6, alpha=15):
+    """
+    Memberikan efek soft drop shadow premium pada sebuah widget PyQt5 secara dinamis.
+    """
+    shadow = QGraphicsDropShadowEffect(widget)
+    shadow.setBlurRadius(blur_radius)
+    shadow.setColor(QColor(0, 0, 0, alpha))
+    shadow.setOffset(offset_x, offset_y)
+    widget.setGraphicsEffect(shadow)
+
+def buat_tombol_kembali(text="← Kembali", parent=None):
+    """
+    Membuat tombol kembali dengan gaya visual terstandarisasi, modern, dan premium.
+    """
+    btn = QPushButton(text, parent)
+    btn.setCursor(Qt.PointingHandCursor)
+    btn.setStyleSheet("""
+        QPushButton {
+            background-color: transparent; color: #2C687B;
+            font-size: 14px; font-weight: bold;
+            border: 1px solid #2C687B; border-radius: 6px; padding: 5px 15px;
+            min-height: 25px;
+        }
+        QPushButton:hover { background-color: #E2EFF1; }
+    """)
+    return btn
 
 class SkillTag(QLabel):
     """Tag skill yang terstandarisasi dengan kategori warna dan ukuran font yang fleksibel."""
@@ -399,6 +426,9 @@ class StatCard(QFrame):
         lay.addWidget(self.lbl_title, alignment=Qt.AlignLeft)
         lay.addWidget(self.lbl_val, alignment=Qt.AlignLeft)
 
+        # Tambahkan soft drop shadow modern
+        terapkan_soft_shadow(self, blur_radius=20, offset_y=5)
+
     def update_value(self, val, color=None):
         self.lbl_val.setText(str(val))
         if color:
@@ -440,6 +470,10 @@ class JobDashboardWidget(QWidget):
         # Bagian Bawah Kiri: Chart Card
         chart_card = QFrame()
         chart_card.setObjectName("PanelCard")
+        
+        # Tambahkan soft drop shadow modern
+        terapkan_soft_shadow(chart_card)
+        
         chart_card_lay = QVBoxLayout(chart_card)
         chart_card_lay.setContentsMargins(0, 20, 0, 50)
         
@@ -455,6 +489,10 @@ class JobDashboardWidget(QWidget):
         # ── KANAN: Daftar Skill & Job Type (Full Height) ──
         right_panel = QFrame()
         right_panel.setObjectName("PanelCard")
+        
+        # Tambahkan soft drop shadow modern
+        terapkan_soft_shadow(right_panel)
+        
         right_lay = QVBoxLayout(right_panel)
         right_lay.setContentsMargins(0, 0, 0, 0)
         
@@ -501,16 +539,7 @@ class JobDashboardWidget(QWidget):
         page_type_lay.setContentsMargins(20, 20, 20, 20)
         
         header_type_lay = QHBoxLayout()
-        btn_back_skill = QPushButton("← Kembali")
-        btn_back_skill.setCursor(Qt.PointingHandCursor)
-        btn_back_skill.setStyleSheet("""
-            QPushButton {
-                background-color: transparent; color: #2C687B;
-                font-size: 14px; font-weight: bold;
-                border: 1px solid #2C687B; border-radius: 6px; padding: 5px 15px;
-            }
-            QPushButton:hover { background-color: #E2EFF1; }
-        """)
+        btn_back_skill = buat_tombol_kembali("← Kembali")
         btn_back_skill.clicked.connect(lambda: self.right_stack.setCurrentIndex(0))
         header_type_lay.addWidget(btn_back_skill)
         
@@ -580,6 +609,10 @@ class BestMatchCard(QFrame):
             }
         """)
         self.setFixedWidth(350)
+
+        # Tambahkan soft drop shadow modern
+        terapkan_soft_shadow(self)
+
         self._init_ui()
 
     def _init_ui(self):
@@ -736,7 +769,7 @@ class JobMatchResultContainer(QWidget):
         self.table.build_cv_clicked.connect(self.build_cv_clicked.emit) # <--- TAMBAHAN: Teruskan sinyal dari tabel
         layout.addWidget(self.table, stretch=1)
 
-    def set_data(self, hasil, selected_skills, show_save=True, show_favorite=True, show_delete=False, show_ai_cv=False, fav_link=None):
+    def set_data(self, hasil, selected_skills, show_save=True, show_favorite=True, show_delete=False, show_ai_cv=False, fav_link=None, saved_links=None):
         if not hasil:
             return
         
@@ -745,7 +778,7 @@ class JobMatchResultContainer(QWidget):
         self.best_match_card.update_data(best, selected_skills)
         
         # Isi tabel dengan semua data (atau sisanya)
-        self.table.set_data(hasil, selected_skills, show_save=show_save, show_favorite=show_favorite, show_delete=show_delete, show_ai_cv=show_ai_cv, fav_link=fav_link)
+        self.table.set_data(hasil, selected_skills, show_save=show_save, show_favorite=show_favorite, show_delete=show_delete, show_ai_cv=show_ai_cv, fav_link=fav_link, saved_links=saved_links)
         self.current_data = hasil
 
     def _on_item_double_clicked(self, item):
@@ -812,8 +845,27 @@ class JobMatchTable(QTableWidget):
             QScrollBar::handle:horizontal { background: #B2D2D9; border-radius: 4px; }
             QScrollBar::handle:horizontal:hover { background: #7A9EB0; }
         """)
+        self.installEventFilter(self)
+        self.viewport().installEventFilter(self)
 
-    def set_data(self, hasil, selected_skills, show_save=True, show_favorite=True, show_delete=False, show_ai_cv=False, fav_link=None):
+    def eventFilter(self, obj, event):
+        from PyQt5.QtCore import QEvent
+        if event.type() == QEvent.KeyPress:
+            key = event.key()
+            if key in (Qt.Key_Up, Qt.Key_Down, Qt.Key_Left, Qt.Key_Right, Qt.Key_PageUp, Qt.Key_PageDown, Qt.Key_Home, Qt.Key_End):
+                KeyboardScrollArea.keyPressEvent(self, event)
+                return True
+        return super().eventFilter(obj, event)
+
+    def keyPressEvent(self, event):
+        """Mendukung scroll vertikal & horizontal menggunakan keyboard dengan langsung memakai metode dari KeyboardScrollArea."""
+        key = event.key()
+        if key in (Qt.Key_Up, Qt.Key_Down, Qt.Key_Left, Qt.Key_Right, Qt.Key_PageUp, Qt.Key_PageDown, Qt.Key_Home, Qt.Key_End):
+            KeyboardScrollArea.keyPressEvent(self, event)
+        else:
+            super().keyPressEvent(event)
+
+    def set_data(self, hasil, selected_skills, show_save=True, show_favorite=True, show_delete=False, show_ai_cv=False, fav_link=None, saved_links=None):
         """Isi tabel dengan data lowongan hasil pencocokan."""
         self.setRowCount(len(hasil))
         
@@ -966,6 +1018,9 @@ class JobMatchTable(QTableWidget):
                 btn_del.clicked.connect(lambda checked, d=data: self.delete_clicked.emit(d))
                 btn_lay.addWidget(btn_del)
             
+            btn_widget.installEventFilter(self)
+            for child in btn_widget.findChildren(QPushButton):
+                child.installEventFilter(self)
             self.setCellWidget(row, 3, btn_widget)
 
 class JobDetailPanel(QFrame):
@@ -973,6 +1028,10 @@ class JobDetailPanel(QFrame):
     def __init__(self, on_back_callback, parent=None):
         super().__init__(parent)
         self.setObjectName("PanelCard")
+
+        # Tambahkan soft drop shadow modern
+        terapkan_soft_shadow(self)
+
         self.on_back_callback = on_back_callback
         self._init_ui()
 
@@ -1057,17 +1116,7 @@ class JobDetailPanel(QFrame):
         layout.addWidget(scroll)
 
     def _create_back_button(self):
-        btn = QPushButton("← Kembali")
-        btn.setCursor(Qt.PointingHandCursor)
-        btn.setStyleSheet("""
-            QPushButton {
-                background-color: transparent; color: #2C687B;
-                font-size: 14px; font-weight: bold;
-                border: 1px solid #2C687B; border-radius: 6px; padding: 5px 15px;
-            }
-            QPushButton:hover { background-color: #E2EFF1; }
-        """)
-        return btn
+        return buat_tombol_kembali("← Kembali")
 
     def _create_section(self, title):
         container = QWidget()
@@ -1205,13 +1254,16 @@ class AktivitasTerkiniWidget(QFrame):
 
         self.setObjectName("AktivitasCard")
         self.setStyleSheet("""
-            QFrame#AktivitasCard {
+            #AktivitasCard {
                 background-color: white;
                 border-radius: 16px;
-                border: none;
+                border: 1px solid #E2E8F0;
             }
             QLabel { border: none; background: transparent; }
         """)
+
+        # Add smooth drop shadow
+        terapkan_soft_shadow(self, blur_radius=30, offset_y=10, alpha=20)
 
         outer = QVBoxLayout(self)
         outer.setContentsMargins(25, 20, 25, 20)

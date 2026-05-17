@@ -9,10 +9,11 @@ import os
 import re
 
 #import modul pengolahan data
-from Modul.modul_pengolahan_data import hitung_persentase_skill, ambil_insight_pasar, ambil_top_skills, hitung_gap_skill, cari_archive_terdekat
+from Modul.modul_pengolahan_data import hitung_persentase_skill, ambil_insight_pasar, ambil_top_skills_count, hitung_gap_skill, cari_archive_terdekat
 from Modul.modul_kategorisasi import pisahkan_skill
 from Modul.modul_database import get_database_permanen_dir, get_favorit
 from Modul.modul_antarmuka_pengguna import AktivitasTerkiniWidget
+from Modul.modul_visualisasi_data import HorizontalBarChartWidget
 
 class Card(QFrame):
     def __init__(self, parent=None, border_color="#AAD9B7"):
@@ -167,7 +168,7 @@ def load_favorite_job(file_path):
 class DashboardPage(QWidget):
     def __init__(self):
         super().__init__()
-        self.setStyleSheet("background-color: white;")
+        self.setStyleSheet("background-color: transparent;")
         
         self.main_layout = QVBoxLayout(self)
         self.main_layout.setContentsMargins(0, 0, 0, 0)
@@ -184,7 +185,7 @@ class DashboardPage(QWidget):
 
         # --- CONTENT AREA ---
         self.content_area = QWidget()
-        self.content_area.setStyleSheet("background-color: #E2E4E4;")
+        self.content_area.setStyleSheet("background-color: transparent;")
         self.main_layout.addWidget(self.content_area)
 
         body_outer_layout = QVBoxLayout(self.content_area)
@@ -202,7 +203,7 @@ class DashboardPage(QWidget):
         left_col_widget = QWidget()
         left_col_widget.setLayout(left_col)
         left_col_widget.setMinimumWidth(600)
-        left_col.setContentsMargins(0, 0, 0, 0)
+        left_col.setContentsMargins(12, 12, 12, 12)
 
         # 1. KARTU LOWONGAN FAVORIT
         self.dev_card = Card(border_color="#AAD9B7")
@@ -223,7 +224,7 @@ class DashboardPage(QWidget):
         # --- KOLOM KANAN (Insight & Aktivitas) ---
         right_col_widget = QWidget()
         right_col_layout = QVBoxLayout(right_col_widget)
-        right_col_layout.setContentsMargins(0, 0, 0, 0)
+        right_col_layout.setContentsMargins(12, 12, 12, 12)
         right_col_layout.setSpacing(20)
 
         # Set lebar minimum di sini (misal 350 atau 400 pixel)
@@ -462,10 +463,18 @@ class DashboardPage(QWidget):
         trend_title.setStyleSheet("font-weight: bold; color: #555; margin-bottom: 10px;")
         self.trend_layout.addWidget(trend_title)
 
-        top_skills = ambil_top_skills(archive_json, limit=5) if archive_json else []
+        top_skills = ambil_top_skills_count(archive_json, limit=5) if archive_json else []
         if top_skills:
-            for skill_name, persentase in top_skills:
-                self.trend_layout.addWidget(SkillProgress(skill_name, persentase))
+            chart = HorizontalBarChartWidget()
+            total_lowongan = 0
+            if archive_json and os.path.exists(archive_json):
+                try:
+                    with open(archive_json, "r", encoding="utf-8") as f:
+                        total_lowongan = len(json.load(f))
+                except Exception:
+                    pass
+            chart.set_data(top_skills, total_lowongan)
+            self.trend_layout.addWidget(chart)
         else:
             self.trend_layout.addWidget(QLabel("Data pendukung tidak ditemukan."))
 

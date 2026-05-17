@@ -32,7 +32,7 @@ if _pages_dir not in sys.path:
     sys.path.insert(0, _pages_dir)
 
 from CRUD.Shared import muat_data, simpan_data
-from modul_antarmuka_pengguna import KeyboardScrollArea, show_message, show_question, MODERN_BUTTON_STYLE, ActionButton, SkillTag
+from modul_antarmuka_pengguna import KeyboardScrollArea, show_message, show_question, MODERN_BUTTON_STYLE, ActionButton, SkillTag, buat_tombol_kembali
 from Modul.modul_database import catat_aktivitas
 from CRUD.Read import JobDetailDialog
 
@@ -827,14 +827,7 @@ class JobPostingPage(QWidget):
 
         # Header
         header = QHBoxLayout()
-        btn_back = QPushButton("← Kembali")
-        btn_back.setCursor(Qt.PointingHandCursor)
-        btn_back.setFixedHeight(38)
-        btn_back.setStyleSheet("""
-            QPushButton { border: 1px solid #ccc; border-radius: 8px; padding: 0 20px;
-                          background-color: white; color: #444; font-size: 14px; }
-            QPushButton:hover { background-color: #f0f0f0; }
-        """)
+        btn_back = buat_tombol_kembali("← Kembali")
         btn_back.clicked.connect(lambda: self.page_stack.setCurrentIndex(0))
 
         self.lbl_form_title = QLabel("Tambah Lowongan Baru")

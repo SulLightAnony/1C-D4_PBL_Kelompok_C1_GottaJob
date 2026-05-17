@@ -57,7 +57,6 @@ class LoginPage(QWidget):
         self.input_user = QLineEdit()
         self.input_user.setPlaceholderText("Enter your username")
         self.apply_input_style(self.input_user)
-        self.input_user.returnPressed.connect(self.handle_login)
 
         lbl_pass = QLabel("Password")
         lbl_pass.setStyleSheet(label_style)
@@ -66,6 +65,7 @@ class LoginPage(QWidget):
         self.input_pass.setEchoMode(QLineEdit.Password)
         self.apply_input_style(self.input_pass)
         self.input_pass.returnPressed.connect(self.handle_login)
+        self.input_user.returnPressed.connect(self.input_pass.setFocus)
 
         # Login Button (Gunakan warna aksen sidebar yang cerah)
         btn_login = QPushButton("LOGIN")

@@ -153,14 +153,14 @@ if process_dir not in sys.path:
 from modul_visualisasi_data import PieChartWidget
 from modul_pengolahan_data import hitung_persentase_skill, cari_pekerjaan_cocok, ambil_jenis_pekerjaan_unik
 from modul_database import get_database_permanen_dir, set_favorit, get_favorit, catat_aktivitas
-from modul_antarmuka_pengguna import JobMatchResultContainer, JobDetailPanel, JobDashboardWidget, show_message, show_question, ActionButton
+from modul_antarmuka_pengguna import JobMatchResultContainer, JobDetailPanel, JobDashboardWidget, show_message, show_question, ActionButton, buat_tombol_kembali
 
 # ─────────────────────────────────────────────────────────────
 # Style Sheet
 # ─────────────────────────────────────────────────────────────
 STYLE = """
 QWidget#JobArchivePage {
-    background-color: #F3F4F6;
+    background-color: transparent;
 }
 
 QFrame#PanelCard {
@@ -230,6 +230,7 @@ class JobArchivePage(QWidget):
 
     def update_theme_mode(self, is_admin):
         """Memperbarui warna tombol di Job Archive dan komponen dashboard anaknya."""
+        self.is_admin = is_admin
         theme = "admin" if is_admin else "user"
         if hasattr(self, 'btn_refresh'):
             self.btn_refresh.set_theme(theme)
@@ -238,6 +239,7 @@ class JobArchivePage(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.is_admin = False
         self.setObjectName("JobArchivePage")
         self.setStyleSheet(STYLE)
         
@@ -282,7 +284,7 @@ class JobArchivePage(QWidget):
         ctrl_layout.setSpacing(10)
 
         self.combo_category = QComboBox()
-        self.combo_category.setPlaceholderText("Pilih Kategori")
+        self.combo_category.setPlaceholderText("Pilih Bidang")
         self.combo_category.currentIndexChanged.connect(self._on_category_changed)
         
         self.combo_file = QComboBox()
@@ -327,23 +329,8 @@ class JobArchivePage(QWidget):
         t_header = QHBoxLayout()
         t_header.addWidget(QLabel("Rekomendasi Lowongan Pekerjaan", objectName="JudulLabel"))
         t_header.addStretch()
-        btn_back = QPushButton("← Kembali")
-        btn_back.setCursor(Qt.PointingHandCursor)
+        btn_back = buat_tombol_kembali("← Kembali")
         btn_back.clicked.connect(lambda: self.main_stack.setCurrentWidget(self.dashboard_view))
-        btn_back.setStyleSheet("""
-            QPushButton {
-                background-color: transparent;
-                color: #2C687B;
-                font-size: 14px;
-                font-weight: bold;
-                border: 1px solid #2C687B;
-                border-radius: 6px;
-                padding: 5px 15px;
-            }
-            QPushButton:hover {
-                background-color: #E2EFF1;
-            }
-        """)
         t_header.addWidget(btn_back)
         table_lay.addLayout(t_header)
         
@@ -355,7 +342,7 @@ class JobArchivePage(QWidget):
         table_lay.addWidget(self.match_results)
 
         # 3. VIEW DETAIL
-        self.detail_view = JobDetailPanel(on_back_callback=lambda: self.main_stack.setCurrentWidget(self.table_view))
+        self.detail_view = JobDetailPanel(on_back_callback=self._go_back_to_table)
 
         # Add to stack
         self.main_stack.addWidget(self.dashboard_view)
@@ -599,11 +586,20 @@ class JobArchivePage(QWidget):
             fav_link=fav_link
         )
         self.main_stack.setCurrentWidget(self.table_view)
+        from PyQt5.QtCore import QTimer
+        QTimer.singleShot(50, lambda: self.match_results.table.setFocus())
 
     def _show_job_detail(self, item):
         data = self.current_matches[item.row()]
         self.detail_view.update_data(data, self.user_skills)
         self.main_stack.setCurrentWidget(self.detail_view)
+        from PyQt5.QtCore import QTimer
+        QTimer.singleShot(50, lambda: self.detail_view.scroll.setFocus())
+
+    def _go_back_to_table(self):
+        self.main_stack.setCurrentWidget(self.table_view)
+        from PyQt5.QtCore import QTimer
+        QTimer.singleShot(50, lambda: self.match_results.table.setFocus())
 
     def _on_favorite_clicked(self, job_data):
         """Menangani klik tombol favorit di Archive."""
@@ -623,7 +619,8 @@ class JobArchivePage(QWidget):
             show_message(self, "Berhasil", f"'{job_data.get('Judul_Pekerjaan')}' sekarang menjadi favorit utama Anda!")
             
             # Catat aktivitas
-            catat_aktivitas(f"<b>Pekerjaan Favorit Diganti</b><br>{job_data.get('Judul_Pekerjaan')}")
+            role = "admin" if getattr(self, 'is_admin', False) else "user"
+            catat_aktivitas(f"<b>Pekerjaan Favorit Diganti</b><br>{job_data.get('Judul_Pekerjaan')}", role=role)
 
             # Emit signal agar dashboard bisa refresh
             self.favorite_changed.emit()
@@ -667,10 +664,11 @@ class JobArchivePage(QWidget):
                 return
 
             # 3. Tulis kembali atau hapus file jika kosong
+            role = "admin" if getattr(self, 'is_admin', False) else "user"
             if not new_data:
                 os.remove(self.current_file)
                 show_message(self, "Berhasil", "Data terakhir dihapus, file arsip dibersihkan.")
-                catat_aktivitas(f"<b>Arsip Dihapus</b><br>{os.path.basename(self.current_file)}")
+                catat_aktivitas(f"<b>Arsip Dihapus</b><br>{os.path.basename(self.current_file)}", role=role)
                 self.load_file_list(auto_check=True)
                 self.main_stack.setCurrentWidget(self.dashboard_view)
             else:
@@ -678,7 +676,7 @@ class JobArchivePage(QWidget):
                     json.dump(new_data, f, ensure_ascii=False, indent=4)
                 
                 show_message(self, "Berhasil", "Pekerjaan berhasil dihapus dari arsip.")
-                catat_aktivitas(f"<b>Lowongan Dihapus</b><br>{job_data.get('Judul_Pekerjaan')}")
+                catat_aktivitas(f"<b>Lowongan Dihapus</b><br>{job_data.get('Judul_Pekerjaan')}", role=role)
                 
                 # Emit signal agar dashboard bisa refresh (tren skill mungkin berubah)
                 self.favorite_changed.emit()
