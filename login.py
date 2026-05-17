@@ -1,3 +1,5 @@
+import os
+import json
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
                              QLineEdit, QPushButton, QFrame, QMessageBox, QSizePolicy)
 from PyQt5.QtCore import Qt
@@ -118,18 +120,40 @@ class LoginPage(QWidget):
         user = self.input_user.text().strip()
         pw = self.input_pass.text().strip()
 
-        # Logika login sederhana
-        if user == "admin" and pw == "admin123":
-            self.parent_window.show_admin_dashboard()
-        elif user == "user" and pw == "user123":
-            self.parent_window.show_user_dashboard()
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        base_path = os.path.dirname(current_dir) if os.path.basename(current_dir).lower() == 'login' else current_dir
+        json_path = os.path.normpath(os.path.join(base_path, 'database', 'user.json'))
+
+        user_find = False
+        user_role = ""
+
+        if os.path.exists(json_path):
+            try:
+                with open(json_path, 'r') as file:
+                    users = json.load(file)
+
+                    # cari username dan password yang cocok
+                    for u in users:
+                        if u['username'].lower() == user.lower() and u['password'] == pw:
+                            user_find = True
+                            user_role = u['role']
+                            break
+            except Exception as e:
+                print(f"Error membaca database user: {e}")
+
+        # Logika login 
+        if user_find:
+            self.parent_window.current_logged_in_user = user
+
+            if user_role == "admin":
+                self.parent_window.show_admin_dashboard()
+            else:
+                self.parent_window.show_user_dashboard()
         else:
             try:
                 from pages.Modul.modul_antarmuka_pengguna import show_message
                 show_message(self, "Login Failed", "Username atau password salah!")
             except Exception:
-                # Fallback jika gagal import
-                from PyQt5.QtWidgets import QMessageBox
                 QMessageBox.warning(self, "Login Failed", "Username atau password salah!")
             
             self.input_user.clear()
