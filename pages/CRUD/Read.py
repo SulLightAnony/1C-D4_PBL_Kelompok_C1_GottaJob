@@ -1,440 +1,494 @@
 import os
 import sys
+import json
 import datetime
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QScrollArea, QWidget, QGridLayout, QFrame, QTextEdit, QCheckBox, QGraphicsDropShadowEffect
-from PyQt5.QtCore import Qt, QSize, pyqtSignal
-from PyQt5.QtGui import QFont, QIcon, QPixmap, QColor
 
-# Setup path agar modul di folder Modul bisa ditemukan
+from PyQt5.QtWidgets import (
+    QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, 
+    QScrollArea, QGridLayout, QFrame, QDialog, QComboBox, 
+    QStyledItemDelegate
+)
+from PyQt5.QtCore import Qt, QSize, pyqtSignal, QUrl
+from PyQt5.QtGui import QFont, QIcon, QPixmap, QDesktopServices
+
 _crud_dir = os.path.dirname(os.path.abspath(__file__))
-_pages_dir_early = os.path.dirname(_crud_dir)
-_modul_dir = os.path.join(_pages_dir_early, "Modul")
-for _p in [_pages_dir_early, _modul_dir]:
+_pages_dir = os.path.dirname(_crud_dir)
+_job_posting_dir = os.path.join(_pages_dir, "Job Posting")
+_modul_dir = os.path.join(_pages_dir, "Modul")
+
+for _p in [_pages_dir, _job_posting_dir, _modul_dir]:
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
-from CRUD.Shared import muat_data
-from modul_antarmuka_pengguna import KeyboardScrollArea
+from constants import (
+    company_icon_path, location_detail_icon_path, edit_icon_path, 
+    trash_icon_path, send_icon_path, checked_icon_path, 
+    currency_icon_path, calendar_icon_path, suitcase_icon_path, 
+    link_icon_path, green_check_icon_path
+)
+from modul_antarmuka_pengguna import ActionButton, SkillTag, MODERN_BUTTON_STYLE
+from flow_layout import FlowLayout
 
-_pages_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-_root_dir = os.path.dirname(_pages_dir)
-trash_icon_path = os.path.join(_root_dir, "assets", "Job Posting", "trash-can.png")
-trash_icon2_path = os.path.join(_root_dir, "assets", "Job Posting", "trash-can2.png")
-currency_icon_path = os.path.join(_root_dir, "assets", "Job Posting", "save-money.png")
-edit_icon_path = os.path.join(_root_dir, "assets", "Job Posting", "edit.png")
-location_icon_path = os.path.join(_root_dir, "assets", "Job Posting", "gps.png")
-check_icon_path = os.path.join(_root_dir, "assets", "Job Posting", "check.png")
+class JobDetailPage(QWidget):
+    back_clicked = pyqtSignal()
+    edit_requested = pyqtSignal(dict)
+    delete_requested = pyqtSignal(dict)
+    lamar_requested = pyqtSignal(dict)
 
-# --- Job Detail Dialog (Tampilan Read-Only) ---
-class JobDetailDialog(QDialog):
-    def __init__(self, job_data, parent=None):
+    def __init__(self, parent=None):
         super().__init__(parent)
-        self.job_data = job_data
-        self.setWindowTitle("Detail Lowongan Pekerjaan")
-        self.resize(600, 750)
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Dialog)
+        self.job_data = {}
+        self.init_ui()
+
+    def init_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        self.setStyleSheet("background-color: white;")
+
+        # ── Header Section (#1D4E5F) ──
+        self.header = QFrame()
+        self.header.setFixedHeight(200)
+        self.header.setStyleSheet("background-color: #1D4E5F; border: none;")
+        h_layout = QVBoxLayout(self.header)
+        h_layout.setContentsMargins(30, 20, 30, 25)
+
+        # Tombol Kembali
+        back_row = QHBoxLayout()
+        self.btn_back = QPushButton("← Kembali")
+        self.btn_back.setCursor(Qt.PointingHandCursor)
+        self.btn_back.setStyleSheet("color: #9FE1CB; border: none; font-size: 14px; font-weight: bold; background: transparent;")
+        self.btn_back.clicked.connect(lambda: self.back_clicked.emit())
+        back_row.addWidget(self.btn_back)
+        back_row.addStretch()
+        h_layout.addLayout(back_row)
+        h_layout.addStretch()
+
+        # Judul & Meta
+        self.lbl_title = QLabel("Job Title")
+        self.lbl_title.setFont(QFont("Segoe UI", 20, QFont.Medium))
+        self.lbl_title.setStyleSheet("color: white; border: none; background: transparent;")
+        self.lbl_title.setWordWrap(True)
+        h_layout.addWidget(self.lbl_title)
+
+        self.meta_info_layout = QHBoxLayout()
+        self.meta_info_layout.setSpacing(20)
+        
+        def create_meta_label(icon_path):
+            container = QWidget()
+            container.setStyleSheet("background: transparent; border: none;")
+            lay = QHBoxLayout(container)
+            lay.setContentsMargins(0, 0, 0, 0)
+            lay.setSpacing(8)
+            
+            icon_lbl = QLabel()
+            pix = QPixmap(icon_path)
+            if not pix.isNull():
+                icon_lbl.setPixmap(pix.scaled(18, 18, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            
+            text_lbl = QLabel("-")
+            text_lbl.setStyleSheet("color: #9FE1CB; font-size: 14px; font-weight: 500; border: none; background: transparent;")
+            
+            lay.addWidget(icon_lbl)
+            lay.addWidget(text_lbl)
+            return container, text_lbl
+
+        self.widget_perusahaan, self.lbl_perusahaan = create_meta_label(company_icon_path)
+        self.widget_lokasi, self.lbl_lokasi = create_meta_label(location_detail_icon_path)
+        
+        self.meta_info_layout.addWidget(self.widget_perusahaan)
+        self.meta_info_layout.addWidget(self.widget_lokasi)
+        self.meta_info_layout.addStretch()
+        h_layout.addLayout(self.meta_info_layout)
+
+        # Badges
+        self.badge_layout = QHBoxLayout()
+        self.badge_layout.setSpacing(8)
+        h_layout.addLayout(self.badge_layout)
+
+        layout.addWidget(self.header)
+
+        # ── Content Area ──
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setStyleSheet("border: none; background-color: white;")
+        
+        container = QWidget()
+        container.setStyleSheet("background-color: white;")
+        c_lay = QVBoxLayout(container)
+        c_lay.setContentsMargins(30, 30, 30, 30)
+        c_lay.setSpacing(25)
+
+        # Meta Grid (2x2)
+        self.meta_grid = QGridLayout()
+        self.meta_grid.setSpacing(15)
+        c_lay.addLayout(self.meta_grid)
+
+        def add_divider():
+            line = QFrame()
+            line.setFrameShape(QFrame.HLine)
+            line.setStyleSheet("background-color: #f0f0f0; border: none; height: 1px;")
+            c_lay.addWidget(line)
+
+        add_divider()
+
+        # Deskripsi
+        c_lay.addWidget(self._create_section_lbl("DESKRIPSI PEKERJAAN"))
+        self.lbl_desc = QLabel()
+        self.lbl_desc.setWordWrap(True)
+        self.lbl_desc.setStyleSheet("color: #4A5568; font-size: 16px; line-height: 160%; border: none;")
+        c_lay.addWidget(self.lbl_desc)
+
+        add_divider()
+
+        # Hard Skills
+        c_lay.addWidget(self._create_section_lbl("HARD SKILLS"))
+        self.h_skills_container = QWidget()
+        self.h_skills_flow = FlowLayout(self.h_skills_container, margin=0, spacing=8, uniform_width=False)
+        c_lay.addWidget(self.h_skills_container)
+
+        c_lay.addSpacing(10)
+
+        # Soft Skills
+        c_lay.addWidget(self._create_section_lbl("SOFT SKILLS"))
+        self.s_skills_container = QWidget()
+        self.s_skills_flow = FlowLayout(self.s_skills_container, margin=0, spacing=8, uniform_width=False)
+        c_lay.addWidget(self.s_skills_container)
+
+        add_divider()
+
+        # Benefit & Kualifikasi
+        bk_row = QHBoxLayout()
+        bk_row.setSpacing(40)
+        bk_row.setAlignment(Qt.AlignTop)
+        
+        self.lay_benefit = QVBoxLayout()
+        self.lay_benefit.setSpacing(12)
+        self.lay_benefit.addWidget(self._create_section_lbl("BENEFIT PEKERJAAN"))
+        bk_row.addLayout(self.lay_benefit, 1)
+        bk_row.setAlignment(self.lay_benefit, Qt.AlignTop)
+
+        self.lay_kual = QVBoxLayout()
+        self.lay_kual.setSpacing(12)
+        self.lay_kual.addWidget(self._create_section_lbl("KUALIFIKASI & PERSYARATAN"))
+        bk_row.addLayout(self.lay_kual, 1)
+        bk_row.setAlignment(self.lay_kual, Qt.AlignTop)
+
+        c_lay.addLayout(bk_row)
+        c_lay.addStretch()
+
+        scroll.setWidget(container)
+        layout.addWidget(scroll)
+
+        # ── Footer Bar ──
+        footer = QFrame()
+        footer.setFixedHeight(80)
+        footer.setStyleSheet("background-color: white; border-top: 1px solid #eee;")
+        f_lay = QHBoxLayout(footer)
+        f_lay.setContentsMargins(30, 0, 30, 0)
+
+        self.btn_edit = QPushButton(" Edit")
+        self.btn_edit.setIcon(QIcon(edit_icon_path))
+        self.btn_edit.setIconSize(QSize(18, 18))
+        self.btn_edit.setCursor(Qt.PointingHandCursor)
+        self.btn_edit.setFixedSize(100, 40)
+        self.btn_edit.setStyleSheet("""
+            QPushButton { border: 1px solid #D1D5DB; border-radius: 8px; color: #4A5568; font-weight: 500; }
+            QPushButton:hover { background-color: #F9FAFB; border-color: #9CA3AF; }
+        """)
+        
+        self.btn_delete = ActionButton(" Hapus", icon_path=trash_icon_path, color_theme="danger")
+        self.btn_delete.setFixedSize(100, 40)
+        
+        self.btn_edit.clicked.connect(lambda: self.edit_requested.emit(self.job_data))
+        self.btn_delete.clicked.connect(lambda: self.delete_requested.emit(self.job_data))
+        
+        f_lay.addWidget(self.btn_edit)
+        f_lay.addWidget(self.btn_delete)
+        f_lay.addStretch()
+
+        self.btn_lamar = QPushButton("Lamar Sekarang")
+        self.btn_lamar.setIcon(QIcon(send_icon_path))
+        self.btn_lamar.setIconSize(QSize(18, 18))
+        self.btn_lamar.setFixedSize(220, 46)
+        self.btn_lamar.setCursor(Qt.PointingHandCursor)
+        self.btn_lamar.setStyleSheet("""
+            QPushButton { background-color: #1D4E5F; color: white; border-radius: 10px; font-weight: bold; font-size: 14px; border: none; }
+            QPushButton:hover { background-color: #2C687B; }
+            QPushButton:disabled { background-color: #E2EFF1; color: #2C687B; border: 1px solid #B2D2D9; }
+        """)
+        self.btn_lamar.clicked.connect(lambda: self.lamar_requested.emit(self.job_data))
+        f_lay.addWidget(self.btn_lamar)
+        f_lay.addStretch()
+
+        layout.addWidget(footer)
+
+    def _create_section_lbl(self, text):
+        lbl = QLabel(text)
+        lbl.setStyleSheet("color: #718096; font-size: 11px; font-weight: 600; text-transform: uppercase; border: none;")
+        return lbl
+
+    def _create_meta_item(self, label, value, icon_path=None, is_link=False):
+        box = QFrame()
+        box.setStyleSheet("background-color: #F8FAFC; border-radius: 10px; border: 1px solid #F1F5F9;")
+        box.setFixedHeight(65)
+        lay = QHBoxLayout(box)
+        lay.setContentsMargins(15, 0, 15, 0)
+        lay.setSpacing(12)
+
+        if icon_path:
+            icon_lbl = QLabel()
+            icon_lbl.setPixmap(QPixmap(icon_path).scaled(22, 22, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            icon_lbl.setStyleSheet("border: none; background: transparent;")
+            lay.addWidget(icon_lbl)
+
+        v = QVBoxLayout()
+        v.setSpacing(2)
+        v.setAlignment(Qt.AlignCenter)
+        
+        l_lbl = QLabel(label)
+        l_lbl.setStyleSheet("color: #64748B; font-size: 10px; font-weight: 600; text-transform: uppercase; border: none; background: transparent;")
+        v.addWidget(l_lbl)
+
+        v_lbl = QLabel(str(value))
+        color = "#F39C12" if "Gaji" in label else "#1E293B"
+        v_lbl.setStyleSheet(f"color: {color}; font-size: 16px; font-weight: 700; border: none; background: transparent;")
+        
+        if is_link and value != "-":
+            v_lbl.setCursor(Qt.PointingHandCursor)
+            v_lbl.setStyleSheet("color: #1D4E5F; font-size: 16px; font-weight: 700; text-decoration: underline; border: none; background: transparent;")
+            v_lbl.mousePressEvent = lambda e: QDesktopServices.openUrl(QUrl(value))
+            
+        v.addWidget(v_lbl)
+        lay.addLayout(v)
+        lay.addStretch()
+        return box
+
+    def _populate_list(self, layout, items_str):
+        while layout.count() > 1:
+            item = layout.takeAt(1)
+            if item.widget():
+                item.widget().deleteLater()
+            elif item.layout():
+                self._clear_layout(item.layout())
+        
+        items = [i.strip() for i in items_str.split("|") if i.strip()]
+        if not items:
+            l = QLabel("Tidak ada data")
+            l.setStyleSheet("color: #94A3B8; font-style: italic; font-size: 16px; border: none;")
+            layout.addWidget(l)
+            return
+
+        for text in items:
+            row = QHBoxLayout()
+            row.setSpacing(10)
+            check = QLabel()
+            pix = QPixmap(green_check_icon_path)
+            if not pix.isNull():
+                check.setPixmap(pix.scaled(16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            check.setStyleSheet("border: none; background: transparent; margin-top: 2px;")
+            row.addWidget(check, 0, Qt.AlignTop)
+            
+            t_lbl = QLabel(text)
+            t_lbl.setWordWrap(True)
+            t_lbl.setStyleSheet("color: #334155; font-size: 16px; line-height: 120%; border: none; padding: 0px;")
+            row.addWidget(t_lbl, 1)
+            layout.addLayout(row)
+        
+        layout.addStretch()
+    
+    def _clear_layout(self, layout):
+        while layout.count():
+            item = layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+            elif item.layout():
+                self._clear_layout(item.layout())
+
+    def setData(self, data):
+        self.job_data = data
+        self.lbl_title.setText(data.get("Judul_Pekerjaan", "Detail Lowongan"))
+        self.lbl_perusahaan.setText(data.get("Nama_Perusahaan", "-"))
+        self.lbl_lokasi.setText(data.get("Lokasi", "-"))
+
+        while self.badge_layout.count():
+            item = self.badge_layout.takeAt(0)
+            if item.widget(): item.widget().deleteLater()
+        
+        badge_style = "border: 1px solid rgba(255,255,255,0.4); background-color: transparent; color: white; border-radius: 20px; padding: 4px 16px; font-size: 11px; font-weight: 600;"
+        
+        for b in [data.get("Jenis_Pekerjaan"), data.get("Kategori")]:
+            if b:
+                lbl = QLabel(b)
+                lbl.setStyleSheet(badge_style)
+                self.badge_layout.addWidget(lbl)
+
+        try:
+            d_str = data.get("Tanggal_Kadaluarsa", "")
+            d = datetime.datetime.strptime(d_str, "%d/%m/%Y").date()
+            diff = (d - datetime.date.today()).days
+            sisa_text = f"Sisa {max(0, diff)} hari" if diff >= 0 else "Berakhir"
+        except:
+            sisa_text = "Sisa - hari"
+            
+        self.lbl_sisa_badge = QLabel(sisa_text)
+        self.lbl_sisa_badge.setStyleSheet(badge_style)
+        self.badge_layout.addWidget(self.lbl_sisa_badge)
+        
+        self.badge_layout.addStretch()
+
+        while self.meta_grid.count():
+            item = self.meta_grid.takeAt(0)
+            if item.widget(): item.widget().deleteLater()
+        
+        self.meta_grid.addWidget(self._create_meta_item("Rentang Gaji", data.get("Rentang_Gaji", "-"), currency_icon_path), 0, 0)
+        self.meta_grid.addWidget(self._create_meta_item("Tanggal Kadaluarsa", data.get("Tanggal_Kadaluarsa", "-"), calendar_icon_path), 0, 1)
+        self.meta_grid.addWidget(self._create_meta_item("Jenis Pekerjaan", data.get("Jenis_Pekerjaan", "-"), suitcase_icon_path), 1, 0)
+        self.meta_grid.addWidget(self._create_meta_item("Link Lowongan", data.get("Link_Lowongan", "-") or "-", icon_path=link_icon_path, is_link=True), 1, 1)
+
+        desc = data.get("Deskripsi_Pekerjaan", "").strip()
+        self.lbl_desc.setText(desc if desc else "Tidak ada deskripsi tersedia untuk lowongan ini.")
+
+        while self.h_skills_flow.count():
+            it = self.h_skills_flow.takeAt(0)
+            if it.widget(): it.widget().deleteLater()
+        
+        h_skills_raw = data.get("Hard_Skills", "")
+        if not h_skills_raw and data.get("Skills"):
+            parts = data.get("Skills", "").split("||")
+            h_skills_raw = parts[0] if len(parts) > 0 else ""
+            
+        h_skills = [s.strip() for s in h_skills_raw.replace(",", "|").replace(";", "|").split("|") if s.strip()]
+        for s in h_skills:
+            pill = SkillTag(s, "hard_skills", font_size=14)
+            self.h_skills_flow.addWidget(pill)
+
+        while self.s_skills_flow.count():
+            it = self.s_skills_flow.takeAt(0)
+            if it.widget(): it.widget().deleteLater()
+            
+        s_skills_raw = data.get("Soft_Skills", "")
+        if not s_skills_raw and data.get("Skills"):
+            parts = data.get("Skills", "").split("||")
+            s_skills_raw = parts[1] if len(parts) > 1 else ""
+
+        s_skills = [s.strip() for s in s_skills_raw.replace(",", "|").replace(";", "|").split("|") if s.strip()]
+        for s in s_skills:
+            pill = SkillTag(s, "soft_skills", font_size=14)
+            self.s_skills_flow.addWidget(pill)
+
+        self._populate_list(self.lay_benefit, data.get("Benefit_Pekerjaan", ""))
+        self._populate_list(self.lay_kual, data.get("Kualifikasi_Persyaratan", ""))
+
+        is_applied = data.get("Is_lamar", False)
+        self.btn_lamar.setText("Sudah Melamar" if is_applied else "Lamar Sekarang")
+        self.btn_lamar.setEnabled(not is_applied)
+        self.btn_lamar.setIcon(QIcon(checked_icon_path if is_applied else send_icon_path))
+
+
+class SelectCVDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Pilih CV")
+        self.setFixedWidth(420)
+        self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint | Qt.Dialog)
         self.setAttribute(Qt.WA_TranslucentBackground)
+        self.selected_cv = None
         self.setup_ui()
 
     def setup_ui(self):
-        main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(20, 20, 20, 20)
-        main_layout.setSpacing(0)
+        main_lay = QVBoxLayout(self)
+        main_lay.setContentsMargins(10, 10, 10, 10)
 
-        # Main Container
-        container = QFrame()
-        container.setObjectName("DetailContainer")
-        container.setStyleSheet("""
-            QFrame#DetailContainer {
+        self.container = QFrame()
+        self.container.setStyleSheet("""
+            QFrame {
                 background-color: white;
                 border: 2px solid #2C687B;
                 border-radius: 15px;
             }
+            QLabel { border: none; background: transparent; }
         """)
-        
-        # Efek Bayangan (Drop Shadow)
-        shadow = QGraphicsDropShadowEffect(self)
-        shadow.setBlurRadius(25)
-        shadow.setXOffset(0)
-        shadow.setYOffset(5)
-        shadow.setColor(QColor(0, 0, 0, 80))
-        container.setGraphicsEffect(shadow)
-        
-        main_layout.addWidget(container)
-        
-        inner_layout = QVBoxLayout(container)
-        inner_layout.setContentsMargins(0, 0, 0, 0)
-        inner_layout.setSpacing(0)
+        main_lay.addWidget(self.container)
 
-        # Header
-        header_frame = QFrame()
-        header_frame.setStyleSheet("background-color: #F8FAFC; border-bottom: 1px solid #E2E8F0; border-top-left-radius: 13px; border-top-right-radius: 13px; border: none;")
-        header_layout = QHBoxLayout(header_frame)
-        header_layout.setContentsMargins(25, 20, 25, 20)
-        
-        title_label = QLabel("Rincian Pekerjaan")
-        title_label.setFont(QFont("Segoe UI", 18, QFont.Bold))
-        title_label.setStyleSheet("color: #1E293B; border: none; background: transparent;")
-        
-        btn_close = QPushButton("×")
-        btn_close.setFixedSize(32, 32)
-        btn_close.setCursor(Qt.PointingHandCursor)
-        btn_close.setStyleSheet("""
-            QPushButton { 
-                border: 1px solid #E2E8F0; border-radius: 6px; 
-                font-size: 20px; color: #64748B; background-color: white;
-            } 
-            QPushButton:hover { background-color: #F1F5F9; color: #0F172A; }
-        """)
-        btn_close.clicked.connect(self.reject)
-        
-        header_layout.addWidget(title_label)
-        header_layout.addStretch()
-        header_layout.addWidget(btn_close)
-        inner_layout.addWidget(header_frame)
+        inner_lay = QVBoxLayout(self.container)
+        inner_lay.setContentsMargins(25, 25, 25, 25)
+        inner_lay.setSpacing(20)
 
-        # Content with Scroll Area
-        scroll = KeyboardScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setFrameShape(QFrame.NoFrame)
-        scroll.setStyleSheet("background-color: transparent;")
-        
-        content_widget = QWidget()
-        content_widget.setStyleSheet("background-color: transparent;")
-        content_layout = QVBoxLayout(content_widget)
-        content_layout.setContentsMargins(30, 25, 30, 35)
-        content_layout.setSpacing(20)
-        
-        scroll.setWidget(content_widget)
-        inner_layout.addWidget(scroll)
+        title = QLabel("Pilih CV untuk Dikirim")
+        title.setFont(QFont("Segoe UI", 16, QFont.Bold))
+        title.setStyleSheet("color: #2C687B;")
+        inner_lay.addWidget(title)
 
-        def add_detail_section(title, value):
-            if not value or value == "-":
-                return
-            lbl_title = QLabel(title)
-            lbl_title.setFont(QFont("Segoe UI", 10, QFont.Bold))
-            lbl_title.setStyleSheet("color: #777; margin-bottom: 2px;")
-            
-            lbl_value = QLabel(value)
-            lbl_value.setFont(QFont("Segoe UI", 12))
-            lbl_value.setStyleSheet("color: #222;")
-            lbl_value.setWordWrap(True)
-            lbl_value.setTextInteractionFlags(Qt.TextSelectableByMouse)
-            
-            content_layout.addWidget(lbl_title)
-            content_layout.addWidget(lbl_value)
-
-        # Basic Info
-        info_layout = QGridLayout()
-        info_layout.setSpacing(15)
-        
-        def create_grid_item(title, value, row, col):
-            container = QWidget()
-            lay = QVBoxLayout(container)
-            lay.setContentsMargins(0, 0, 0, 0)
-            lay.setSpacing(6)
-            t = QLabel(title)
-            t.setStyleSheet("color: #666; font-size: 13px; font-weight: bold;")
-            v = QLabel(value if value else "-")
-            v.setStyleSheet("color: #111; font-size: 16px;")
-            v.setWordWrap(True)
-            v.setTextInteractionFlags(Qt.TextSelectableByMouse)
-            lay.addWidget(t)
-            lay.addWidget(v)
-            info_layout.addWidget(container, row, col)
-
-        create_grid_item("PERUSAHAAN", self.job_data.get("Nama_Perusahaan", "-"), 0, 0)
-        create_grid_item("JENIS PEKERJAAN", self.job_data.get("Jenis_Pekerjaan", "-"), 0, 1)
-        create_grid_item("LOKASI", self.job_data.get("Lokasi", "-"), 1, 0)
-        create_grid_item("RENTANG GAJI", self.job_data.get("Rentang_Gaji", "-"), 1, 1)
-        create_grid_item("KADALUARSA", self.job_data.get("Tanggal_Kadaluarsa", "-"), 2, 0)
-        create_grid_item("SKILLS", self.job_data.get("Skills", "-"), 2, 1)
-
-        # Judul Besar
-        lbl_judul = QLabel(self.job_data.get("Judul_Pekerjaan", "-"))
-        lbl_judul.setFont(QFont("Segoe UI", 20, QFont.Bold))
-        lbl_judul.setStyleSheet("color: #111;")
-        lbl_judul.setWordWrap(True)
-        lbl_judul.setTextInteractionFlags(Qt.TextSelectableByMouse)
-        content_layout.addWidget(lbl_judul)
-        
-        content_layout.addLayout(info_layout)
-        
-        divider1 = QFrame()
-        divider1.setFrameShape(QFrame.HLine)
-        divider1.setStyleSheet("background-color: #eee; margin: 10px 0;")
-        content_layout.addWidget(divider1)
-        
-        add_detail_section("Link Lowongan", self.job_data.get("Link_Lowongan", "-"))
-        
-        desc = self.job_data.get("Deskripsi_Pekerjaan", "").strip()
-        if desc and desc != "-":
-            lbl_desc_title = QLabel("Deskripsi Pekerjaan")
-            lbl_desc_title.setFont(QFont("Segoe UI", 11, QFont.Bold))
-            lbl_desc_title.setStyleSheet("color: #333; margin-top: 10px;")
-            
-            text_desc = QTextEdit()
-            text_desc.setReadOnly(True)
-            text_desc.setPlainText(desc)
-            text_desc.setStyleSheet("QTextEdit { border: 1px solid #ddd; border-radius: 8px; padding: 12px; background-color: #fafafa; color: #444; font-size: 13px; line-height: 1.5; }")
-            text_desc.setMinimumHeight(150)
-            
-            content_layout.addWidget(lbl_desc_title)
-            content_layout.addWidget(text_desc)
-            
-        benefits = self.job_data.get("Benefit_Pekerjaan", "").strip()
-        if benefits and benefits != "-":
-            add_detail_section("Benefit Pekerjaan", benefits)
-            
-        reqs = self.job_data.get("Kualifikasi_Persyaratan", "").strip()
-        if reqs and reqs != "-":
-            add_detail_section("Kualifikasi & Persyaratan", reqs)
-
-        content_layout.addStretch()
-
-
-# --- Job Card Widget ---
-class JobCardWidget(QFrame):
-    edit_clicked = pyqtSignal(dict)
-    delete_clicked = pyqtSignal(dict)
-    checkbox_toggled = pyqtSignal(dict, bool)
-    card_clicked = pyqtSignal(dict)
-
-    def __init__(self, job_data, parent=None):
-        super().__init__(parent)
-        self.job_data = job_data
-        self.setFixedHeight(240)
-        self.setMinimumWidth(320)
-        self.setCursor(Qt.PointingHandCursor)
-        self.setFocusPolicy(Qt.StrongFocus)
-        self.setup_ui()
-
-    def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self.card_clicked.emit(self.job_data)
-        super().mousePressEvent(event)
-
-    def keyPressEvent(self, event):
-        if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
-            self.card_clicked.emit(self.job_data)
-        super().keyPressEvent(event)
-
-    def setup_ui(self):
-        self.setObjectName("JobCard")
-        self.setStyleSheet("""
-            QFrame#JobCard {
-                background-color: white;
-                border: 1px solid #e8e8e8;
-                border-radius: 10px;
-            }
-            QFrame#JobCard:hover, QFrame#JobCard:focus {
-                border: 1px solid #2C687B;
-            }
-        """)
-
-        main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(15, 15, 15, 12)
-        main_layout.setSpacing(8)
-
-        # Header Row: Initial Logo, Title & Company, Checkbox
-        header_layout = QHBoxLayout()
-        header_layout.setContentsMargins(0, 0, 0, 0)
-        header_layout.setSpacing(12)
-
-        # Initial Logo
-        initial = self.job_data.get("Nama_Perusahaan", "X")[:2].upper()
-        lbl_logo = QLabel(initial)
-        lbl_logo.setFixedSize(48, 48)
-        lbl_logo.setAlignment(Qt.AlignCenter)
-        lbl_logo.setFont(QFont("Segoe UI", 16, QFont.Bold))
-        # Determine color based on initial
-        colors = ["#fce4ec", "#e3f2fd", "#e8f5e9", "#fff3e0", "#f3e5f5"]
-        text_colors = ["#880e4f", "#0d47a1", "#1b5e20", "#e65100", "#4a148c"]
-        idx = sum(ord(c) for c in initial) % len(colors)
-        lbl_logo.setStyleSheet(f"background-color: {colors[idx]}; color: {text_colors[idx]}; border-radius: 12px; border: none;")
-        header_layout.addWidget(lbl_logo)
-
-        # Title & Company
-        title_layout = QVBoxLayout()
-        title_layout.setSpacing(2)
-        
-        judul = self.job_data.get("Judul_Pekerjaan", "Tanpa Judul")
-        if len(judul) > 23: judul = judul[:21] + "..."
-        lbl_title = QLabel(judul)
-        lbl_title.setFont(QFont("Segoe UI", 13, QFont.Bold))
-        lbl_title.setStyleSheet("color: #111; border: none;")
-        
-        lbl_company = QLabel(self.job_data.get("Nama_Perusahaan", "-"))
-        lbl_company.setFont(QFont("Segoe UI", 11))
-        lbl_company.setStyleSheet("color: #777; border: none;")
-        
-        title_layout.addWidget(lbl_title)
-        title_layout.addWidget(lbl_company)
-        header_layout.addLayout(title_layout)
-        header_layout.addStretch()
-
-        # Checkbox
-        self.checkbox = QCheckBox()
-        safe_check_path = check_icon_path.replace("\\", "/")
-        self.checkbox.setStyleSheet(f"""
-            QCheckBox::indicator {{ width: 16px; height: 16px; border: 1.5px solid #ccc; border-radius: 4px; }}
-            QCheckBox::indicator:checked {{ background-color: #2C687B; border-color: #2C687B; image: url('{safe_check_path}'); }}
-        """)
-        self.checkbox.toggled.connect(lambda checked: self.checkbox_toggled.emit(self.job_data, checked))
-        header_layout.addWidget(self.checkbox, alignment=Qt.AlignTop)
-        
-        main_layout.addLayout(header_layout)
-
-        # Badges Row (Type, Remote, Status)
-        badges_layout = QHBoxLayout()
-        badges_layout.setSpacing(6)
-        
-        def create_badge(text, bg_color, text_color):
-            lbl = QLabel(text)
-            lbl.setStyleSheet(f"background-color: {bg_color}; color: {text_color}; border-radius: 10px; padding: 3px 10px; font-size: 11px; font-weight: bold; border: none;")
-            return lbl
-
-        # Jenis Pekerjaan
-        jenis = self.job_data.get("Jenis_Pekerjaan", "Full-time")
-        if jenis == "Internship":
-            badges_layout.addWidget(create_badge(jenis, "#fce4ec", "#c2185b"))
-        else:
-            badges_layout.addWidget(create_badge(jenis, "#e8f0fe", "#1a73e8"))
-
-        # Remote Badge
-        lokasi = self.job_data.get("Lokasi", "")
-        if "remote" in lokasi.lower() or "remote" in jenis.lower():
-            badges_layout.addWidget(create_badge("Remote", "#e8f5e9", "#2e7d32"))
-
-        # Kadaluarsa Badge check
-        date_str = self.job_data.get("Tanggal_Kadaluarsa", "")
-        kadaluarsa_date = None
-        is_warn = False
+        cvs = []
         try:
-            d = datetime.datetime.strptime(date_str, "%d/%m/%Y").date()
-            kadaluarsa_date = d
-            if (d - datetime.date.today()).days <= 7:
-                badges_layout.addWidget(create_badge("Segera Berakhir", "#ffebee", "#c62828"))
-                is_warn = True
-        except: pass
-        
-        badges_layout.addStretch()
-        main_layout.addLayout(badges_layout)
+            root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            path = os.path.join(root_dir, "database", "Database Permanen", "Career Toolkit", "curiculum-vitae.json")
+            if os.path.exists(path):
+                with open(path, 'r', encoding='utf-8') as f:
+                    cvs = json.load(f)
+        except Exception as e:
+            print(f"Error loading CVs: {e}")
 
-        main_layout.addSpacing(4) # extra spacing before location
-
-        # Info Row (Location & Salary)
-        info_layout = QVBoxLayout()
-        info_layout.setSpacing(3)
-        
-        loc_layout = QHBoxLayout()
-        loc_layout.setContentsMargins(0, 0, 0, 0)
-        loc_layout.setSpacing(6)
-        loc_icon = QLabel()
-        loc_icon.setPixmap(QPixmap(location_icon_path).scaled(14, 14, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        lbl_loc = QLabel(self.job_data.get('Lokasi', '-'))
-        lbl_loc.setStyleSheet("color: #666; font-size: 12px; border: none;")
-        loc_layout.addWidget(loc_icon)
-        loc_layout.addWidget(lbl_loc)
-        loc_layout.addStretch()
-        info_layout.addLayout(loc_layout)
-
-        sal_layout = QHBoxLayout()
-        sal_layout.setContentsMargins(0, 0, 0, 0)
-        sal_layout.setSpacing(6)
-        sal_icon = QLabel()
-        sal_icon.setPixmap(QPixmap(currency_icon_path).scaled(16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        lbl_sal = QLabel(self.job_data.get('Rentang_Gaji', '-'))
-        lbl_sal.setFont(QFont("Segoe UI", 12, QFont.Bold))
-        lbl_sal.setStyleSheet("color: #20a082; border: none;")
-        sal_layout.addWidget(sal_icon)
-        sal_layout.addWidget(lbl_sal)
-        sal_layout.addStretch()
-        info_layout.addLayout(sal_layout)
-        
-        main_layout.addLayout(info_layout)
-
-        main_layout.addSpacing(4)
-
-        # Skills Row (Max 3 items)
-        skills = [s.strip() for s in self.job_data.get('Skills', '').split(',') if s.strip()]
-        if skills:
-            skills_layout = QHBoxLayout()
-            skills_layout.setSpacing(6)
-            for s in skills[:3]:
-                lbl_s = QLabel(s)
-                lbl_s.setStyleSheet("background-color: #f4f4f4; color: #444; border-radius: 8px; padding: 4px 10px; font-size: 11px; border: none;")
-                skills_layout.addWidget(lbl_s)
-            if len(skills) > 3:
-                lbl_more = QLabel(f"+{len(skills)-3}")
-                lbl_more.setStyleSheet("background-color: #e8e8e8; color: #555; border-radius: 8px; padding: 4px 10px; font-size: 11px; border: none;")
-                skills_layout.addWidget(lbl_more)
-            skills_layout.addStretch()
-            main_layout.addLayout(skills_layout)
-        else:
-            main_layout.addSpacing(25) # Spacer if no skills
-
-        main_layout.addStretch()
-
-        # Divider
-        divider = QFrame()
-        divider.setFrameShape(QFrame.HLine)
-        divider.setStyleSheet("background-color: #f0f0f0; border: none; height: 1px;")
-        main_layout.addWidget(divider)
-
-        # Footer Row (Kadaluarsa + Action Buttons)
-        footer_layout = QHBoxLayout()
-        footer_layout.setContentsMargins(0, 4, 0, 0)
-        
-        kad_layout = QVBoxLayout()
-        kad_layout.setSpacing(0)
-        lbl_k_lbl = QLabel("Kadaluarsa")
-        lbl_k_lbl.setStyleSheet("color: #888; font-size: 11px; border: none;")
-        
-        formatted_date = "-"
-        if kadaluarsa_date:
-            formatted_date = kadaluarsa_date.strftime("%Y-%m-%d")
+        if not cvs:
+            lbl_empty = QLabel("Tidak ada CV tersedia. Silakan buat CV di Career Toolkit.")
+            lbl_empty.setWordWrap(True)
+            lbl_empty.setStyleSheet("color: #718096; font-size: 14px; font-style: italic;")
+            inner_lay.addWidget(lbl_empty)
             
-        lbl_k_val = QLabel(formatted_date)
-        lbl_k_val.setFont(QFont("Segoe UI", 11, QFont.Bold))
-        lbl_k_val.setStyleSheet(f"color: {'#c62828' if is_warn else '#333'}; border: none;")
-        
-        kad_layout.addWidget(lbl_k_lbl)
-        kad_layout.addWidget(lbl_k_val)
-        footer_layout.addLayout(kad_layout)
-        
-        footer_layout.addStretch()
-        
-        btn_style = "QPushButton { border: 1px solid #ddd; border-radius: 6px; background: white; font-size: 14px;} QPushButton:hover { background: #f5f5f5; }"
-        
-        btn_edit = QPushButton()
-        btn_edit.setIcon(QIcon(edit_icon_path))
-        btn_edit.setIconSize(QSize(18, 18))
-        btn_edit.setFixedSize(32, 32)
-        btn_edit.setCursor(Qt.PointingHandCursor)
-        btn_edit.setStyleSheet(btn_style)
-        btn_edit.clicked.connect(lambda: self.edit_clicked.emit(self.job_data))
-        
-        btn_del = QPushButton()
-        btn_del.setIcon(QIcon(trash_icon2_path))
-        btn_del.setIconSize(QSize(18, 18))
-        btn_del.setFixedSize(32, 32)
-        btn_del.setCursor(Qt.PointingHandCursor)
-        btn_del.setStyleSheet("QPushButton { border: 1px solid #ddd; border-radius: 6px; background: white; font-size: 14px;} QPushButton:hover { background: #fee; border-color: #ffcdd2; color: red; }")
-        btn_del.clicked.connect(lambda: self.delete_clicked.emit(self.job_data))
+            btn_close = QPushButton("Tutup")
+            btn_close.setCursor(Qt.PointingHandCursor)
+            btn_close.setFixedHeight(38)
+            btn_close.setStyleSheet(MODERN_BUTTON_STYLE)
+            btn_close.clicked.connect(self.reject)
+            inner_lay.addWidget(btn_close)
+            return
 
-        footer_layout.addWidget(btn_edit)
-        footer_layout.addWidget(btn_del)
+        hint = QLabel("Pilih salah satu CV di bawah ini:")
+        hint.setStyleSheet("color: #4A5568; font-size: 14px;")
+        inner_lay.addWidget(hint)
+
+        self.combo_cv = QComboBox()
+        for cv in cvs:
+            self.combo_cv.addItem(cv.get("cv_name", "CV Tanpa Nama"), cv)
         
-        main_layout.addLayout(footer_layout)
+        self.combo_cv.setItemDelegate(QStyledItemDelegate())
+        self.combo_cv.setFixedHeight(40)
+        self.combo_cv.setStyleSheet("""
+            QComboBox { 
+                border: 1px solid #D1D5DB; border-radius: 8px; padding: 8px 12px; font-size: 14px; background: #F9FAFB; color: #1E3A4A;
+            }
+            QComboBox:focus { border: 2px solid #2C687B; }
+            QComboBox QAbstractItemView { background: white; border: 1px solid #D1D5DB; selection-background-color: #E2EFF1; selection-color: #2C687B; outline: none; }
+        """)
+        inner_lay.addWidget(self.combo_cv)
 
+        btn_layout = QHBoxLayout()
+        btn_layout.setSpacing(12)
+        
+        btn_cancel = QPushButton("Batal")
+        btn_cancel.setCursor(Qt.PointingHandCursor)
+        btn_cancel.setFixedHeight(38)
+        btn_cancel.setStyleSheet("""
+            QPushButton {
+                background-color: #F3F4F6; color: #4A5568;
+                border: 1px solid #D1D5DB; border-radius: 8px;
+                padding: 8px 18px; font-weight: bold; font-size: 14px;
+            }
+            QPushButton:hover { background-color: #E5E7EB; }
+        """)
+        btn_cancel.clicked.connect(self.reject)
 
-# --- Main Page ---
+        btn_confirm = QPushButton("Kirim CV Ini")
+        btn_confirm.setCursor(Qt.PointingHandCursor)
+        btn_confirm.setFixedHeight(38)
+        btn_confirm.setStyleSheet(MODERN_BUTTON_STYLE)
+        btn_confirm.clicked.connect(self.on_confirm)
 
+        btn_layout.addWidget(btn_cancel)
+        btn_layout.addWidget(btn_confirm)
+        inner_lay.addLayout(btn_layout)
 
-def gui_muat_data(page):
-    page.data = muat_data()
-    page.selected_ids.clear()
-    page.btn_delete_multi.hide()
-    page.render_cards()
-    page.update_statistics()
+    def on_confirm(self):
+        self.selected_cv = self.combo_cv.currentData()
+        self.accept()
