@@ -122,14 +122,16 @@ class SkillTagInput(QWidget):
         
         for skill in parts:
             # Kapitalisasi huruf pertama setiap kata
+            skill = skill.strip()
             skill = skill.title() if skill.islower() else skill[0].upper() + skill[1:]
-            if skill not in self._skills:
+            if skill and skill not in self._skills:
                 self._insert_tag(skill)
         
         self._edit.clear()
 
     def _insert_tag(self, text):
-        """Buat tag pill dengan desain baru: nama skill (bold) + tombol x (rounded border)."""
+        """Buat tag pill dan hubungkan tombol X ke penghapus."""
+        text = text.strip()
         tag = QFrame()
         tag.setObjectName("SkillTag")
         tag.setStyleSheet("""
@@ -139,7 +141,6 @@ class SkillTagInput(QWidget):
                 padding: 0;
             }
         """)
-        # Menetapkan tinggi yang konsisten untuk tag
         tag.setFixedHeight(30)
         
         tag_lay = QHBoxLayout(tag)
@@ -151,7 +152,6 @@ class SkillTagInput(QWidget):
         lbl.setStyleSheet("color: white; border: none; background: transparent;")
         tag_lay.addWidget(lbl)
 
-        # Tombol x dengan border bulat kecil di dalamnya
         btn_x = QPushButton("×")
         btn_x.setFixedSize(20, 20)
         btn_x.setCursor(Qt.PointingHandCursor)
@@ -171,15 +171,35 @@ class SkillTagInput(QWidget):
             }
         """)
 
-        def _remove(t=text, w=tag):
-            if t in self._skills:
-                self._skills.remove(t)
-            self.tags_layout.removeWidget(w)
-            w.deleteLater()
+        # PERBAIKAN KRITIS: Gunakan lambda untuk menghindari signal clicked(bool) 
+        # meng-override parameter closure. Signal clicked mengirim bool `checked`,
+        # yang akan menimpa parameter `t` jika dihubungkan langsung ke _remove(t=...).
+        _skill_text = text  # capture di scope lokal
+        _tag_widget = tag   # capture di scope lokal
+        
+        def _do_remove():
+            """Hapus skill dari list internal dan dari FlowLayout."""
+            # 1. Hapus dari list Python
+            if _skill_text in self._skills:
+                self._skills.remove(_skill_text)
+
+            # 2. Hapus dari FlowLayout.itemList secara manual
+            for i in range(self.tags_layout.count()):
+                item = self.tags_layout.itemAt(i)
+                if item is not None and item.widget() is _tag_widget:
+                    self.tags_layout.takeAt(i)
+                    break
+
+            # 3. Hancurkan widget
+            _tag_widget.hide()
+            _tag_widget.setParent(None)
+            _tag_widget.deleteLater()
+
+            # 4. Sembunyikan container jika kosong
             if not self._skills:
                 self.tags_widget.hide()
 
-        btn_x.clicked.connect(_remove)
+        btn_x.clicked.connect(lambda checked: _do_remove())
         tag_lay.addWidget(btn_x)
 
         self.tags_layout.addWidget(tag)
@@ -194,8 +214,12 @@ class SkillTagInput(QWidget):
         """Hapus semua tag dan kosongkan input."""
         while self.tags_layout.count():
             item = self.tags_layout.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
+            if item is not None:
+                w = item.widget()
+                if w:
+                    w.hide()
+                    w.setParent(None)
+                    w.deleteLater()
         self._skills.clear()
         self._edit.clear()
         self.tags_widget.hide()
@@ -204,5 +228,6 @@ class SkillTagInput(QWidget):
         """Muat daftar skill ke dalam widget."""
         self.clear_all()
         for s in skills_list:
+            s = s.strip() if isinstance(s, str) else ""
             if s:
                 self._insert_tag(s)
