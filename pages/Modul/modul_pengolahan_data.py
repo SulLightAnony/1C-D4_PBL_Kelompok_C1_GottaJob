@@ -320,3 +320,93 @@ def cari_archive_terdekat(judul_pekerjaan, folder_archive):
             archive_json = file_path
             
     return archive_json if best_match_count > 0 else None
+
+
+def hitung_total_lowongan_aktif():
+    """
+    Menghitung total lowongan aktif (jumlah data/item di seluruh JSON kategori dalam database permanen).
+    """
+    import glob
+    from Modul.modul_database import get_database_permanen_dir
+    
+    try:
+        db_dir = get_database_permanen_dir()
+        if not os.path.exists(db_dir):
+            return 0
+        
+        total = 0
+        file_paths = glob.glob(os.path.join(db_dir, "**", "*.json"), recursive=True)
+        for fp in file_paths:
+            try:
+                with open(fp, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    if isinstance(data, list):
+                        total += len(data)
+            except Exception as e:
+                print(f"Error saat membaca file {fp}: {e}")
+        return total
+    except Exception as e:
+        print(f"Error hitung_total_lowongan_aktif: {e}")
+        return 0
+
+
+def hitung_persentase_lowongan_per_kategori():
+    """
+    Menghitung jumlah lowongan per kategori dan persentasenya terhadap total lowongan aktif.
+    Mengembalikan dict: { nama_kategori: (jumlah, persentase) } terurut berdasarkan jumlah terbesar.
+    """
+    import glob
+    from Modul.modul_database import get_database_permanen_dir, KATEGORI_GLINTS
+    
+    try:
+        db_dir = get_database_permanen_dir()
+        if not os.path.exists(db_dir):
+            return {}
+        
+        # Inisialisasi hitungan untuk setiap kategori resmi Glints
+        kategori_counts = {kat: 0 for kat in KATEGORI_GLINTS}
+        total_lowongan = 0
+        
+        # Cari seluruh file JSON di folder Job Archive secara rekursif
+        file_paths = glob.glob(os.path.join(db_dir, "**", "*.json"), recursive=True)
+        for fp in file_paths:
+            try:
+                # Dapatkan nama kategori dari nama parent folder
+                parent_folder = os.path.basename(os.path.dirname(fp))
+                
+                with open(fp, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    if isinstance(data, list):
+                        count = len(data)
+                        total_lowongan += count
+                        
+                        # Masukkan ke kategori yang sesuai
+                        if parent_folder in kategori_counts:
+                            kategori_counts[parent_folder] += count
+                        elif parent_folder != "Job Archive":
+                            kategori_counts[parent_folder] = kategori_counts.get(parent_folder, 0) + count
+                        else:
+                            kategori_counts["Lainnya"] = kategori_counts.get("Lainnya", 0) + count
+            except Exception as e:
+                print(f"Error saat membaca file {fp} untuk per kategori: {e}")
+                
+        # Jika tidak ada lowongan sama sekali, hindari pembagian dengan nol
+        if total_lowongan == 0:
+            return {}
+            
+        # Hitung persentase dan buat hasil
+        hasil = {}
+        for kat, count in kategori_counts.items():
+            if count > 0: # Hanya tampilkan kategori yang memiliki lowongan aktif
+                persentase = round((count / total_lowongan) * 100)
+                hasil[kat] = {
+                    "jumlah": count,
+                    "persentase": persentase
+                }
+                
+        # Urutkan berdasarkan jumlah lowongan terbanyak
+        sorted_hasil = dict(sorted(hasil.items(), key=lambda item: item[1]["jumlah"], reverse=True))
+        return sorted_hasil
+    except Exception as e:
+        print(f"Error hitung_persentase_lowongan_per_kategori: {e}")
+        return {}

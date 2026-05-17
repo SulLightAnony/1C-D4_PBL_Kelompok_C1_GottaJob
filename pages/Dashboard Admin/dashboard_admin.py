@@ -5,6 +5,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor
 
 from Modul.modul_antarmuka_pengguna import AktivitasTerkiniWidget
+from Modul.modul_pengolahan_data import hitung_total_lowongan_aktif, hitung_persentase_lowongan_per_kategori
 
 # --- REUSABLE COMPONENTS ---
 
@@ -111,10 +112,6 @@ class AdminDashboardPage(QWidget):
         lbl_b.setStyleSheet("font-weight: bold; color: #2C3E50; margin-bottom: 10px;")
         self.bidang_lay.addWidget(lbl_b)
         
-        # Contoh baris statis
-        self.bidang_lay.addWidget(SkillProgressAdmin("Teknologi", 60, "#3498DB"))
-        self.bidang_lay.addWidget(SkillProgressAdmin("Keuangan", 60, "#F1C40F"))
-        self.bidang_lay.addStretch()
         
         lower_layout.addWidget(bidang_card, 4)
 
@@ -192,28 +189,60 @@ class AdminDashboardPage(QWidget):
     def load_data(self):
         """Logika utama untuk refresh data Admin"""
         try:
-            # 1. Hitung total lowongan dari folder Job Archive
-            total_fav = self.hitung_file_json("database/Database Permanen/Job Archive")
+            # 1. Hitung total lowongan dari seluruh kategori di Database Permanen/Job Archive
+            total_lowongan = hitung_total_lowongan_aktif()
 
             # 2. Update Label Angka
-            self.stat_job.lbl_value.setText(str(total_fav))
+            self.stat_job.lbl_value.setText(str(total_lowongan))
 
             # 3. Refresh widget aktivitas admin
             self.aktivitas_widget.refresh()
 
-            print(f"Admin Dashboard Updated: {total_fav} lowongan ditemukan.")
+            # 4. Update LOWONGAN PER BIDANG secara dinamis
+            self.update_lowongan_per_bidang()
+
+            print(f"Admin Dashboard Updated: {total_lowongan} lowongan ditemukan.")
         except Exception as e:
             print(f"Gagal update dashboard admin: {e}")
 
-    def hitung_file_json(self, relative_path):
-        """Menghitung jumlah file .json di folder tertentu"""
+    def clear_layout(self, layout, keep=1):
+        """Menghapus semua widget di dalam layout kecuali beberapa widget awal"""
+        if layout is not None:
+            while layout.count() > keep:
+                item = layout.takeAt(keep)
+                widget = item.widget()
+                if widget is not None:
+                    widget.deleteLater()
+                else:
+                    self.clear_layout(item.layout(), keep=0)
+
+    def update_lowongan_per_bidang(self):
+        """Mengupdate card LOWONGAN PER BIDANG secara dinamis berdasarkan data ril"""
         try:
-            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            target_path = os.path.join(base_dir, relative_path)
+            # Hapus data sebelumnya (tetapkan judul index 0 tetap ada)
+            self.clear_layout(self.bidang_lay, keep=1)
             
-            if os.path.exists(target_path):
-                files = [f for f in os.listdir(target_path) if f.endswith('.json')]
-                return len(files)
-        except:
-            pass
-        return 0
+            # Ambil data per kategori dari pengolahan data
+            data_kategori = hitung_persentase_lowongan_per_kategori()
+            
+            # Daftar warna premium untuk progress bar
+            colors = ["#3498DB", "#2ECC71", "#E67E22", "#9B59B6", "#F1C40F", "#E74C3C", "#1ABC9C", "#34495E"]
+            
+            if not data_kategori:
+                no_data_lbl = QLabel("Tidak ada lowongan aktif.")
+                no_data_lbl.setStyleSheet("color: #7F8C8D; font-style: italic; font-size: 14px; margin-top: 10px;")
+                self.bidang_lay.addWidget(no_data_lbl)
+            else:
+                # Tampilkan maksimal 5 kategori teratas untuk menjaga estetika layout agar tetap presisi
+                for i, (kat, info) in enumerate(list(data_kategori.items())[:5]):
+                    color = colors[i % len(colors)]
+                    percentage = info["persentase"]
+                    jumlah = info["jumlah"]
+                    
+                    # Tambahkan baris skill progress admin
+                    display_name = f"{kat} ({jumlah})"
+                    self.bidang_lay.addWidget(SkillProgressAdmin(display_name, percentage, color))
+            
+            self.bidang_lay.addStretch()
+        except Exception as e:
+            print(f"Error update_lowongan_per_bidang: {e}")
