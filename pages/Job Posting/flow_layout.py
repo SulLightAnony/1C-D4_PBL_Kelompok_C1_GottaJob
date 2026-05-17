@@ -37,6 +37,14 @@ class FlowLayout(QLayout):
             return self.itemList.pop(index)
         return None
 
+    def removeWidget(self, widget):
+        """Hapus widget dari itemList secara eksplisit."""
+        for i, item in enumerate(self.itemList):
+            if item.widget() is widget:
+                self.itemList.pop(i)
+                self.invalidate()
+                return
+
     def expandingDirections(self):
         return Qt.Orientations(Qt.Orientation(0))
 
