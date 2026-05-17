@@ -3,7 +3,7 @@ import os
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, 
                              QVBoxLayout, QPushButton, QFrame, QLabel, 
                              QStackedWidget, QShortcut)
-from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtCore import Qt, QSize, QPropertyAnimation, QEasingCurve
 from PyQt5.QtGui import QFont, QPixmap, QIcon, QKeySequence
 
 # IMPORT file menu
@@ -56,6 +56,16 @@ from skill_manager import SkillManagerPage
 class AppRouter(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.menu_texts = {
+            "Dashboard": "  Dashboard",
+            "Dashboard Admin": "  Dashboard Admin",
+            "Skill Manager": "  Skill Manager",
+            "Live Discovery": "  Live Discovery",
+            "Job Archive": "  Job Archive",
+            "Job Posting": "  Job Posting",
+            "Career Toolkit": "  Career Toolkit",
+            "Logout": "  Logout"
+        }
         self.setWindowTitle("Gottajob")
         self.setStyleSheet("QMainWindow { background-color: #F3F4F6; }") # Background dasar QMainWindow
 
@@ -73,8 +83,14 @@ class AppRouter(QMainWindow):
         self.layout_utama.setSpacing(0)
 
         # SIDEBAR
+        # COLLAPSE SIDEBAR
+        self.sidebar_expanded_width = 280
+        self.sidebar_collapsed_width = 85
+        self.sidebar_expanded = True
+
         self.sidebar = QFrame()
-        self.sidebar.setFixedWidth(280)
+        self.sidebar.setMinimumWidth(self.sidebar_expanded_width)
+        self.sidebar.setMaximumWidth(self.sidebar_expanded_width)
         self.sidebar.setObjectName("Sidebar")
         self.sidebar.setStyleSheet("""
             QFrame#Sidebar { background-color: #2C687B; border: none; }
@@ -280,34 +296,179 @@ class AppRouter(QMainWindow):
 
     def setup_logo(self):
         container = QWidget()
-        container.setFixedHeight(100)
-        container.setStyleSheet("background-color: transparent;") # Mencegah pewarisan background dari main_widget
+        container.setFixedHeight(80)
+        container.setStyleSheet("""
+            QWidget {
+                background-color: transparent;
+                border: none;
+            }
+        """)
+
         layout = QHBoxLayout(container)
-        layout.setContentsMargins(15, 10, 10, 10)
-        label_img = QLabel()
-        pix = QPixmap('assets/logo.png')
+        layout.setContentsMargins(10, 10, 10, 10)
+        layout.setSpacing(10)
+
+        # =========================
+        # LOGO IMAGE
+        # =========================
+        self.label_img = QLabel()
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        # Pastikan path ke assets selalu dihitung dari root proyek (naik satu tingkat)
+        base_path = os.path.dirname(current_dir)
+        logo_path = os.path.join(base_path, 'assets', 'logo.png')
+        pix = QPixmap(logo_path)
+
         if not pix.isNull():
-            label_img.setFixedWidth(60)
-            label_img.setPixmap(pix.scaledToHeight(60, Qt.SmoothTransformation))
-        text_layout = QVBoxLayout()
+            self.label_img.setPixmap(
+                pix.scaled(
+                    38,
+                    38,
+                    Qt.KeepAspectRatio,
+                    Qt.SmoothTransformation
+                )
+            )
+
+        # =========================
+        # TEXT LOGO
+        # =========================
+        self.container_text_logo = QWidget()
+        text_layout = QVBoxLayout(self.container_text_logo)
+        text_layout.setContentsMargins(0, 0, 0, 0)
         text_layout.setSpacing(0)
-        
-        label_txt = QLabel("GOTTAJOB")
-        label_txt.setStyleSheet("color: white; font-size: 22px; font-weight: bold;")
-        
+
+        self.label_txt = QLabel("GOTTAJOB")
+        self.label_txt.setStyleSheet("""
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+        """)
+
         self.lbl_admin_badge = QLabel("admin")
-        self.lbl_admin_badge.setStyleSheet("color: #E74C3C; font-size: 20px; font-style: italic; font-weight: bold;")
-        self.lbl_admin_badge.setAlignment(Qt.AlignRight)
+        self.lbl_admin_badge.setStyleSheet("""
+            color: #E74C3C;
+            font-size: 13px;
+            font-weight: bold;
+            font-style: italic;
+        """)
         self.lbl_admin_badge.hide()
-        
-        text_layout.addWidget(label_txt)
+
+        text_layout.addWidget(self.label_txt)
         text_layout.addWidget(self.lbl_admin_badge)
-        text_layout.setAlignment(Qt.AlignVCenter)
+
+        # =========================
+        # TOGGLE BUTTON (Pindah ke Kanan)
+        # =========================
+        self.btn_toggle = QPushButton()
+        self.btn_toggle.setFixedSize(40, 40)
+        self.btn_toggle.setCursor(Qt.PointingHandCursor)
+
+        icon_path = os.path.join(base_path, 'assets', 'burger-bar.png')
+
+        if os.path.exists(icon_path):
+            icon = QIcon(icon_path)
+            self.btn_toggle.setIcon(icon)
+            self.btn_toggle.setIconSize(QSize(30, 30))
+            self.btn_toggle.setText("")
+        else:
+            self.btn_toggle.setText("☰")
+
+        self.btn_toggle.setStyleSheet("""
+            QPushButton {
+                background-color: rgba(255, 255, 255, 0.12);
+                border: none;
+                border-radius: 8px;
+                color: #FFFFFF; 
+                font-size: 22px;
+                font-weight: bold;
+                text-align: center;
+            }
+            QPushButton:hover {
+                background-color: rgba(255,255,255,0.2);
+            }
+        """)
+        self.btn_toggle.clicked.connect(self.toggle_sidebar)
+
+        # =========================
+        # ADD WIDGET (Urutan diubah agar Burger di Kanan)
+        # =========================
+        layout.addWidget(self.label_img)
+        layout.addWidget(self.container_text_logo)
         
-        layout.addWidget(label_img)
-        layout.addLayout(text_layout)
-        layout.addStretch()
+        # Dorong tombol burger ke ujung kanan menggunakan Stretch
+        layout.addStretch() 
+        layout.addWidget(self.btn_toggle)
+
         self.layout_sidebar.addWidget(container)
+
+    #TOOGLE SIDEBAR
+    def toggle_sidebar(self):
+        # Tentukan width tujuan
+        if self.sidebar_expanded:
+            new_width = self.sidebar_collapsed_width
+        else:
+            new_width = self.sidebar_expanded_width
+
+        # Animasi minimum width
+        self.anim_min = QPropertyAnimation(self.sidebar, b"minimumWidth")
+        self.anim_min.setDuration(250)
+        self.anim_min.setStartValue(self.sidebar.width())
+        self.anim_min.setEndValue(new_width)
+        self.anim_min.setEasingCurve(QEasingCurve.InOutQuart)
+
+        # Animasi maximum width
+        self.anim_max = QPropertyAnimation(self.sidebar, b"maximumWidth")
+        self.anim_max.setDuration(250)
+        self.anim_max.setStartValue(self.sidebar.width())
+        self.anim_max.setEndValue(new_width)
+        self.anim_max.setEasingCurve(QEasingCurve.InOutQuart)
+
+        self.anim_min.start()
+        self.anim_max.start()
+
+        # =========================
+        # COLLAPSE STATE
+        # =========================
+        if self.sidebar_expanded:
+            self.container_text_logo.hide()
+            self.label_img.hide() # Sembunyikan logo utama agar tersisa tombol burger saja di atas
+
+            self.btn_logout.setText("")
+
+            for btn in self.menu_buttons:
+                btn.setText("")
+                # Pastikan icon tetap muncul di tengah (Center) saat teks kosong
+                btn.setStyleSheet("""
+                    QPushButton {
+                        padding: 14px;
+                        margin: 6px;
+                        text-align: center;
+                    }
+                    QPushButton:hover {
+                        border-radius: 10px;
+                    }
+                """)
+
+        # =========================
+        # EXPAND STATE
+        # =========================
+        else:
+            self.container_text_logo.show()
+            self.label_img.show() # Munculkan kembali logo utama
+
+            self.btn_dashboard.setText(self.menu_texts["Dashboard"])
+            self.btn_admin.setText(self.menu_texts["Dashboard Admin"])
+            self.btn_skill_manager.setText(self.menu_texts["Skill Manager"])
+            self.btn_discovery.setText(self.menu_texts["Live Discovery"])
+            self.btn_archive.setText(self.menu_texts["Job Archive"])
+            self.btn_directory.setText(self.menu_texts["Job Posting"])
+            self.btn_toolkit.setText(self.menu_texts["Career Toolkit"])
+            self.btn_logout.setText(self.menu_texts["Logout"])
+
+            for btn in self.menu_buttons:
+                btn.setStyleSheet("") # Kembalikan ke style asal (text-align: left biasanya)
+
+        # FIX: Pindahkan toggle state ke luar if-else agar selalu dieksekusi tiap kali diklik
+        self.sidebar_expanded = not self.sidebar_expanded
 
     def create_menu_btn(self, text, index, folder_name, icon_name=None):
         btn = QPushButton(text)
@@ -355,3 +516,5 @@ class AppRouter(QMainWindow):
         except:
             pass
         event.accept()
+
+    
