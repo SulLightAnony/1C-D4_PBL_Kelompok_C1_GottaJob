@@ -34,7 +34,6 @@ if _pages_dir not in sys.path:
 from CRUD.Shared import muat_data, simpan_data
 from modul_antarmuka_pengguna import KeyboardScrollArea, show_message, show_question, MODERN_BUTTON_STYLE, ActionButton, SkillTag
 from Modul.modul_database import catat_aktivitas
-from CRUD.Read import JobDetailDialog
 
 # --- Page: Detail Lowongan ---
 class JobDetailPage(QWidget):
@@ -407,7 +406,7 @@ class JobDetailPage(QWidget):
         self.btn_lamar.setEnabled(not is_applied)
         self.btn_lamar.setIcon(QIcon(checked_icon_path if is_applied else send_icon_path))
 
-        # Remaining days logic moved to badge layout
+        # Info kadaluarsa sudah dipindahkan ke badge di header
         pass
 
 class SelectCVDialog(QDialog):
