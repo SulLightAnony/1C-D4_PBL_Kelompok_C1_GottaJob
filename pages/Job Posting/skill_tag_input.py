@@ -113,19 +113,18 @@ class SkillTagInput(QWidget):
         if not text:
             return
         
-        # Split berdasarkan koma atau spasi jika perlu
-        # Kita pisahkan berdasarkan koma terlebih dahulu, jika tidak ada koma, pisahkan berdasar spasi
+        # Hanya pisah berdasarkan koma jika user ingin tambah beberapa skill sekaligus.
+        # Spasi TIDAK memisahkan — satu entri bisa terdiri dari beberapa kata (misal: "Customer Support").
         if ',' in text:
-            parts = [p.strip() for p in text.split(',')]
+            parts = [p.strip() for p in text.split(',') if p.strip()]
         else:
-            parts = [p.strip() for p in text.split()]
+            parts = [text]
         
-        for word in parts:
-            # Kapitalisasi huruf pertama
-            if len(word) > 0:
-                word = word[0].upper() + word[1:]
-                if word not in self._skills:
-                    self._insert_tag(word)
+        for skill in parts:
+            # Kapitalisasi huruf pertama setiap kata
+            skill = skill.title() if skill.islower() else skill[0].upper() + skill[1:]
+            if skill not in self._skills:
+                self._insert_tag(skill)
         
         self._edit.clear()
 

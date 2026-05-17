@@ -216,7 +216,16 @@ class JobCardWidget(QFrame):
         main_layout.addSpacing(4)
 
         # ── Skills (maks 3 tag) ──
-        skills = [s.strip() for s in self.job_data.get("Skills", "").split("|") if s.strip()]
+        raw_skills = self.job_data.get("Skills", "").replace("||", "|")
+        skills = [s.strip() for s in raw_skills.split("|") if s.strip()]
+        # Jika skill dipisahkan koma di dalam blok (format baru)
+        final_skills = []
+        for s in skills:
+            if "," in s:
+                final_skills.extend([p.strip() for p in s.split(",") if p.strip()])
+            else:
+                final_skills.append(s)
+        skills = final_skills
         if skills:
             skills_layout = QHBoxLayout()
             skills_layout.setSpacing(6)

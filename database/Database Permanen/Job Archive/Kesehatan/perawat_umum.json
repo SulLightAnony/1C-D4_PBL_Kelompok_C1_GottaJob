@@ -1,17 +1,1 @@
-[
-    {
-        "id": "e7850b33-b827-4eff-8d8f-e1ade0628a7d",
-        "Judul_Pekerjaan": "Perawat Umum",
-        "Nama_Perusahaan": "RS Medika Utama",
-        "Jenis_Pekerjaan": "Penuh Waktu",
-        "Lokasi": "Surabaya",
-        "Rentang_Gaji": "5.000.000 - 7.000.000",
-        "Skills": "Nursing|Emergency Care",
-        "Kategori": "Kesehatan",
-        "Tanggal_Kadaluarsa": "01/07/2026",
-        "Deskripsi_Pekerjaan": "Memberikan perawatan medis kepada pasien.",
-        "Link_Lowongan": "https://example.com/nursing",
-        "source": "job_posting",
-        "Is_lamar": false
-    }
-]
+[]

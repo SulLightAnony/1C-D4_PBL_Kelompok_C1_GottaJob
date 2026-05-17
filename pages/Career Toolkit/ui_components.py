@@ -16,26 +16,61 @@ class DateRangeWidget(QWidget):
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         
+        base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        down_icon_path = os.path.join(base_path, "assets", "Job Archive", "down.png").replace("\\", "/")
+        qdate_style = f"""
+            QDateEdit {{
+                border: 2px solid #B2D2D9;
+                border-radius: 8px;
+                padding: 8px 12px;
+                font-size: 14px;
+                color: #1E3A4A;
+                background-color: #F7FBFC;
+            }}
+            QDateEdit:hover {{
+                border: 2px solid #2C687B;
+            }}
+            QDateEdit::drop-down {{
+                subcontrol-origin: padding;
+                subcontrol-position: top right;
+                width: 35px;
+                border: none;
+            }}
+            QDateEdit::down-arrow {{
+                image: url({down_icon_path});
+                width: 20px;
+                height: 20px;
+            }}
+        """
+
+        label_style = "color: #475569; font-size: 13px; font-weight: 600;"
+
         self.start_date = QDateEdit()
         self.start_date.setDisplayFormat("MM/yyyy")
         self.start_date.setDate(QDate.currentDate())
-        self.start_date.setCalendarPopup(True) 
-        self.start_date.setMinimumWidth(110) 
-        self.start_date.setStyleSheet("background: white; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px;")
-        
+        self.start_date.setCalendarPopup(True)
+        self.start_date.setMinimumWidth(120)
+        self.start_date.setStyleSheet(qdate_style)
+
         self.end_date = QDateEdit()
         self.end_date.setDisplayFormat("MM/yyyy")
         self.end_date.setDate(QDate.currentDate())
         self.end_date.setCalendarPopup(True)
-        self.end_date.setMinimumWidth(110) 
-        self.end_date.setStyleSheet("background: white; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px;")
-        
+        self.end_date.setMinimumWidth(120)
+        self.end_date.setStyleSheet(qdate_style)
+
         self.chk_present = QCheckBox("Sekarang")
+        self.chk_present.setStyleSheet("color: #475569; font-size: 13px;")
         self.chk_present.stateChanged.connect(self.toggle_end_date)
-        
-        layout.addWidget(QLabel("Mulai:"))
+
+        start_label = QLabel("Mulai:")
+        start_label.setStyleSheet(label_style)
+        end_label = QLabel("Selesai:")
+        end_label.setStyleSheet(label_style)
+
+        layout.addWidget(start_label)
         layout.addWidget(self.start_date)
-        layout.addWidget(QLabel("Selesai:"))
+        layout.addWidget(end_label)
         layout.addWidget(self.end_date)
         layout.addWidget(self.chk_present)
         layout.addStretch()
@@ -63,12 +98,14 @@ class CompactInputWidget(QFrame):
     delete_requested = pyqtSignal(object)
     def __init__(self, placeholder, data=None, parent=None):
         super().__init__(parent)
-        self.setStyleSheet("QFrame { background: white; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 5px; } QLineEdit { border: none; padding: 5px; }")
+        self.setStyleSheet("QFrame { background: #F8FAFC; border: 1px solid #D1D5DB; border-radius: 14px; margin-bottom: 8px; } QLineEdit { background: transparent; border: none; padding: 10px 8px; color: #334155; font-size: 14px; } QLineEdit:focus { outline: none; }")
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(5, 5, 5, 5)
+        layout.setContentsMargins(10, 8, 10, 8)
+        layout.setSpacing(10)
         
         self.input_field = QLineEdit()
         self.input_field.setPlaceholderText(placeholder)
+        self.input_field.setStyleSheet("background: transparent; color: #334155;")
         
         self.btn_delete = QPushButton(self)
         self.btn_delete.setCursor(QCursor(Qt.PointingHandCursor))
@@ -96,6 +133,7 @@ class CVCard(QFrame):
     print_clicked = pyqtSignal(str)
     duplicate_clicked = pyqtSignal(str)
     delete_clicked = pyqtSignal(str)
+    preview_clicked = pyqtSignal(str)
 
     def __init__(self, cv_data, parent=None):
         super().__init__(parent)
@@ -103,22 +141,25 @@ class CVCard(QFrame):
         self.cv_id = cv_data.get("cv_id", "")
         self.cv_name = cv_data.get("cv_name", "Untitled CV")
         self.last_updated = cv_data.get("last_updated", "")
+        
         self.init_ui()
+        self.lbl_thumbnail.setCursor(Qt.PointingHandCursor)
+        self.lbl_thumbnail.mousePressEvent = self.on_thumbnail_click
 
     def init_ui(self):
         self.setFixedSize(220, 280)
         self.setObjectName("CVCard")
-        self.setStyleSheet("QFrame#CVCard { background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; } QFrame#CVCard:hover { border: 2px solid #2C687B; background-color: #f8fafc; }")
-        layout = QVBoxLayout(self); layout.setContentsMargins(15, 15, 15, 15)
+        self.setStyleSheet("QFrame#CVCard { background-color: #ffffff; border-radius: 18px; border: 1px solid rgba(115, 128, 150, 0.17); box-shadow: 0px 6px 18px rgba(15, 23, 42, 0.06); } QFrame#CVCard:hover { border-color: #2C687B; background-color: #f8fbfd; }")
+        layout = QVBoxLayout(self); layout.setContentsMargins(18, 18, 18, 18)
 
         header_layout = QHBoxLayout(); header_layout.addStretch()
         self.btn_menu = QToolButton(); self.btn_menu.setText("⋮")
         self.btn_menu.setFont(QFont("Arial", 16, QFont.Bold)); self.btn_menu.setCursor(QCursor(Qt.PointingHandCursor))
-        self.btn_menu.setStyleSheet("border: none; color: #64748b; background: transparent;")
+        self.btn_menu.setStyleSheet("QToolButton { border: none; color: #64748b; background: transparent; padding: 6px; } QToolButton:hover { background-color: rgba(44, 104, 123, 0.08); border-radius: 8px; }")
         self.btn_menu.setPopupMode(QToolButton.InstantPopup)
         
         self.kebab_menu = QMenu(self)
-        self.kebab_menu.setStyleSheet("QMenu { background-color: white; border: 1px solid #cbd5e1; border-radius: 5px; } QMenu::item { padding: 5px 20px; } QMenu::item:selected { background-color: #f1f5f9; }")
+        self.kebab_menu.setStyleSheet("QMenu { background-color: white; border: 1px solid #D1D5DB; border-radius: 12px; padding: 6px 0; } QMenu::item { padding: 10px 20px; color: #334155; } QMenu::item:selected { background-color: #E2EFF1; color: #1F5161; }")
         
         action_dup = QAction("Duplikasi", self); action_dup.triggered.connect(lambda: self.duplicate_clicked.emit(self.cv_id))
         action_del = QAction("Hapus", self); action_del.triggered.connect(lambda: self.delete_clicked.emit(self.cv_id))
@@ -156,6 +197,10 @@ class CVCard(QFrame):
         action_layout.addWidget(self.btn_edit); action_layout.addWidget(self.btn_print)
         layout.addLayout(action_layout)
 
+    def on_thumbnail_click(self, event):
+        """Memancarkan ID CV saat gambar diklik"""
+        self.preview_clicked.emit(self.cv_id)
+
 
 # ==========================================
 # 2. KOMPONEN FOTO (VERSI ALTERNATIF MINIMALIS)
@@ -164,7 +209,7 @@ class PhotoUploaderWidget(QFrame):
     def __init__(self, data=None, parent=None):
         super().__init__(parent)
         self.photo_path = ""
-        self.setStyleSheet("QFrame { background-color: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; }")
+        self.setStyleSheet("QFrame { background-color: #ffffff; border: 1px solid #D1D5DB; border-radius: 18px; }")
         
         # --- BUILD UI HANYA SEKALI DI SINI ---
         layout = QVBoxLayout(self)
@@ -180,20 +225,20 @@ class PhotoUploaderWidget(QFrame):
         
         self.btn_browse = QPushButton("Pilih File")
         self.btn_browse.setCursor(QCursor(Qt.PointingHandCursor))
-        self.btn_browse.setStyleSheet("padding: 6px 15px; background-color: #2C687B; color: white; border-radius: 4px; font-weight: bold;")
+        self.btn_browse.setStyleSheet("QPushButton { padding: 10px 18px; background-color: #2C687B; color: white; border-radius: 12px; font-weight: 700; } QPushButton:hover { background-color: #26566a; }")
         self.btn_browse.clicked.connect(self.browse_image)
         btn_layout.addWidget(self.btn_browse)
         
         self.btn_view = QPushButton("Lihat Foto")
         self.btn_view.setCursor(QCursor(Qt.PointingHandCursor))
-        self.btn_view.setStyleSheet("padding: 6px 15px; background-color: #E28F41; color: white; border-radius: 4px; font-weight: bold;")
+        self.btn_view.setStyleSheet("QPushButton { padding: 10px 18px; background-color: #E28F41; color: white; border-radius: 12px; font-weight: 700; } QPushButton:hover { background-color: #c97736; }")
         self.btn_view.clicked.connect(self.view_image)
         self.btn_view.setVisible(False)
         btn_layout.addWidget(self.btn_view)
 
         self.btn_remove = QPushButton("Hapus")
         self.btn_remove.setCursor(QCursor(Qt.PointingHandCursor))
-        self.btn_remove.setStyleSheet("padding: 6px 15px; background-color: #ef4444; color: white; border-radius: 4px; font-weight: bold;")
+        self.btn_remove.setStyleSheet("QPushButton { padding: 10px 18px; background-color: #F87171; color: white; border-radius: 12px; font-weight: 700; } QPushButton:hover { background-color: #dc2626; }")
         self.btn_remove.clicked.connect(self.remove_image)
         self.btn_remove.setVisible(False)
         btn_layout.addWidget(self.btn_remove)
@@ -278,9 +323,9 @@ class BaseInputWidget(QFrame):
     delete_requested = pyqtSignal(object)
     def __init__(self, title, bg_color, border_color, parent=None):
         super().__init__(parent)
-        self.setStyleSheet(f"QFrame {{ background-color: {bg_color}; border: 1px solid {border_color}; border-radius: 8px; margin-bottom: 10px; }} QLineEdit, QTextEdit {{ background: white; border: 1px solid #cbd5e1; border-radius: 4px; padding: 5px; }}")
+        self.setStyleSheet(f"QFrame {{ background-color: {bg_color}; border: 1px solid {border_color}; border-radius: 18px; margin-bottom: 14px; }} QLineEdit, QTextEdit {{ background: white; border: 1px solid #D1D5DB; border-radius: 12px; padding: 10px; color: #334155; }} QLineEdit:focus, QTextEdit:focus {{ border: 1px solid #2C687B; }}")
         self.layout = QVBoxLayout(self)
-        self.layout.setContentsMargins(15, 10, 15, 15)
+        self.layout.setContentsMargins(18, 14, 18, 14)
         
         header = QHBoxLayout()
         lbl_title = QLabel(title); lbl_title.setFont(QFont("Segoe UI", 10, QFont.Bold)); lbl_title.setStyleSheet("border: none; background: transparent;")
