@@ -413,6 +413,16 @@ class StatCard(QFrame):
     def __init__(self, title, val="0", parent=None):
         super().__init__(parent)
         self.setObjectName("PanelCard")
+        self.setStyleSheet("""
+            QFrame#PanelCard {
+                background-color: white;
+                border-radius: 16px;
+                border: 1px solid #E2E8F0;
+            }
+            QWidget {
+                background-color: transparent;
+            }
+        """)
         lay = QVBoxLayout(self)
         lay.setContentsMargins(15, 15, 15, 15)
         lay.setSpacing(5)
@@ -470,6 +480,16 @@ class JobDashboardWidget(QWidget):
         # Bagian Bawah Kiri: Chart Card
         chart_card = QFrame()
         chart_card.setObjectName("PanelCard")
+        chart_card.setStyleSheet("""
+            QFrame#PanelCard {
+                background-color: white;
+                border-radius: 16px;
+                border: 1px solid #E2E8F0;
+            }
+            QWidget {
+                background-color: transparent;
+            }
+        """)
         
         # Tambahkan soft drop shadow modern
         terapkan_soft_shadow(chart_card)
@@ -489,6 +509,16 @@ class JobDashboardWidget(QWidget):
         # ── KANAN: Daftar Skill & Job Type (Full Height) ──
         right_panel = QFrame()
         right_panel.setObjectName("PanelCard")
+        right_panel.setStyleSheet("""
+            QFrame#PanelCard {
+                background-color: white;
+                border-radius: 16px;
+                border: 1px solid #E2E8F0;
+            }
+            QWidget {
+                background-color: transparent;
+            }
+        """)
         
         # Tambahkan soft drop shadow modern
         terapkan_soft_shadow(right_panel)
@@ -503,27 +533,13 @@ class JobDashboardWidget(QWidget):
         page_skill_lay = QVBoxLayout(page_skill)
         page_skill_lay.setContentsMargins(20, 20, 20, 20)
         
-        right_title = QLabel("Daftar Skill Pekerjaan", alignment=Qt.AlignCenter)
-        right_title.setStyleSheet("font-size: 16px; font-weight: bold; color: #2C687B; background-color: transparent;")
-        page_skill_lay.addWidget(right_title)
+        self.right_title = QLabel("Daftar Skill Pekerjaan", alignment=Qt.AlignCenter)
+        self.right_title.setStyleSheet(f"font-size: 16px; font-weight: bold; color: {'#1E3A5F' if self.current_theme == 'admin' else '#2C687B'}; background-color: transparent;")
+        page_skill_lay.addWidget(self.right_title)
         page_skill_lay.addSpacing(15)
         
         self.skill_list = QListWidget()
-        list_style = """
-            QListWidget { 
-                border: none; background-color: #F7FBFC; border-radius: 8px; font-size: 16px; color: #1E3A4A;
-            }
-            QListWidget::item { padding: 12px; border-bottom: 1px solid #E0E7EF; color: #1E3A4A; }
-            QListWidget::item:hover { background-color: #EBF4F6; }
-            QListWidget::item:selected { background-color: #E2EFF1; color: #2C687B; border-left: 4px solid #2C687B; }
-            QScrollBar:vertical { border: none; background: #F3F4F6; width: 8px; border-radius: 4px; }
-            QScrollBar::handle:vertical { background: #B2D2D9; border-radius: 4px; }
-            QScrollBar:horizontal { border: none; background: #F3F4F6; height: 8px; border-radius: 4px; }
-            QScrollBar::handle:horizontal { background: #B2D2D9; border-radius: 4px; }
-            QListWidget::indicator { width: 22px; height: 22px; border: 2px solid #B2D2D9; border-radius: 4px; background-color: white; }
-            QListWidget::indicator:checked { background-color: #2C687B; border: 2px solid #2C687B; }
-        """
-        self.skill_list.setStyleSheet(list_style)
+        self.skill_list.setStyleSheet(self._get_list_stylesheet(self.current_theme))
         self.skill_list.itemClicked.connect(self._toggle_item_check)
         page_skill_lay.addWidget(self.skill_list, stretch=1)
         page_skill_lay.addSpacing(15)
@@ -543,15 +559,15 @@ class JobDashboardWidget(QWidget):
         btn_back_skill.clicked.connect(lambda: self.right_stack.setCurrentIndex(0))
         header_type_lay.addWidget(btn_back_skill)
         
-        type_title = QLabel("Tipe Pekerjaan")
-        type_title.setStyleSheet("font-size: 16px; font-weight: bold; color: #2C687B; background-color: transparent;")
-        header_type_lay.addWidget(type_title, stretch=1, alignment=Qt.AlignCenter)
+        self.type_title = QLabel("Tipe Pekerjaan")
+        self.type_title.setStyleSheet(f"font-size: 16px; font-weight: bold; color: {'#1E3A5F' if self.current_theme == 'admin' else '#2C687B'}; background-color: transparent;")
+        header_type_lay.addWidget(self.type_title, stretch=1, alignment=Qt.AlignCenter)
         header_type_lay.addSpacing(70) # balance for the wider back button
         page_type_lay.addLayout(header_type_lay)
         page_type_lay.addSpacing(15)
         
         self.job_type_list = QListWidget()
-        self.job_type_list.setStyleSheet(list_style)
+        self.job_type_list.setStyleSheet(self._get_list_stylesheet(self.current_theme))
         self.job_type_list.itemClicked.connect(self._toggle_item_check)
         page_type_lay.addWidget(self.job_type_list, stretch=1)
         page_type_lay.addSpacing(15)
@@ -569,7 +585,8 @@ class JobDashboardWidget(QWidget):
     def update_stats(self, total_jobs, total_skills, dominant_skill):
         self.card_total.update_value(total_jobs)
         self.card_skills.update_value(total_skills)
-        self.card_dominant.update_value(dominant_skill, color="#2C687B")
+        color = "#1E3A5F" if self.current_theme == "admin" else "#2C687B"
+        self.card_dominant.update_value(dominant_skill, color=color)
 
     def update_theme_mode(self, theme):
         self.current_theme = theme
@@ -577,6 +594,51 @@ class JobDashboardWidget(QWidget):
             self.btn_next_job_type.set_theme(theme)
         if hasattr(self, 'btn_find_match'):
             self.btn_find_match.set_theme(theme)
+            
+        # Perbarui warna judul secara dinamis sesuai tema
+        title_color = "#1E3A5F" if theme == "admin" else "#2C687B"
+        if hasattr(self, 'right_title'):
+            self.right_title.setStyleSheet(f"font-size: 16px; font-weight: bold; color: {title_color}; background-color: transparent;")
+        if hasattr(self, 'type_title'):
+            self.type_title.setStyleSheet(f"font-size: 16px; font-weight: bold; color: {title_color}; background-color: transparent;")
+            
+        # Perbarui style list secara dinamis untuk checkbox dan indikator
+        style = self._get_list_stylesheet(theme)
+        if hasattr(self, 'skill_list'):
+            self.skill_list.setStyleSheet(style)
+        if hasattr(self, 'job_type_list'):
+            self.job_type_list.setStyleSheet(style)
+
+    def _get_list_stylesheet(self, theme):
+        if theme == "admin":
+            accent = "#1E3A5F"
+            bg_selected = "#E4ECF5"
+            bg_hover = "#ECF2F9"
+            border_indicator = "#A3BFD9"
+            bg_list = "#F5F8FA"
+            text_color = "#1E3A4A"
+        else: # user
+            accent = "#2C687B"
+            bg_selected = "#E2EFF1"
+            bg_hover = "#EBF4F6"
+            border_indicator = "#B2D2D9"
+            bg_list = "#F7FBFC"
+            text_color = "#1E3A4A"
+
+        return f"""
+            QListWidget {{ 
+                border: none; background-color: {bg_list}; border-radius: 8px; font-size: 16px; color: {text_color};
+            }}
+            QListWidget::item {{ padding: 12px; border-bottom: 1px solid #E0E7EF; color: {text_color}; }}
+            QListWidget::item:hover {{ background-color: {bg_hover}; }}
+            QListWidget::item:selected {{ background-color: {bg_selected}; color: {accent}; border-left: 4px solid {accent}; }}
+            QScrollBar:vertical {{ border: none; background: #F3F4F6; width: 8px; border-radius: 4px; }}
+            QScrollBar::handle:vertical {{ background: {border_indicator}; border-radius: 4px; }}
+            QScrollBar:horizontal {{ border: none; background: #F3F4F6; height: 8px; border-radius: 4px; }}
+            QScrollBar::handle:horizontal {{ background: {border_indicator}; border-radius: 4px; }}
+            QListWidget::indicator {{ width: 22px; height: 22px; border: 2px solid {border_indicator}; border-radius: 4px; background-color: white; }}
+            QListWidget::indicator:checked {{ background-color: {accent}; border: 2px solid {accent}; }}
+        """
 
     def _toggle_item_check(self, item):
         last_state = item.data(Qt.UserRole)

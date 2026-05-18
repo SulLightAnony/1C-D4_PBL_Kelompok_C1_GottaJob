@@ -68,6 +68,8 @@ class AppRouter(QMainWindow):
             "Job Archive": "  Job Archive",
             "Job Posting": "  Job Posting",
             "Career Toolkit": "  Career Toolkit",
+            "Admin Manager": "  Admin Manager",
+            "Admin Manager ": "  Admin Manager",
             "Logout": "  Logout"
         }
         self.setWindowTitle("Gottajob")
@@ -107,12 +109,17 @@ class AppRouter(QMainWindow):
                 border: none;
                 border-radius: 12px;
                 margin: 8px 15px;
+                outline: none;
             }
-            QPushButton:hover { background-color: #408699; color: white; }
+            QPushButton:hover, QPushButton:focus { background-color: #408699; color: white; outline: none; }
             QPushButton#ActiveMenu {
                 background-color: #8CC7C4;
                 color: white;
                 font-weight: bold;
+            }
+            QPushButton#ActiveMenu:hover, QPushButton#ActiveMenu:focus {
+                background-color: #8CC7C4;
+                color: white;
             }
         """)
 
@@ -134,12 +141,12 @@ class AppRouter(QMainWindow):
         
         self.btn_dashboard = self.create_menu_btn("  Dashboard", 0, "Dashboard", "dashboard.png")
         self.btn_admin     = self.create_menu_btn("  Dashboard", 5, "Dashboard Admin", "dahboard.png")
-        self.btn_skill_manager = self.create_menu_btn("  Skill Manager", 6, "Skill Manager", "settings.png")
         self.btn_discovery = self.create_menu_btn("  Live Discovery", 1, "Live Discovery", "search.png")
         self.btn_archive   = self.create_menu_btn("  Job Archive", 2, "Job Archive", "folder.png")
+        self.btn_skill_manager = self.create_menu_btn("  Skill Manager", 6, "Skill Manager", "settings.png")
+        self.btn_admin_manager   = self.create_menu_btn("  Admin Manager", 8, "Admin Manager", "settings.png")
         self.btn_directory = self.create_menu_btn("  Job Posting", 3, "Job Posting", "post.png")
         self.btn_toolkit   = self.create_menu_btn("  Career Toolkit", 4, "Career Toolkit", "toolbox.png")
-        self.btn_admin_manager   = self.create_menu_btn("  Admin Manager", 8, "Admin Manager", "settings.png")
         
         # Sembunyikan Dashboard Admin & Skill Manager dari menu default (user biasa)
         self.btn_admin.hide()
@@ -180,12 +187,13 @@ class AppRouter(QMainWindow):
 
         self.nav_buttons = [
             self.btn_dashboard,
+            self.btn_admin,
             self.btn_discovery,
             self.btn_archive,
+            self.btn_skill_manager,
+            self.btn_admin_manager,
             self.btn_directory,
-            self.btn_toolkit,
-            self.btn_admin,
-            self.btn_skill_manager
+            self.btn_toolkit
         ]
 
         self.btn_dashboard.setObjectName("ActiveMenu")
@@ -250,6 +258,17 @@ class AppRouter(QMainWindow):
         self.btn_skill_manager.show()
         self.btn_admin_manager.show()
         self.lbl_admin_badge.show()
+        
+        # Batasi navigasi tombol hanya untuk admin sesuai urutan baru
+        self.nav_buttons = [
+            self.btn_admin,
+            self.btn_discovery,
+            self.btn_archive,
+            self.btn_skill_manager,
+            self.btn_admin_manager,
+            self.btn_directory
+        ]
+        
         self.pindah_halaman(self.btn_admin, 5)
 
     def show_user_dashboard(self):
@@ -288,7 +307,7 @@ class AppRouter(QMainWindow):
     def update_theme(self, is_admin):
         """Mengatur tema umum aplikasi (background window, sidebar, dan halaman) tergantung sisi user/admin."""
         # 1. Tentukan warna background dasar aplikasi
-        bg_app = "#F0FFFF" if is_admin else "#F3F4F6"
+        bg_app = "#000000" if is_admin else "#F3F4F6"
         
         # Terapkan background ke QMainWindow, main_widget, dan content_stack
         self.setStyleSheet(f"QMainWindow {{ background-color: {bg_app}; }}")
@@ -318,12 +337,17 @@ class AppRouter(QMainWindow):
                 border: none;
                 border-radius: 12px;
                 margin: 8px 15px;
+                outline: none;
             }}
-            QPushButton:hover {{ background-color: {hover_color}; color: white; }}
+            QPushButton:hover, QPushButton:focus {{ background-color: {hover_color}; color: white; outline: none; }}
             QPushButton#ActiveMenu {{
                 background-color: {active_color};
                 color: white;
                 font-weight: bold;
+            }}
+            QPushButton#ActiveMenu:hover, QPushButton#ActiveMenu:focus {{
+                background-color: {active_color};
+                color: white;
             }}
         """)
         
@@ -619,15 +643,34 @@ class AppRouter(QMainWindow):
                 super().keyPressEvent(event)
                 return
 
-            # 5. Jalankan navigasi sidebar page-switching
-            curr_idx = self.get_current_nav_index()
+            # 5. Jalankan navigasi pemindahan fokus/highlight sidebar
+            focused = QApplication.focusWidget()
+            curr_idx = -1
+            for i, btn in enumerate(self.nav_buttons):
+                if btn == focused:
+                    curr_idx = i
+                    break
+            
+            if curr_idx == -1:
+                # Jika belum ada yang fokus, mulai dari tombol halaman aktif saat ini
+                curr_idx = self.get_current_nav_index()
+            
             if is_up:
-                if curr_idx > 0:
-                    self.nav_buttons[curr_idx - 1].click()
+                target_idx = curr_idx - 1
             else:
-                if 0 <= curr_idx < len(self.nav_buttons) - 1:
-                    self.nav_buttons[curr_idx + 1].click()
+                target_idx = curr_idx + 1
+                
+            if 0 <= target_idx < len(self.nav_buttons):
+                self.nav_buttons[target_idx].setFocus()
             event.accept()
+        elif key in (Qt.Key_Return, Qt.Key_Enter, Qt.Key_Space):
+            focused = QApplication.focusWidget()
+            if focused in self.nav_buttons:
+                focused.click()
+                event.accept()
+                return
+            else:
+                super().keyPressEvent(event)
         else:
             super().keyPressEvent(event)
 
