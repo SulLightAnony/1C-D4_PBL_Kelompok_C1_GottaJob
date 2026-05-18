@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QColor, QIcon
 
-def create_admin_manager_page(router_self):
+def create_account_manager_page(router_self):
     page = QWidget()
     page.setStyleSheet("background-color: #F3F4F6;") 
     
@@ -22,7 +22,7 @@ def create_admin_manager_page(router_self):
     header_layout.setContentsMargins(0, 0, 0, 0)
     header_layout.setSpacing(6)
 
-    title = QLabel("Admin Manager")
+    title = QLabel("Account Manager")
     title.setFont(QFont("Segoe UI", 26, QFont.Bold))
     title.setStyleSheet("color: #1E3A5F; font-weight: bold; letter-spacing: -0.5px;")
     

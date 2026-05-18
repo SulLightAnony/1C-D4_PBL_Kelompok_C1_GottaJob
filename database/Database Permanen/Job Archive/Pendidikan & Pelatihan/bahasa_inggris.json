@@ -16,11 +16,11 @@
         "match_percentage": 83.3,
         "matched_categorized": {
             "hard_skills": [
-                "classroom management",
-                "teaching",
-                "lesson planning",
-                "language teaching",
-                "english language"
+                "Classroom Management",
+                "Teaching",
+                "Lesson Planning",
+                "Language Teaching",
+                "English Language"
             ],
             "soft_skills": [],
             "positions": []
@@ -39,11 +39,11 @@
             "positions": []
         },
         "matched_skills": [
-            "classroom management",
-            "teaching",
-            "lesson planning",
-            "language teaching",
-            "english language"
+            "Classroom Management",
+            "Teaching",
+            "Lesson Planning",
+            "Language Teaching",
+            "English Language"
         ],
         "is_type_match": false
     },
@@ -64,8 +64,8 @@
         "match_percentage": 66.7,
         "matched_categorized": {
             "hard_skills": [
-                "teaching",
-                "english language"
+                "Teaching",
+                "English Language"
             ],
             "soft_skills": [],
             "positions": []
@@ -81,8 +81,8 @@
             "positions": []
         },
         "matched_skills": [
-            "teaching",
-            "english language"
+            "Teaching",
+            "English Language"
         ],
         "is_type_match": false
     },
@@ -103,10 +103,10 @@
         "match_percentage": 66.7,
         "matched_categorized": {
             "hard_skills": [
-                "classroom management",
-                "lesson planning",
-                "teaching",
-                "english language"
+                "Classroom Management",
+                "Lesson Planning",
+                "Teaching",
+                "English Language"
             ],
             "soft_skills": [],
             "positions": []
@@ -125,10 +125,10 @@
             "positions": []
         },
         "matched_skills": [
-            "classroom management",
-            "lesson planning",
-            "teaching",
-            "english language"
+            "Classroom Management",
+            "Lesson Planning",
+            "Teaching",
+            "English Language"
         ],
         "is_type_match": false
     },
@@ -149,10 +149,10 @@
         "match_percentage": 66.7,
         "matched_categorized": {
             "hard_skills": [
-                "lesson planning",
-                "english language",
-                "language teaching",
-                "classroom management"
+                "Lesson Planning",
+                "English Language",
+                "Language Teaching",
+                "Classroom Management"
             ],
             "soft_skills": [],
             "positions": []
@@ -171,10 +171,10 @@
             "positions": []
         },
         "matched_skills": [
-            "lesson planning",
-            "english language",
-            "language teaching",
-            "classroom management"
+            "Lesson Planning",
+            "English Language",
+            "Language Teaching",
+            "Classroom Management"
         ],
         "is_type_match": false
     },
@@ -195,10 +195,10 @@
         "match_percentage": 66.7,
         "matched_categorized": {
             "hard_skills": [
-                "english language",
-                "classroom management",
-                "teaching",
-                "language teaching"
+                "English Language",
+                "Classroom Management",
+                "Teaching",
+                "Language Teaching"
             ],
             "soft_skills": [],
             "positions": []
@@ -216,10 +216,10 @@
             "positions": []
         },
         "matched_skills": [
-            "english language",
-            "classroom management",
-            "teaching",
-            "language teaching"
+            "English Language",
+            "Classroom Management",
+            "Teaching",
+            "Language Teaching"
         ],
         "is_type_match": false
     }

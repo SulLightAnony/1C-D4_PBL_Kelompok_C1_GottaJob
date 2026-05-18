@@ -72,6 +72,7 @@ class SkillManagerPage(QWidget):
         self.db_dir = get_database_permanen_dir()
         self.dict_dir = _get_dictionary_dir()
         self.all_data = {}
+        self.is_programmatic_change = False
         self.init_ui()
 
     def init_ui(self):
@@ -153,7 +154,7 @@ class SkillManagerPage(QWidget):
 
     def load_scan_categories(self):
         self.combo_scan_cat.clear()
-        self.combo_scan_cat.addItem("-- Semua Kategori --", self.db_dir)
+        self.combo_scan_cat.addItem("-- Semua Bidang --", self.db_dir)
         
         if not os.path.exists(self.db_dir):
             return
@@ -167,6 +168,11 @@ class SkillManagerPage(QWidget):
         # Mencegah scan ganda jika sudah ada yang berjalan
         if hasattr(self, 'worker') and self.worker.isRunning():
             return
+            
+        # Bersihkan input pencarian jika kategori berubah secara manual dari dropdown user,
+        # agar tidak menyaring hasil bidang baru dengan teks pencarian bidang sebelumnya
+        if not getattr(self, 'is_programmatic_change', False):
+            self.search_input.clear()
             
         target_path = self.combo_scan_cat.currentData()
         self.last_scan_category = self.combo_scan_cat.currentText() # Simpan nama kategori
@@ -266,6 +272,17 @@ class SkillManagerPage(QWidget):
             """)
             self.table.setCellWidget(i, 5, alias_edit)
 
+        # Highlight dan gulir otomatis ke baris skill sasaran jika ada
+        if hasattr(self, 'pending_highlight_skill') and self.pending_highlight_skill:
+            target = self.pending_highlight_skill.lower()
+            for r in range(self.table.rowCount()):
+                item = self.table.item(r, 0)
+                if item and item.text().lower() == target:
+                    self.table.setCurrentCell(r, 0)
+                    self.table.scrollToItem(item)
+                    break
+            self.pending_highlight_skill = None
+
     def filter_table(self):
         if self.all_data:
             self.display_data(self.all_data)
@@ -291,8 +308,8 @@ class SkillManagerPage(QWidget):
         category_data = {"hard_skills": [], "positions": []}
         cat_file_path = None
         
-        # Jika bukan "Semua Kategori", siapkan path file skills.json di folder kategori tersebut
-        if hasattr(self, 'last_scan_category') and self.last_scan_category != "-- Semua Kategori --":
+        # Jika bukan "Semua Bidang", siapkan path file skills.json di folder kategori tersebut
+        if hasattr(self, 'last_scan_category') and self.last_scan_category != "-- Semua Bidang --":
             cat_dir = os.path.join(self.dict_dir, self.last_scan_category)
             if not os.path.exists(cat_dir):
                 os.makedirs(cat_dir, exist_ok=True)
@@ -318,6 +335,57 @@ class SkillManagerPage(QWidget):
             # 2. Category
             if new_cat != "(Tetap)":
                 skill_low = skill_raw.lower()
+                
+                # --- BERSIHKAN DAHULU DARI KATEGORI LAIN UNTUK MENCEGAH DUPLIKAT ---
+                # A. Dari Universal
+                if skill_low in univ.get("soft_skills", []):
+                    univ["soft_skills"].remove(skill_low)
+                    count_changes += 1
+                if skill_low in univ.get("hard_skills", []):
+                    univ["hard_skills"].remove(skill_low)
+                    count_changes += 1
+                
+                pattern = f"\\b{skill_low}\\b"
+                if pattern in univ.get("position_patterns", []):
+                    univ["position_patterns"].remove(pattern)
+                    count_changes += 1
+                
+                # B. Dari Seluruh Category-Specific (skills.json di semua subfolder)
+                for entry in os.scandir(self.dict_dir):
+                    if entry.is_dir():
+                        other_cat_file = os.path.join(entry.path, "skills.json")
+                        if cat_file_path and other_cat_file == cat_file_path:
+                            continue
+                        if os.path.exists(other_cat_file):
+                            try:
+                                with open(other_cat_file, "r", encoding="utf-8") as f:
+                                    other_data = json.load(f)
+                                
+                                other_modified = False
+                                if skill_low in other_data.get("hard_skills", []):
+                                    other_data["hard_skills"].remove(skill_low)
+                                    other_modified = True
+                                    count_changes += 1
+                                if skill_low in other_data.get("positions", []):
+                                    other_data["positions"].remove(skill_low)
+                                    other_modified = True
+                                    count_changes += 1
+                                    
+                                if other_modified:
+                                    with open(other_cat_file, "w", encoding="utf-8") as f:
+                                        json.dump(other_data, f, ensure_ascii=False, indent=4)
+                            except:
+                                pass
+                                
+                # C. Dari Category-Specific Target yang sedang aktif di memori
+                if skill_low in category_data.get("hard_skills", []):
+                    category_data["hard_skills"].remove(skill_low)
+                    count_changes += 1
+                if skill_low in category_data.get("positions", []):
+                    category_data["positions"].remove(skill_low)
+                    count_changes += 1
+
+                # --- SEKARANG MASUKKAN KE KATEGORI YANG DIPILIH ---
                 if new_cat == "Soft Skill":
                     if skill_low not in univ["soft_skills"]:
                         univ["soft_skills"].append(skill_low)
@@ -328,7 +396,6 @@ class SkillManagerPage(QWidget):
                             category_data["hard_skills"].append(skill_low)
                             count_changes += 1
                     else:
-                        # Fallback ke universal jika scan semua kategori
                         if "hard_skills" not in univ: univ["hard_skills"] = []
                         if skill_low not in univ["hard_skills"]:
                             univ["hard_skills"].append(skill_low)
@@ -357,14 +424,113 @@ class SkillManagerPage(QWidget):
                     with open(cat_file_path, "w", encoding="utf-8") as f:
                         json.dump(category_data, f, ensure_ascii=False, indent=4)
                 
-                show_message(self, "Berhasil", f"Kamus skill berhasil diperbarui! {count_changes} perubahan disimpan.")
-                # Reload global categorizer agar Confidence jadi HIGH
+                # Reload global categorizer agar modul kategorisasi sinkron dengan perubahan terbaru
                 categorizer.__init__()
+                
+                # Sinkronisasikan perubahan kamus langsung ke seluruh file database
+                self.sync_changes_to_database()
+                
+                show_message(self, "Berhasil", f"Kamus skill berhasil diperbarui! {count_changes} perubahan disimpan dan database permanen disinkronkan.")
                 self.start_scan() # Refresh tabel agar warna berubah
             except Exception as e:
                 show_message(self, "Error", f"Gagal menyimpan perubahan: {e}")
         else:
             show_message(self, "Info", "Tidak ada perubahan yang dideteksi.")
+
+    def sync_changes_to_database(self):
+        """
+        Menyelaraskan perubahan kamus langsung ke sumber data di Database Permanen/Job Archive.
+        Menggabungkan Opsi A (koreksi typo/alias) & Opsi B (re-kategorisasi fisik) ke seluruh berkas JSON.
+        """
+        db_dir = self.db_dir
+        if not os.path.exists(db_dir):
+            return
+            
+        file_paths = glob.glob(os.path.join(db_dir, "**", "*.json"), recursive=True)
+        
+        for fp in file_paths:
+            try:
+                modified = False
+                with open(fp, "r", encoding="utf-8") as f:
+                    jobs = json.load(f)
+                    
+                if not isinstance(jobs, list):
+                    continue
+                    
+                for job in jobs:
+                    raw_skills = job.get("Skills", "")
+                    if not raw_skills or raw_skills == "-":
+                        continue
+                        
+                    # Split dan bersihkan/normalisasikan skill (Opsi A - Alias & Typo)
+                    skill_list = [s.strip() for s in raw_skills.split("|") if s.strip()]
+                    cleaned_skills = []
+                    has_alias_change = False
+                    
+                    for skill in skill_list:
+                        normalized = categorizer._normalize(skill)
+                        if normalized.lower() != skill.lower():
+                            cleaned_skills.append(normalized.title())
+                            has_alias_change = True
+                        else:
+                            cleaned_skills.append(skill)
+                            
+                    if has_alias_change:
+                        job["Skills"] = " | ".join(cleaned_skills)
+                        modified = True
+                        
+                    # Re-kategorisasi fisik berdasarkan aturan kamus baru (Opsi B)
+                    new_all_categorized = categorizer.kategorikan(cleaned_skills)
+                    
+                    # Jika ada perubahan kategori, perbarui secara fisik
+                    if job.get("all_categorized") != new_all_categorized:
+                        job["all_categorized"] = new_all_categorized
+                        modified = True
+                        
+                    # Jika ada matched_categorized, perbarui juga berdasarkan list skill-nya
+                    if "matched_categorized" in job:
+                        old_matched = job.get("matched_skills", [])
+                        if not old_matched and "matched_categorized" in job:
+                            mc = job["matched_categorized"]
+                            old_matched = mc.get("hard_skills", []) + mc.get("soft_skills", []) + mc.get("positions", [])
+                            
+                        cleaned_matched = []
+                        for ms in old_matched:
+                            cleaned_matched.append(categorizer._normalize(ms).title())
+                            
+                        new_matched_categorized = categorizer.kategorikan(cleaned_matched)
+                        if job["matched_categorized"] != new_matched_categorized:
+                            job["matched_categorized"] = new_matched_categorized
+                            job["matched_skills"] = cleaned_matched
+                            modified = True
+                            
+                if modified:
+                    with open(fp, "w", encoding="utf-8") as f:
+                        json.dump(jobs, f, ensure_ascii=False, indent=4)
+                        
+            except Exception as e:
+                print(f"Error syncing dictionary to {fp}: {e}")
+
+    def set_search_filter(self, skill_name, category_name=None):
+        """Pindah ke kategori bidang, aktifkan filter low confidence, dan highlight skill sasaran"""
+        self.is_programmatic_change = True
+        try:
+            self.pending_highlight_skill = skill_name
+            self.search_input.clear()
+            self.filter_conf.setCurrentIndex(1) # Pilih "Hanya Low Confidence"
+            
+            if category_name:
+                idx = self.combo_scan_cat.findText(category_name)
+                if idx >= 0:
+                    self.combo_scan_cat.setCurrentIndex(idx)
+                else:
+                    self.combo_scan_cat.setCurrentIndex(0) # Fallback ke Semua Bidang
+            else:
+                self.combo_scan_cat.setCurrentIndex(0)
+                
+            self.filter_table()
+        finally:
+            self.is_programmatic_change = False
 
 if __name__ == "__main__":
     from PyQt5.QtWidgets import QApplication

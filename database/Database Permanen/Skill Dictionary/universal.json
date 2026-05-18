@@ -2,35 +2,94 @@
     "versi": "1.0",
     "deskripsi": "Soft skills universal yang berlaku di semua bidang pekerjaan",
     "soft_skills": [
-        "komunikasi", "communication", "teamwork", "kerjasama tim",
-        "kepemimpinan", "leadership", "negosiasi", "negotiation",
-        "presentasi", "public speaking", "interpersonal",
-        "kolaborasi", "collaboration", "empati", "empathy",
-        "active listening", "mendengarkan aktif",
-        "disiplin", "discipline", "motivasi", "motivation",
-        "etika", "ethics", "tanggung jawab", "responsibility",
-        "integritas", "integrity", "fleksibel", "flexible",
-        "proaktif", "proactive", "inisiatif", "initiative",
-        "jujur", "honest", "teliti", "detail oriented",
-        "mandiri", "independent", "tekun", "persistent",
-        "sabar", "patient",
-        "pemecahan masalah", "problem solving",
-        "berpikir kritis", "critical thinking",
-        "kreativitas", "creativity", "inovasi", "innovation",
-        "analytical thinking", "pengambilan keputusan", "decision making",
-        "adaptabilitas", "adaptability", "adaptif",
-        "kemauan belajar", "fast learner", "quick learner",
-        "growth mindset", "continuous learning",
-        "manajemen waktu", "time management",
-        "manajemen stres", "stress management",
-        "manajemen diri", "self management",
+        "komunikasi",
+        "communication",
+        "kerjasama tim",
+        "kepemimpinan",
+        "leadership",
+        "negosiasi",
+        "negotiation",
+        "presentasi",
+        "interpersonal",
+        "kolaborasi",
+        "collaboration",
+        "empati",
+        "empathy",
+        "active listening",
+        "mendengarkan aktif",
+        "disiplin",
+        "discipline",
+        "motivasi",
+        "motivation",
+        "etika",
+        "ethics",
+        "tanggung jawab",
+        "responsibility",
+        "integritas",
+        "integrity",
+        "fleksibel",
+        "flexible",
+        "proaktif",
+        "proactive",
+        "inisiatif",
+        "initiative",
+        "jujur",
+        "honest",
+        "teliti",
+        "detail oriented",
+        "mandiri",
+        "independent",
+        "tekun",
+        "persistent",
+        "sabar",
+        "patient",
+        "pemecahan masalah",
+        "problem solving",
+        "berpikir kritis",
+        "critical thinking",
+        "kreativitas",
+        "creativity",
+        "inovasi",
+        "innovation",
+        "analytical thinking",
+        "pengambilan keputusan",
+        "decision making",
+        "adaptabilitas",
+        "adaptability",
+        "adaptif",
+        "kemauan belajar",
+        "fast learner",
+        "quick learner",
+        "growth mindset",
+        "continuous learning",
+        "manajemen waktu",
+        "time management",
+        "manajemen stres",
+        "stress management",
+        "manajemen diri",
+        "self management",
         "work life balance",
-        "kerjasama", "bekerja dalam tim", "terorganisir", "organized",
-        "multitasking", "self motivated", "attention to detail",
-        "emotional intelligence", "kecerdasan emosional",
-        "networking", "mentoring", "coaching",
-        "conflict resolution", "resolusi konflik",
-        "customer service", "pelayanan pelanggan"
+        "kerjasama",
+        "bekerja dalam tim",
+        "terorganisir",
+        "organized",
+        "multitasking",
+        "self motivated",
+        "attention to detail",
+        "emotional intelligence",
+        "kecerdasan emosional",
+        "networking",
+        "mentoring",
+        "coaching",
+        "conflict resolution",
+        "resolusi konflik",
+        "pelayanan pelanggan",
+        "customer service",
+        "teamwork",
+        "social media",
+        "organizational skills",
+        "public speaking",
+        "yapping"
     ],
     "position_patterns": [
         "\\b(senior|junior|lead|mid|principal)?\\s*(software|web|mobile|backend|frontend|fullstack|full.stack|android|ios|flutter|react|vue|angular)\\s*(developer|programmer|engineer)\\b",
@@ -43,72 +102,226 @@
     ],
     "ambiguous_keywords": {
         "management": {
-            "hard_indicators": ["database", "server", "network", "system", "cloud", "it", "project", "product", "supply chain", "inventory", "asset", "content", "social media", "risk", "quality"],
-            "soft_indicators": ["stress", "diri", "self", "waktu", "time", "emosi"],
+            "hard_indicators": [
+                "database",
+                "server",
+                "network",
+                "system",
+                "cloud",
+                "it",
+                "project",
+                "product",
+                "supply chain",
+                "inventory",
+                "asset",
+                "content",
+                "social media",
+                "risk",
+                "quality"
+            ],
+            "soft_indicators": [
+                "stress",
+                "diri",
+                "self",
+                "waktu",
+                "time",
+                "emosi"
+            ],
             "default": "hard_skill"
         },
         "manajemen": {
-            "hard_indicators": ["database", "server", "jaringan", "sistem", "cloud", "proyek", "produk", "rantai pasok", "inventori", "aset", "konten", "media sosial", "risiko", "kualitas"],
-            "soft_indicators": ["stres", "diri", "waktu", "emosi"],
+            "hard_indicators": [
+                "database",
+                "server",
+                "jaringan",
+                "sistem",
+                "cloud",
+                "proyek",
+                "produk",
+                "rantai pasok",
+                "inventori",
+                "aset",
+                "konten",
+                "media sosial",
+                "risiko",
+                "kualitas"
+            ],
+            "soft_indicators": [
+                "stres",
+                "diri",
+                "waktu",
+                "emosi"
+            ],
             "default": "hard_skill"
         },
         "koordinasi": {
-            "hard_indicators": ["logistik", "proyek", "project", "supply"],
-            "soft_indicators": ["tim", "team"],
+            "hard_indicators": [
+                "logistik",
+                "proyek",
+                "project",
+                "supply"
+            ],
+            "soft_indicators": [
+                "tim",
+                "team"
+            ],
             "default": "soft_skill"
         },
         "coordination": {
-            "hard_indicators": ["logistics", "project", "supply"],
-            "soft_indicators": ["team"],
+            "hard_indicators": [
+                "logistics",
+                "project",
+                "supply"
+            ],
+            "soft_indicators": [
+                "team"
+            ],
             "default": "soft_skill"
         },
         "administrasi": {
-            "hard_indicators": ["database", "sistem", "office", "microsoft"],
+            "hard_indicators": [
+                "database",
+                "sistem",
+                "office",
+                "microsoft"
+            ],
             "soft_indicators": [],
             "default": "hard_skill"
         },
         "administration": {
-            "hard_indicators": ["database", "system", "office", "microsoft", "linux", "windows", "it"],
+            "hard_indicators": [
+                "database",
+                "system",
+                "office",
+                "microsoft",
+                "linux",
+                "windows",
+                "it"
+            ],
             "soft_indicators": [],
             "default": "hard_skill"
         },
         "planning": {
-            "hard_indicators": ["capacity", "production", "network", "infrastructure", "resource", "sprint", "release", "urban", "spatial"],
-            "soft_indicators": ["strategic", "career"],
+            "hard_indicators": [
+                "capacity",
+                "production",
+                "network",
+                "infrastructure",
+                "resource",
+                "sprint",
+                "release",
+                "urban",
+                "spatial"
+            ],
+            "soft_indicators": [
+                "strategic",
+                "career"
+            ],
             "default": "hard_skill"
         },
         "perencanaan": {
-            "hard_indicators": ["kapasitas", "produksi", "jaringan", "infrastruktur", "sumber daya", "sprint", "tata ruang", "kota"],
-            "soft_indicators": ["strategis", "karir"],
+            "hard_indicators": [
+                "kapasitas",
+                "produksi",
+                "jaringan",
+                "infrastruktur",
+                "sumber daya",
+                "sprint",
+                "tata ruang",
+                "kota"
+            ],
+            "soft_indicators": [
+                "strategis",
+                "karir"
+            ],
             "default": "hard_skill"
         },
         "detail": {
-            "hard_indicators": ["engineering", "teknik", "desain", "design", "drawing", "technical", "spesifikasi", "specification"],
-            "soft_indicators": ["oriented", "perhatian", "attention"],
+            "hard_indicators": [
+                "engineering",
+                "teknik",
+                "desain",
+                "design",
+                "drawing",
+                "technical",
+                "spesifikasi",
+                "specification"
+            ],
+            "soft_indicators": [
+                "oriented",
+                "perhatian",
+                "attention"
+            ],
             "default": "soft_skill"
         },
         "analisa": {
-            "hard_indicators": ["data", "sistem", "keuangan", "finansial", "bisnis", "pasar", "kredit", "risiko"],
+            "hard_indicators": [
+                "data",
+                "sistem",
+                "keuangan",
+                "finansial",
+                "bisnis",
+                "pasar",
+                "kredit",
+                "risiko"
+            ],
             "soft_indicators": [],
             "default": "hard_skill"
         },
         "analysis": {
-            "hard_indicators": ["data", "system", "financial", "business", "market", "code", "security", "network", "gap", "root cause"],
+            "hard_indicators": [
+                "data",
+                "system",
+                "financial",
+                "business",
+                "market",
+                "code",
+                "security",
+                "network",
+                "gap",
+                "root cause"
+            ],
             "soft_indicators": [],
             "default": "hard_skill"
         },
         "troubleshooting": {
-            "hard_indicators": ["network", "hardware", "software", "sistem", "server", "it", "jaringan"],
+            "hard_indicators": [
+                "network",
+                "hardware",
+                "software",
+                "sistem",
+                "server",
+                "it",
+                "jaringan"
+            ],
             "soft_indicators": [],
             "default": "hard_skill"
         },
         "implementation": {
-            "hard_indicators": ["system", "software", "erp", "crm", "api", "cloud", "network", "database"],
+            "hard_indicators": [
+                "system",
+                "software",
+                "erp",
+                "crm",
+                "api",
+                "cloud",
+                "network",
+                "database"
+            ],
             "soft_indicators": [],
             "default": "hard_skill"
         },
         "implementasi": {
-            "hard_indicators": ["sistem", "software", "erp", "crm", "api", "cloud", "jaringan", "database"],
+            "hard_indicators": [
+                "sistem",
+                "software",
+                "erp",
+                "crm",
+                "api",
+                "cloud",
+                "jaringan",
+                "database"
+            ],
             "soft_indicators": [],
             "default": "hard_skill"
         }

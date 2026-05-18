@@ -18,6 +18,7 @@ from ui_components import (CVCard, ExperienceInputWidget, EducationInputWidget,
                            CompactInputWidget)
 from pdf_generator import CVRenderer
 from flow_layout import FlowLayout
+from Modul.modul_antarmuka_pengguna import buat_tombol_kembali
 
 class AIWorker(QThread):
     finished_signal = pyqtSignal(str)
@@ -253,8 +254,7 @@ class CareerToolkitPage(QWidget):
 
         # --- FOOTER NAVIGASI (DENGAN TOMBOL EDIT/SIMPAN PERUBAHAN) ---
         footer = QHBoxLayout(); footer.setContentsMargins(0, 20, 0, 10)
-        btn_back = QPushButton("Batal"); btn_back.setCursor(QCursor(Qt.PointingHandCursor))
-        btn_back.setStyleSheet("padding: 10px 20px; border: 1px solid #cbd5e1; border-radius: 6px;")
+        btn_back = buat_tombol_kembali("Batal")
         btn_back.clicked.connect(lambda: self.stack.setCurrentIndex(0))
         
         # TOMBOL SIMPAN PERUBAHAN (HANYA MUNCUL DI MODE EDIT)
@@ -418,7 +418,8 @@ class CareerToolkitPage(QWidget):
             t_card = TemplateCard(t_id, t_name, t_desc, t_img)
             t_card.template_selected.connect(self.go_to_preview); grid.addWidget(t_card, 0, col); col += 1
         
-        btn_back = QPushButton("← Kembali ke Edit Data"); btn_back.setStyleSheet("padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;"); btn_back.clicked.connect(lambda: self.stack.setCurrentIndex(1))
+        btn_back = buat_tombol_kembali("← Kembali ke Edit Data")
+        btn_back.clicked.connect(lambda: self.stack.setCurrentIndex(1))
         scroll.setWidget(grid_widget); layout.addWidget(scroll); layout.addWidget(btn_back)
 
     def setup_preview_ui(self):
@@ -433,7 +434,7 @@ class CareerToolkitPage(QWidget):
         footer = QHBoxLayout()
         
         # --- PERUBAHAN: Jadikan tombol sebagai variabel instance (pakai self.) ---
-        self.btn_back_preview = QPushButton("← Kembali Pilih Desain")
+        self.btn_back_preview = buat_tombol_kembali("← Kembali Pilih Desain")
         self.btn_back_preview.clicked.connect(self.handle_preview_back) # Hubungkan ke fungsi cerdas
         
         self.btn_save_preview = QPushButton("Simpan")
@@ -464,7 +465,7 @@ class CareerToolkitPage(QWidget):
             self.preview_from_dashboard = True
             
             # Ubah teks tombol dan sembunyikan tombol simpan (karena ini cuma lihat-lihat)
-            self.btn_back_preview.setText("← Kembali ke Dashboard")
+            self.btn_back_preview.setText("← Kembali ")
             self.btn_save_preview.setVisible(False) 
             
             # Render UI dengan data database dan pindah ke halaman Preview (Index 3)

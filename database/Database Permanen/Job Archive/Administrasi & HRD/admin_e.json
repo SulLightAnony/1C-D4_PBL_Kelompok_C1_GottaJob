@@ -16,27 +16,29 @@
         "match_percentage": 75.0,
         "matched_categorized": {
             "hard_skills": [
-                "administration",
-                "microsoft office",
-                "data entry"
+                "Microsoft Office"
             ],
             "soft_skills": [],
-            "positions": []
+            "positions": [
+                "Administration",
+                "Data Entry"
+            ]
         },
         "all_categorized": {
             "hard_skills": [
-                "Administration",
                 "Google Sheets",
-                "Microsoft Office",
-                "Data Entry"
+                "Microsoft Office"
             ],
             "soft_skills": [],
-            "positions": []
+            "positions": [
+                "Administration",
+                "Data Entry"
+            ]
         },
         "matched_skills": [
-            "administration",
-            "microsoft office",
-            "data entry"
+            "Administration",
+            "Microsoft Office",
+            "Data Entry"
         ],
         "is_type_match": true
     },
@@ -57,27 +59,29 @@
         "match_percentage": 75.0,
         "matched_categorized": {
             "hard_skills": [
-                "microsoft office",
-                "microsoft excel",
-                "administration"
+                "Microsoft Office",
+                "Microsoft Excel"
             ],
             "soft_skills": [],
-            "positions": []
+            "positions": [
+                "Administration"
+            ]
         },
         "all_categorized": {
             "hard_skills": [
                 "Microsoft Office",
                 "Microsoft Excel",
-                "Administration",
                 "Google Sheets"
             ],
             "soft_skills": [],
-            "positions": []
+            "positions": [
+                "Administration"
+            ]
         },
         "matched_skills": [
-            "microsoft office",
-            "microsoft excel",
-            "administration"
+            "Microsoft Office",
+            "Microsoft Excel",
+            "Administration"
         ],
         "is_type_match": true
     },
@@ -98,25 +102,27 @@
         "match_percentage": 66.7,
         "matched_categorized": {
             "hard_skills": [
-                "administration",
-                "microsoft office"
+                "Microsoft Office"
             ],
             "soft_skills": [],
-            "positions": []
+            "positions": [
+                "Administration"
+            ]
         },
         "all_categorized": {
             "hard_skills": [
-                "Administration",
                 "Microsoft Office"
             ],
             "soft_skills": [
                 "Teamwork"
             ],
-            "positions": []
+            "positions": [
+                "Administration"
+            ]
         },
         "matched_skills": [
-            "administration",
-            "microsoft office"
+            "Administration",
+            "Microsoft Office"
         ],
         "is_type_match": true
     },
@@ -137,29 +143,31 @@
         "match_percentage": 60.0,
         "matched_categorized": {
             "hard_skills": [
-                "administration",
-                "data entry",
-                "microsoft office"
+                "Microsoft Office"
             ],
             "soft_skills": [],
-            "positions": []
+            "positions": [
+                "Administration",
+                "Data Entry"
+            ]
         },
         "all_categorized": {
             "hard_skills": [
                 "Google Sheets",
-                "Administration",
-                "Data Entry",
                 "Microsoft Office"
             ],
             "soft_skills": [
                 "Customer Service"
             ],
-            "positions": []
+            "positions": [
+                "Administration",
+                "Data Entry"
+            ]
         },
         "matched_skills": [
-            "administration",
-            "data entry",
-            "microsoft office"
+            "Administration",
+            "Data Entry",
+            "Microsoft Office"
         ],
         "is_type_match": true
     },
@@ -180,29 +188,31 @@
         "match_percentage": 60.0,
         "matched_categorized": {
             "hard_skills": [
-                "microsoft office",
-                "administration",
-                "microsoft excel"
+                "Microsoft Office",
+                "Microsoft Excel"
             ],
             "soft_skills": [],
-            "positions": []
+            "positions": [
+                "Administration"
+            ]
         },
         "all_categorized": {
             "hard_skills": [
                 "Microsoft Office",
-                "Social Media",
-                "Administration",
                 "Microsoft Excel"
             ],
             "soft_skills": [
-                "Customer Service"
+                "Customer Service",
+                "Social Media"
             ],
-            "positions": []
+            "positions": [
+                "Administration"
+            ]
         },
         "matched_skills": [
-            "microsoft office",
-            "administration",
-            "microsoft excel"
+            "Microsoft Office",
+            "Administration",
+            "Microsoft Excel"
         ],
         "is_type_match": false
     },
@@ -223,33 +233,35 @@
         "match_percentage": 57.1,
         "matched_categorized": {
             "hard_skills": [
-                "administration",
-                "microsoft office",
-                "microsoft excel",
-                "data entry"
+                "Microsoft Office",
+                "Microsoft Excel"
             ],
             "soft_skills": [],
-            "positions": []
+            "positions": [
+                "Administration",
+                "Data Entry"
+            ]
         },
         "all_categorized": {
             "hard_skills": [
-                "Administration",
                 "Microsoft Office",
                 "Microsoft Excel",
                 "Google Docs",
-                "Google Sheets",
-                "Data Entry"
+                "Google Sheets"
             ],
             "soft_skills": [
                 "Customer Service"
             ],
-            "positions": []
+            "positions": [
+                "Administration",
+                "Data Entry"
+            ]
         },
         "matched_skills": [
-            "administration",
-            "microsoft office",
-            "microsoft excel",
-            "data entry"
+            "Administration",
+            "Microsoft Office",
+            "Microsoft Excel",
+            "Data Entry"
         ],
         "is_type_match": true
     },
@@ -270,34 +282,36 @@
         "match_percentage": 50.0,
         "matched_categorized": {
             "hard_skills": [
-                "microsoft office",
-                "administration",
-                "microsoft excel",
-                "data entry"
+                "Microsoft Office",
+                "Microsoft Excel"
             ],
             "soft_skills": [],
-            "positions": []
+            "positions": [
+                "Administration",
+                "Data Entry"
+            ]
         },
         "all_categorized": {
             "hard_skills": [
                 "Microsoft Office",
-                "Administration",
                 "Microsoft Excel",
-                "Office Administration",
                 "Google Sheets",
-                "Data Entry",
                 "Google Docs"
             ],
             "soft_skills": [
                 "Customer Service"
             ],
-            "positions": []
+            "positions": [
+                "Administration",
+                "Office Administration",
+                "Data Entry"
+            ]
         },
         "matched_skills": [
-            "microsoft office",
-            "administration",
-            "microsoft excel",
-            "data entry"
+            "Microsoft Office",
+            "Administration",
+            "Microsoft Excel",
+            "Data Entry"
         ],
         "is_type_match": true
     },
@@ -318,30 +332,32 @@
         "match_percentage": 50.0,
         "matched_categorized": {
             "hard_skills": [
-                "microsoft excel",
-                "administration",
-                "data entry"
+                "Microsoft Excel"
             ],
             "soft_skills": [],
-            "positions": []
+            "positions": [
+                "Administration",
+                "Data Entry"
+            ]
         },
         "all_categorized": {
             "hard_skills": [
                 "Microsoft Excel",
-                "Administration",
-                "Google Docs",
-                "Office Administration",
-                "Data Entry"
+                "Google Docs"
             ],
             "soft_skills": [
                 "Customer Service"
             ],
-            "positions": []
+            "positions": [
+                "Administration",
+                "Office Administration",
+                "Data Entry"
+            ]
         },
         "matched_skills": [
-            "microsoft excel",
-            "administration",
-            "data entry"
+            "Microsoft Excel",
+            "Administration",
+            "Data Entry"
         ],
         "is_type_match": true
     },
@@ -362,36 +378,38 @@
         "match_percentage": 40.0,
         "matched_categorized": {
             "hard_skills": [
-                "administration",
-                "data entry",
-                "microsoft office",
-                "microsoft excel"
+                "Microsoft Office",
+                "Microsoft Excel"
             ],
             "soft_skills": [],
-            "positions": []
+            "positions": [
+                "Administration",
+                "Data Entry"
+            ]
         },
         "all_categorized": {
             "hard_skills": [
-                "Administration",
                 "Microsoft Outlook",
-                "Data Entry",
                 "Microsoft Office",
-                "Organizational Skills",
                 "Google Docs",
-                "Office Administration",
                 "Google Sheets",
                 "Microsoft Excel"
             ],
             "soft_skills": [
+                "Organizational Skills",
                 "Customer Service"
             ],
-            "positions": []
+            "positions": [
+                "Administration",
+                "Data Entry",
+                "Office Administration"
+            ]
         },
         "matched_skills": [
-            "administration",
-            "data entry",
-            "microsoft office",
-            "microsoft excel"
+            "Administration",
+            "Data Entry",
+            "Microsoft Office",
+            "Microsoft Excel"
         ],
         "is_type_match": true
     },
@@ -412,26 +430,28 @@
         "match_percentage": 40.0,
         "matched_categorized": {
             "hard_skills": [
-                "microsoft excel",
-                "administration"
+                "Microsoft Excel"
             ],
             "soft_skills": [],
-            "positions": []
+            "positions": [
+                "Administration"
+            ]
         },
         "all_categorized": {
             "hard_skills": [
                 "Microsoft Word",
                 "Google Sheets",
                 "Microsoft Excel",
-                "Administration",
                 "Google Docs"
             ],
             "soft_skills": [],
-            "positions": []
+            "positions": [
+                "Administration"
+            ]
         },
         "matched_skills": [
-            "microsoft excel",
-            "administration"
+            "Microsoft Excel",
+            "Administration"
         ],
         "is_type_match": true
     },
@@ -451,81 +471,29 @@
         "Link_Lowongan": "https://glints.com/id/opportunities/jobs/admin-e-commerce/9a03c9ab-f547-4962-9ca1-95ae6575868f",
         "match_percentage": 40.0,
         "matched_categorized": {
-            "hard_skills": [
-                "administration",
-                "data entry"
-            ],
+            "hard_skills": [],
             "soft_skills": [],
-            "positions": []
+            "positions": [
+                "Administration",
+                "Data Entry"
+            ]
         },
         "all_categorized": {
             "hard_skills": [
-                "Google Sheets",
+                "Google Sheets"
+            ],
+            "soft_skills": [
+                "Customer Service"
+            ],
+            "positions": [
                 "Administration",
                 "Marketplace",
                 "Data Entry"
-            ],
-            "soft_skills": [
-                "Customer Service"
-            ],
-            "positions": []
+            ]
         },
         "matched_skills": [
-            "administration",
-            "data entry"
-        ],
-        "is_type_match": true
-    },
-    {
-        "Judul_Pekerjaan": "ADMIN E-commerce",
-        "Jenis_Pekerjaan": "Penuh Waktu",
-        "Nama_Perusahaan": "PT. CATUR ABADI BERSAUDARA",
-        "Lokasi": "DUTA INDAH STARHUB BLOK U-02 JL SALURA IRIGASI CISADANE TIMUR",
-        "Rentang_Gaji": "Rp2.500.000 - 3.250.000/Bulan",
-        "Bonus": "-",
-        "Kategori_Utama": "Administrasi & HRD",
-        "Sub_Kategori": "Admin",
-        "Skills": "E-Commerce Customer Service | Office Administration | Microsoft Office | Data Entry | Customer Service | Microsoft Excel | Microsoft Outlook | Google Docs | Google Sheets | E-Commerce Products | E-commerce | Administration | Live E-Commerce",
-        "Benefit_Pekerjaan": "Work Insurance | Career Path | Training/Certification | THR | Perform Bonus",
-        "Kualifikasi_Persyaratan": "Kerja di lokasi | Pengalaman kurang dari 1 tahun | Minimal SMA/SMK",
-        "Deskripsi_Pekerjaan": "Manajemen Produk: Mengunggah produk baru, memperbarui deskripsi, harga, dan gambar.\nPemenuhan Pesanan: Memproses pesanan yang masuk, mengemas, dan berkoordinasi dengan kurir.\nPengendalian Persediaan: Memantau tingkat stok di berbagai marketplace untuk mencegah penjualan berlebih.\nLayanan Pelanggan: Menanggapi pertanyaan, keluhan, dan ulasan melalui obrolan dengan cepat untuk mempertahankan peringkat toko.\nManajemen Kampanye: Membantu kegiatan promosi, penjualan kilat, dan kampanye pemasaran.\nPelaporan: Membuat laporan dan analisis penjualan harian atau mingguan.",
-        "Link_Lowongan": "https://glints.com/id/opportunities/jobs/admin-e-commerce/bf9afa42-2523-42af-bfad-159d0a4b5ac9",
-        "match_percentage": 30.8,
-        "matched_categorized": {
-            "hard_skills": [
-                "microsoft office",
-                "data entry",
-                "microsoft excel",
-                "administration"
-            ],
-            "soft_skills": [],
-            "positions": []
-        },
-        "all_categorized": {
-            "hard_skills": [
-                "Office Administration",
-                "Microsoft Office",
-                "Data Entry",
-                "Microsoft Excel",
-                "Microsoft Outlook",
-                "Google Docs",
-                "Google Sheets",
-                "E-Commerce Products",
-                "E-commerce",
-                "Administration",
-                "Live E-Commerce"
-            ],
-            "soft_skills": [
-                "E-Commerce Customer Service",
-                "Customer Service"
-            ],
-            "positions": []
-        },
-        "matched_skills": [
-            "microsoft office",
-            "data entry",
-            "microsoft excel",
-            "administration"
+            "Administration",
+            "Data Entry"
         ],
         "is_type_match": true
     },
@@ -546,30 +514,32 @@
         "match_percentage": 25.0,
         "matched_categorized": {
             "hard_skills": [
-                "microsoft excel",
-                "administration"
+                "Microsoft Excel"
             ],
             "soft_skills": [],
-            "positions": []
+            "positions": [
+                "Administration"
+            ]
         },
         "all_categorized": {
             "hard_skills": [
-                "Office Administration",
-                "E-commerce",
-                "Microsoft Excel",
-                "Administration",
-                "Host"
+                "Microsoft Excel"
             ],
             "soft_skills": [
                 "Customer Service",
                 "Public Speaking",
                 "Teamwork"
             ],
-            "positions": []
+            "positions": [
+                "Office Administration",
+                "E-commerce",
+                "Administration",
+                "Host"
+            ]
         },
         "matched_skills": [
-            "microsoft excel",
-            "administration"
+            "Microsoft Excel",
+            "Administration"
         ],
         "is_type_match": true
     }

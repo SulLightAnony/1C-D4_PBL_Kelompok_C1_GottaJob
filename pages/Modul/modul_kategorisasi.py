@@ -177,17 +177,33 @@ class KategorisasiSkill:
         skill_normal = self._normalize(skill_clean)
         tl = skill_normal
 
-        # Prioritas 1: Soft skill
-        if self._is_soft_skill(tl):
-            soft_matches = [kw for kw in self.soft_skill_keywords if kw in tl]
+        # --- PRIORITAS UTAMA: Exact Match Pilihan Admin / Kamus Terkategori ---
+        # 1A. Soft Skill (Exact Match)
+        if tl in self.soft_skill_keywords:
             return HasilKlasifikasi(
                 skill_asli=skill_clean, skill_normal=skill_normal,
-                kategori="soft_skill",
-                confidence=self._confidence("soft_skill", tl, len(soft_matches)),
-                alasan=f"Mengandung keyword soft skill: {', '.join(soft_matches[:3])}"
+                kategori="soft_skill", confidence="high",
+                alasan="Ditemukan di kamus soft skill"
             )
 
-        # Prioritas 2: Kata ambigu (resolusi kontekstual)
+        # 1B. Hard Skill (Exact Match)
+        if tl in self.hard_skill_keywords:
+            return HasilKlasifikasi(
+                skill_asli=skill_clean, skill_normal=skill_normal,
+                kategori="hard_skill", confidence="high",
+                alasan="Ditemukan di kamus hard skill terkategori"
+            )
+
+        # 1C. Position (Exact Match)
+        if tl in self.position_keywords:
+            return HasilKlasifikasi(
+                skill_asli=skill_clean, skill_normal=skill_normal,
+                kategori="position", confidence="high",
+                alasan="Ditemukan di kamus posisi terkategori"
+            )
+
+        # --- PRIORITAS KEDUA: Pola Heuristik / Kontekstual NLP ---
+        # 2. Kata ambigu (resolusi kontekstual)
         resolved = self._resolve_ambiguous(tl)
         if resolved is not None:
             return HasilKlasifikasi(
@@ -196,7 +212,7 @@ class KategorisasiSkill:
                 alasan=f"Kata ambigu, diselesaikan via konteks → {resolved}"
             )
 
-        # Prioritas 3: Posisi (Pola Regex)
+        # 3. Posisi (Pola Regex)
         if self._is_position(tl):
             return HasilKlasifikasi(
                 skill_asli=skill_clean, skill_normal=skill_normal,
@@ -204,20 +220,14 @@ class KategorisasiSkill:
                 alasan="Cocok dengan pola jabatan"
             )
 
-        # Prioritas 4: Hard Skill (Kamus Terkategori)
-        if tl in self.hard_skill_keywords:
+        # 4. Soft skill (Partial Match)
+        if self._is_soft_skill(tl):
+            soft_matches = [kw for kw in self.soft_skill_keywords if kw in tl]
             return HasilKlasifikasi(
                 skill_asli=skill_clean, skill_normal=skill_normal,
-                kategori="hard_skill", confidence="high",
-                alasan="Ditemukan di kamus hard skill terkategori"
-            )
-
-        # Prioritas 5: Position (Kamus Terkategori - Exact Match)
-        if tl in self.position_keywords:
-            return HasilKlasifikasi(
-                skill_asli=skill_clean, skill_normal=skill_normal,
-                kategori="position", confidence="high",
-                alasan="Ditemukan di kamus posisi terkategori"
+                kategori="soft_skill",
+                confidence=self._confidence("soft_skill", tl, len(soft_matches)),
+                alasan=f"Mengandung keyword soft skill: {', '.join(soft_matches[:3])}"
             )
 
         # Fallback
