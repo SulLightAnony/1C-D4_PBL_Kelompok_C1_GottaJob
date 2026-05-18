@@ -364,6 +364,7 @@ def show_question(parent, title, text):
     dialog.exec_()
     return dialog.result
 
+
 GLOBAL_DIALOG_STYLE = MODERN_SCROLLBAR_STYLE + """
 QDialog { background-color: white; }
 """

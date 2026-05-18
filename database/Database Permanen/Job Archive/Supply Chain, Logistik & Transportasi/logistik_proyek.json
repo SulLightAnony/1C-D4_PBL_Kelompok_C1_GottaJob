@@ -15,22 +15,22 @@
         "Link_Lowongan": "https://glints.com/id/opportunities/jobs/logistik/8f2bc8a6-ac8a-47b0-9f3b-1c15964205d9",
         "match_percentage": 100.0,
         "matched_categorized": {
-            "hard_skills": [
+            "hard_skills": [],
+            "soft_skills": [],
+            "positions": [
                 "Inventory Management",
                 "Logistics Management",
                 "Warehouse Management"
-            ],
-            "soft_skills": [],
-            "positions": []
+            ]
         },
         "all_categorized": {
-            "hard_skills": [
+            "hard_skills": [],
+            "soft_skills": [],
+            "positions": [
                 "Inventory Management",
                 "Logistics Management",
                 "Warehouse Management"
-            ],
-            "soft_skills": [],
-            "positions": []
+            ]
         },
         "matched_skills": [
             "Inventory Management",
@@ -56,21 +56,23 @@
         "match_percentage": 100.0,
         "matched_categorized": {
             "hard_skills": [
-                "Microsoft Office",
-                "Logistics Distribution",
-                "Logistics Management"
+                "Microsoft Office"
             ],
             "soft_skills": [],
-            "positions": []
+            "positions": [
+                "Logistics Distribution",
+                "Logistics Management"
+            ]
         },
         "all_categorized": {
             "hard_skills": [
-                "Microsoft Office",
-                "Logistics Distribution",
-                "Logistics Management"
+                "Microsoft Office"
             ],
             "soft_skills": [],
-            "positions": []
+            "positions": [
+                "Logistics Distribution",
+                "Logistics Management"
+            ]
         },
         "matched_skills": [
             "Microsoft Office",
@@ -95,22 +97,22 @@
         "Link_Lowongan": "https://glints.com/id/opportunities/jobs/logistik/a62eca5f-45bd-4ca6-83a9-44a32e7c6723",
         "match_percentage": 100.0,
         "matched_categorized": {
-            "hard_skills": [
+            "hard_skills": [],
+            "soft_skills": [],
+            "positions": [
                 "Logistics Distribution",
                 "Logistics Management",
                 "Warehouse Management"
-            ],
-            "soft_skills": [],
-            "positions": []
+            ]
         },
         "all_categorized": {
-            "hard_skills": [
+            "hard_skills": [],
+            "soft_skills": [],
+            "positions": [
                 "Logistics Distribution",
                 "Logistics Management",
                 "Warehouse Management"
-            ],
-            "soft_skills": [],
-            "positions": []
+            ]
         },
         "matched_skills": [
             "Logistics Distribution",
@@ -135,22 +137,22 @@
         "Link_Lowongan": "https://glints.com/id/opportunities/jobs/logistik/6a1fee22-b8cb-4717-9c3f-13738b6e5177",
         "match_percentage": 100.0,
         "matched_categorized": {
-            "hard_skills": [
+            "hard_skills": [],
+            "soft_skills": [],
+            "positions": [
                 "Inventory Management",
                 "Logistics Management",
                 "Warehouse Management"
-            ],
-            "soft_skills": [],
-            "positions": []
+            ]
         },
         "all_categorized": {
-            "hard_skills": [
+            "hard_skills": [],
+            "soft_skills": [],
+            "positions": [
                 "Inventory Management",
                 "Logistics Management",
                 "Warehouse Management"
-            ],
-            "soft_skills": [],
-            "positions": []
+            ]
         },
         "matched_skills": [
             "Inventory Management",

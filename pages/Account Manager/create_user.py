@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                              QTableWidgetItem, QMessageBox, QHeaderView, QFrame, QStyle)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QColor, QIcon
+from Modul.modul_antarmuka_pengguna import show_message, show_question
 
 def create_account_manager_page(router_self):
     page = QWidget()
@@ -62,10 +63,10 @@ def create_account_manager_page(router_self):
     form_layout.addWidget(router_self.lbl_form_status)
 
     # Tokenizing Input Style
-    label_style = "font-weight: 600; color: #4B5563; font-size: 14px; font-family: 'Segoe UI';"
+    label_style = "font-weight: 600; color: #4B5563; font-size: 14px; font-family: 'Segoe UI'; background: transparent;"
     input_style = """
         QLineEdit, QComboBox {
-            background-color: #F9FAFB;
+            background-color: transparent;
             border: 1.5px solid #E5E7EB;
             border-radius: 12px;
             padding: 12px 14px;
@@ -403,7 +404,7 @@ def simpan_user_baru(router_self):
     role = router_self.cmb_role.currentText()
 
     if not username or not password:
-        QMessageBox.warning(router_self, "Peringatan", "Username dan Password tidak boleh kosong!")
+        show_message(router_self, "Peringatan", "Username dan Password tidak boleh kosong!")
         return
 
     base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -415,7 +416,7 @@ def simpan_user_baru(router_self):
         if router_self.editing_username_target is not None:
             if username.lower() != router_self.editing_username_target.lower():
                 if any(u['username'].lower() == username.lower() for u in users):
-                    QMessageBox.warning(router_self, "Gagal", f"Username '{username}' sudah dipakai user lain!")
+                    show_message(router_self, "Gagal", f"Username '{username}' sudah dipakai user lain!")
                     return
             
             for u in users:
@@ -427,16 +428,15 @@ def simpan_user_baru(router_self):
                     
             if hasattr(router_self, 'current_logged_in_user') and router_self.current_logged_in_user == router_self.editing_username_target:
                 router_self.current_logged_in_user = username
-
-            QMessageBox.information(router_self, "Sukses", "Data pengguna berhasil diperbarui!")
+            show_message(router_self, "Sukses", "Data pengguna berhasil diperbarui!")
 
         else:
             if any(u['username'].lower() == username.lower() for u in users):
-                QMessageBox.warning(router_self, "Gagal", f"Username '{username}' sudah terdaftar!")
+                show_message(router_self, "Gagal", f"Username '{username}' sudah terdaftar!")
                 return
 
             users.append({"username": username, "password": password, "role": role})
-            QMessageBox.information(router_self, "Sukses", f"User '{username}' berhasil ditambahkan!")
+            show_message(router_self, "Sukses", f"User '{username}' berhasil ditambahkan!")
 
         file.seek(0)
         json.dump(users, file, indent=4)
@@ -448,11 +448,10 @@ def simpan_user_baru(router_self):
 
 def hapus_user(router_self, username):
     if hasattr(router_self, 'current_logged_in_user') and username == router_self.current_logged_in_user:
-        QMessageBox.critical(router_self, "Gagal", "Anda tidak bisa menghapus akun Anda sendiri yang sedang aktif!")
+        show_message(router_self, "Gagal", "Anda tidak bisa menghapus akun Anda sendiri yang sedang aktif!")
         return
 
-    reply = QMessageBox.question(router_self, "Konfirmasi", f"Apakah Anda yakin ingin menghapus user '{username}'?",
-                                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+    reply = show_question(router_self, "Konfirmasi", f"Apakah Anda yakin ingin menghapus user '{username}'?")
     
     if reply == QMessageBox.Yes:
         base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -466,7 +465,7 @@ def hapus_user(router_self, username):
         with open(json_path, 'w') as file:
             json.dump(users, file, indent=4)
 
-        QMessageBox.information(router_self, "Sukses", "User berhasil dihapus!")
+        show_message(router_self, "Sukses", "User berhasil dihapus!")
         
         if router_self.editing_username_target == username:
             reset_form_state(router_self)
