@@ -20,9 +20,9 @@ try:
 except ImportError:
     from login_page import LoginPage
 
-# Admin Manager
+# Account Manager
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "create_user"))
-from create_user import create_admin_manager_page
+from create_user import create_account_manager_page
 
 # Dashboard
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pages", "Dashboard"))
@@ -68,8 +68,7 @@ class AppRouter(QMainWindow):
             "Job Archive": "  Job Archive",
             "Job Posting": "  Job Posting",
             "Career Toolkit": "  Career Toolkit",
-            "Admin Manager": "  Admin Manager",
-            "Admin Manager ": "  Admin Manager",
+            "Account Manager": "  Account Manager",
             "Logout": "  Logout"
         }
         self.setWindowTitle("Gottajob")
@@ -144,14 +143,14 @@ class AppRouter(QMainWindow):
         self.btn_discovery = self.create_menu_btn("  Live Discovery", 1, "Live Discovery", "search.png")
         self.btn_archive   = self.create_menu_btn("  Job Archive", 2, "Job Archive", "folder.png")
         self.btn_skill_manager = self.create_menu_btn("  Skill Manager", 6, "Skill Manager", "settings.png")
-        self.btn_admin_manager   = self.create_menu_btn("  Admin Manager", 8, "Admin Manager", "settings.png")
+        self.btn_account_manager   = self.create_menu_btn("  Account Manager", 8, "Account Manager", "settings.png")
         self.btn_directory = self.create_menu_btn("  Job Posting", 3, "Job Posting", "post.png")
         self.btn_toolkit   = self.create_menu_btn("  Career Toolkit", 4, "Career Toolkit", "toolbox.png")
         
         # Sembunyikan Dashboard Admin & Skill Manager dari menu default (user biasa)
         self.btn_admin.hide()
         self.btn_skill_manager.hide()
-        self.btn_admin_manager.hide()
+        self.btn_account_manager.hide()
 
         # Tambahkan Spacer agar tombol Logout selalu di bawah
         self.layout_sidebar.addStretch()
@@ -191,7 +190,7 @@ class AppRouter(QMainWindow):
             self.btn_discovery,
             self.btn_archive,
             self.btn_skill_manager,
-            self.btn_admin_manager,
+            self.btn_account_manager,
             self.btn_directory,
             self.btn_toolkit
         ]
@@ -211,7 +210,7 @@ class AppRouter(QMainWindow):
         self.job_posting_page = JobPostingPage()
         self.skill_manager_page = SkillManagerPage()
         self.halaman_login = LoginPage(self)
-        self.halaman_admin_manager = create_admin_manager_page(self)
+        self.halaman_account_manager = create_account_manager_page(self)
 
         # Koneksi Signal
         self.halaman_discovery.favorite_changed.connect(self.halaman_dashboard.load_data)
@@ -230,7 +229,7 @@ class AppRouter(QMainWindow):
         self.content_stack.addWidget(self.halaman_dashboard_admin)   # Index 5
         self.content_stack.addWidget(self.skill_manager_page)        # Index 6
         self.content_stack.addWidget(self.halaman_login)             # Index 7
-        self.content_stack.addWidget(self.halaman_admin_manager)     # Index 8
+        self.content_stack.addWidget(self.halaman_account_manager)   # Index 8
 
         # Tampilan Awal: Login
         self.sidebar.hide()
@@ -256,7 +255,7 @@ class AppRouter(QMainWindow):
 
         self.btn_admin.show()
         self.btn_skill_manager.show()
-        self.btn_admin_manager.show()
+        self.btn_account_manager.show()
         self.lbl_admin_badge.show()
         
         # Batasi navigasi tombol hanya untuk admin sesuai urutan baru
@@ -265,7 +264,7 @@ class AppRouter(QMainWindow):
             self.btn_discovery,
             self.btn_archive,
             self.btn_skill_manager,
-            self.btn_admin_manager,
+            self.btn_account_manager,
             self.btn_directory
         ]
         
@@ -280,7 +279,7 @@ class AppRouter(QMainWindow):
         self.sidebar.show()
         self.btn_admin.hide()
         self.btn_skill_manager.hide()
-        self.btn_admin_manager.hide()
+        self.btn_account_manager.hide()
         self.lbl_admin_badge.hide()
         self.btn_dashboard.show()
         self.btn_toolkit.show() # Tampilkan jika sebelumnya disembunyikan oleh admin
@@ -307,7 +306,7 @@ class AppRouter(QMainWindow):
     def update_theme(self, is_admin):
         """Mengatur tema umum aplikasi (background window, sidebar, dan halaman) tergantung sisi user/admin."""
         # 1. Tentukan warna background dasar aplikasi
-        bg_app = "#000000" if is_admin else "#F3F4F6"
+        bg_app = "#F0FFFF" if is_admin else "#F3F4F6"
         
         # Terapkan background ke QMainWindow, main_widget, dan content_stack
         self.setStyleSheet(f"QMainWindow {{ background-color: {bg_app}; }}")
@@ -541,7 +540,7 @@ class AppRouter(QMainWindow):
             self.btn_archive.setText(self.menu_texts["Job Archive"])
             self.btn_directory.setText(self.menu_texts["Job Posting"])
             self.btn_toolkit.setText(self.menu_texts["Career Toolkit"])
-            self.btn_admin_manager.setText(self.menu_texts["Admin Manager "])
+            self.btn_account_manager.setText(self.menu_texts["Account Manager"])
             self.btn_logout.setText(self.menu_texts["Logout"])
 
             for btn in self.menu_buttons:
