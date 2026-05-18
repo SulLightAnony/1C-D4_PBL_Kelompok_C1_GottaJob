@@ -1,9 +1,9 @@
 import os
 import json
-from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
+from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, QStyle,
                              QLineEdit, QPushButton, QFrame, QMessageBox, QSizePolicy)
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont, QPixmap
+from PyQt5.QtGui import QFont, QPixmap, QIcon
 
 class LoginPage(QWidget):
     def __init__(self, parent_window):
@@ -69,6 +69,16 @@ class LoginPage(QWidget):
         self.apply_input_style(self.input_pass)
         self.input_pass.returnPressed.connect(self.handle_login)
 
+        self.password_visible = False
+        self.icon_hidden = QIcon('assets/hidden.png') 
+        self.icon_shown = QIcon('assets/eye.png')
+        
+        self.toggle_login_password_action = self.input_pass.addAction(
+            self.icon_hidden, 
+            QLineEdit.TrailingPosition
+        )
+        self.toggle_login_password_action.triggered.connect(self.toggle_login_password)
+
         # Login Button (Gunakan warna aksen sidebar yang cerah)
         btn_login = QPushButton("LOGIN")
         btn_login.setCursor(Qt.PointingHandCursor)
@@ -110,6 +120,7 @@ class LoginPage(QWidget):
                 border: 2px solid #ECF0F1;
                 border-radius: 10px;
                 padding: 12px;
+                padding-right: 35px;
                 font-size: 16px;
                 color: #2C3E50;
             }
@@ -159,3 +170,15 @@ class LoginPage(QWidget):
             self.input_user.clear()
             self.input_pass.clear()
             self.input_user.setFocus()
+
+    def toggle_login_password(self):
+        if self.password_visible:
+            self.input_pass.setEchoMode(QLineEdit.Password)
+            self.password_visible = False
+            self.toggle_login_password_action.setIcon(self.icon_hidden)
+        else:
+            self.input_pass.setEchoMode(QLineEdit.Normal)
+            self.password_visible = True
+            self.toggle_login_password_action.setIcon(self.icon_shown)
+            
+        self.input_pass.setFocus()

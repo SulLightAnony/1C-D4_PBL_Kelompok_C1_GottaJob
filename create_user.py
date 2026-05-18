@@ -2,9 +2,9 @@ import os
 import json
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
                              QLineEdit, QComboBox, QPushButton, QTableWidget, 
-                             QTableWidgetItem, QMessageBox, QHeaderView, QFrame)
+                             QTableWidgetItem, QMessageBox, QHeaderView, QFrame, QStyle)
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont, QColor
+from PyQt5.QtGui import QFont, QColor, QIcon
 
 def create_admin_manager_page(router_self):
     page = QWidget()
@@ -133,6 +133,16 @@ def create_admin_manager_page(router_self):
     router_self.txt_password.setEchoMode(QLineEdit.Password)
     router_self.txt_password.setPlaceholderText("Masukkan password...")
     router_self.txt_password.setStyleSheet(input_style)
+    router_self.password_visible = False
+    router_self.icon_hidden = QIcon('assets/hidden.png')
+    router_self.icon_shown = QIcon('assets/eye.png')
+    router_self.toggle_password_action = router_self.txt_password.addAction(
+        router_self.icon_hidden, 
+        QLineEdit.TrailingPosition
+    )
+
+    router_self.toggle_password_action.triggered.connect(lambda: toggle_password_visibility(router_self))
+
     form_layout.addWidget(lbl_password)
     form_layout.addWidget(router_self.txt_password)
 
@@ -462,3 +472,15 @@ def hapus_user(router_self, username):
             reset_form_state(router_self)
             
         load_data_user_ke_tabel(router_self)
+
+def toggle_password_visibility(router_self):
+    if router_self.password_visible:
+        router_self.txt_password.setEchoMode(QLineEdit.Password)
+        router_self.password_visible = False
+        router_self.toggle_password_action.setIcon(router_self.icon_hidden)
+    else:
+        router_self.txt_password.setEchoMode(QLineEdit.Normal)
+        router_self.password_visible = True
+        router_self.toggle_password_action.setIcon(router_self.icon_shown)
+
+    router_self.txt_password.setFocus()
