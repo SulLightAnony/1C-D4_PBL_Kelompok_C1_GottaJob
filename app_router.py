@@ -21,7 +21,7 @@ except ImportError:
     from login_page import LoginPage
 
 # Account Manager
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "create_user"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pages", "Account Manager"))
 from create_user import create_account_manager_page
 
 # Dashboard
