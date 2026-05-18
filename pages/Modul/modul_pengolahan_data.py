@@ -562,3 +562,22 @@ def cari_kategori_untuk_skill(skill_name):
                 except:
                     continue
     return None
+
+def hitung_total_user_terdaftar():
+    """
+    Menghitung total user terdaftar di database (user.json).
+    """
+    try:
+        from Modul.modul_database import get_root_dir
+        root = get_root_dir()
+        json_path = os.path.join(root, 'database', 'user.json')
+        if os.path.exists(json_path):
+            with open(json_path, 'r', encoding='utf-8') as file:
+                users = json.load(file)
+                if isinstance(users, list):
+                    return len(users)
+        return 0
+    except Exception as e:
+        print(f"Error hitung_total_user_terdaftar: {e}")
+        return 0
+

@@ -7,7 +7,8 @@ from Modul.modul_antarmuka_pengguna import AktivitasTerkiniWidget, terapkan_soft
 from Modul.modul_pengolahan_data import (hitung_total_lowongan_aktif, 
                                         hitung_persentase_lowongan_per_kategori,
                                         hitung_tren_bidang_aktif,
-                                        ambil_skill_tidak_terklasifikasi)
+                                        ambil_skill_tidak_terklasifikasi,
+                                        hitung_total_user_terdaftar)
 from Modul.modul_visualisasi_data import PieChartWidget
 
 # --- REUSABLE COMPONENTS ---
@@ -103,7 +104,7 @@ class AdminDashboardPage(QWidget):
         
         self.stat_job = StatCard("LOWONGAN AKTIF", 0, "#27AE60")
         self.stat_skill = StatCard("SKILL TIDAK TERKLASIFIKASI", 78, "#E74C3C")
-        self.stat_user = StatCard("USER TERDAFTAR", 450, "#9B59B6")
+        self.stat_user = StatCard("USER TERDAFTAR", 0, "#9B59B6")
         
         stats_layout.addWidget(self.stat_job)
         stats_layout.addWidget(self.stat_skill)
@@ -180,9 +181,11 @@ class AdminDashboardPage(QWidget):
         try:
             # 1. Hitung total lowongan dari seluruh kategori di Database Permanen/Job Archive
             total_lowongan = hitung_total_lowongan_aktif()
+            total_user = hitung_total_user_terdaftar()
 
             # 2. Update Label Angka
             self.stat_job.lbl_value.setText(str(total_lowongan))
+            self.stat_user.lbl_value.setText(str(total_user))
 
             # 3. Refresh widget aktivitas admin
             self.aktivitas_widget.refresh()
