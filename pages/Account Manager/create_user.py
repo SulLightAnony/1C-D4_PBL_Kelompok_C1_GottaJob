@@ -10,7 +10,7 @@ from Modul.modul_database import catat_aktivitas
 
 def create_account_manager_page(router_self):
     page = QWidget()
-    page.setStyleSheet("background-color: #F3F4F6;") 
+    page.setStyleSheet("background-color: #F0FFFF;") 
     
     main_layout = QVBoxLayout(page)
     main_layout.setContentsMargins(40, 40, 40, 40)
