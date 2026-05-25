@@ -2,7 +2,7 @@ import sys
 import os
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, 
                              QVBoxLayout, QPushButton, QFrame, QLabel, 
-                             QStackedWidget, QShortcut)
+                             QStackedWidget, QShortcut, QMessageBox)
 from PyQt5.QtCore import Qt, QSize, QPropertyAnimation, QEasingCurve
 from PyQt5.QtGui import QFont, QPixmap, QIcon, QKeySequence
 
@@ -297,11 +297,22 @@ class AppRouter(QMainWindow):
 
     def proses_logout(self):
         """Kembali ke halaman login dan sembunyikan sidebar."""
-        self.sidebar.hide()
-        self.halaman_login.input_user.clear()
-        self.halaman_login.input_pass.clear()
-        self.update_theme(is_admin=False) # Reset background to clean gray (#F3F4F6)
-        self.content_stack.setCurrentWidget(self.halaman_login)
+        confirm = QMessageBox.question(
+            self,
+            "Konfirmasi Logout",
+            "Apakah anda yakin ingin keluar?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+
+        if confirm == QMessageBox.Yes:
+            self.sidebar.hide()
+            self.halaman_login.input_user.clear()
+            self.halaman_login.input_pass.clear()
+            self.update_theme(is_admin=False) # Reset background to clean gray (#F3F4F6)
+            self.content_stack.setCurrentWidget(self.halaman_login)
+        else:
+            pass    
 
     def update_theme(self, is_admin):
         """Mengatur tema umum aplikasi (background window, sidebar, dan halaman) tergantung sisi user/admin."""

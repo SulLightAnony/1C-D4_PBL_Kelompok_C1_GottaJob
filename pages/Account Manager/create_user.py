@@ -8,7 +8,7 @@ from PyQt5.QtGui import QFont, QColor, QIcon
 
 def create_account_manager_page(router_self):
     page = QWidget()
-    page.setStyleSheet("background-color: #F3F4F6;") 
+    page.setStyleSheet("background-color: #F0FFFF;") 
     
     main_layout = QVBoxLayout(page)
     main_layout.setContentsMargins(40, 40, 40, 40)
