@@ -269,6 +269,19 @@ class LiveDiscoveryPage(QWidget):
         header_lay.addWidget(lbl_table_title)
         header_lay.addStretch()
         
+        self.btn_save_all = QPushButton(" 📥 Simpan Semua")
+        self.btn_save_all.setStyleSheet("""
+            QPushButton {
+                background-color: #059669; color: white; border: none;
+                border-radius: 6px; padding: 5px 15px; font-weight: bold;
+                font-size: 14px; min-height: 25px;
+            }
+            QPushButton:hover { background-color: #047857; }
+        """)
+        self.btn_save_all.setCursor(Qt.PointingHandCursor)
+        self.btn_save_all.clicked.connect(self._on_save_all_clicked)
+        header_lay.addWidget(self.btn_save_all)
+        
         self.btn_back = buat_tombol_kembali("← Kembali")
         self.btn_back.clicked.connect(self._back_to_dashboard)
         header_lay.addWidget(self.btn_back)
@@ -472,7 +485,8 @@ class LiveDiscoveryPage(QWidget):
             # Ambil semua link yang sudah tersimpan untuk update status tombol Simpan
             saved_links = get_all_saved_links()
             
-            self.match_results.set_data(hasil, selected_skills, fav_link=fav_link, saved_links=saved_links)
+            show_fav = not getattr(self, 'is_admin', False)
+            self.match_results.set_data(hasil, selected_skills, show_favorite=show_fav, fav_link=fav_link, saved_links=saved_links)
             self.main_stack.setCurrentWidget(self.table_panel)
         except Exception as e:
             show_message(self, "Error", f"Gagal mencari kecocokan: {e}")
@@ -504,12 +518,56 @@ class LiveDiscoveryPage(QWidget):
             fav = get_favorit()
             fav_link = fav.get("Link_Lowongan") if fav else None
             saved_links = get_all_saved_links()
-            self.match_results.set_data(self.current_matches, self.user_selected_skills, fav_link=fav_link, saved_links=saved_links)
+            show_fav = not getattr(self, 'is_admin', False)
+            self.match_results.set_data(self.current_matches, self.user_selected_skills, show_favorite=show_fav, fav_link=fav_link, saved_links=saved_links)
             role = "admin" if getattr(self, 'is_admin', False) else "user"
             catat_aktivitas(f"<b>Lowongan disimpan</b><br>{job_data.get('Nama_Perusahaan')}", role=role)
             self.favorite_changed.emit()
         else:
             show_message(self, "Gagal", "Gagal menyimpan lowongan secara permanen.")
+
+    def _on_save_all_clicked(self):
+        """Menyimpan seluruh lowongan pekerjaan yang tampil ke Job Archive."""
+        if not self.last_scraped_file or not hasattr(self, 'current_matches') or not self.current_matches:
+            show_message(self, "Informasi", "Tidak ada data untuk disimpan.")
+            return
+
+        res = show_question(self, "Konfirmasi", f"Apakah Anda yakin ingin menyimpan {len(self.current_matches)} pekerjaan ini ke Job Archive?")
+        if res == QMessageBox.No:
+            return
+
+        berhasil = 0
+        duplikat = 0
+        gagal = 0
+        
+        for job_data in self.current_matches:
+            path = simpan_ke_database_permanen(job_data, self.last_scraped_file)
+            if path == "DUPLICATE":
+                duplikat += 1
+            elif path:
+                berhasil += 1
+            else:
+                gagal += 1
+                
+        # Tampilkan ringkasan
+        msg = []
+        if berhasil > 0: msg.append(f"{berhasil} pekerjaan berhasil disimpan.")
+        if duplikat > 0: msg.append(f"{duplikat} pekerjaan sudah ada (duplikat).")
+        if gagal > 0: msg.append(f"{gagal} pekerjaan gagal disimpan.")
+        
+        show_message(self, "Hasil Simpan Semua", "\\n".join(msg) if msg else "Tidak ada yang diproses.")
+        
+        if berhasil > 0:
+            role = "admin" if getattr(self, 'is_admin', False) else "user"
+            catat_aktivitas(f"<b>{berhasil} Lowongan disimpan massal</b>", role=role)
+            self.favorite_changed.emit()
+            
+            # Refresh tabel
+            fav = get_favorit()
+            fav_link = fav.get("Link_Lowongan") if fav else None
+            saved_links = get_all_saved_links()
+            show_fav = not getattr(self, 'is_admin', False)
+            self.match_results.set_data(self.current_matches, self.user_selected_skills, show_favorite=show_fav, fav_link=fav_link, saved_links=saved_links)
 
     def _on_favorite_clicked(self, job_data):
         """Menangani klik tombol favorit."""
@@ -537,9 +595,11 @@ class LiveDiscoveryPage(QWidget):
             self.favorite_changed.emit()
 
             # 4. Refresh tabel untuk mengubah warna tombol
+            show_fav = not getattr(self, 'is_admin', False)
             self.match_results.set_data(
                 self.current_matches, 
                 self.user_selected_skills, 
+                show_favorite=show_fav,
                 fav_link=job_data.get("Link_Lowongan")
             )
         else:

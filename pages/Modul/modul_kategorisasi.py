@@ -86,8 +86,9 @@ class KategorisasiSkill:
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
 
-        # Soft skills
+        # Soft skills & Hard skills universal
         self.soft_skill_keywords.update(data.get("soft_skills", []))
+        self.hard_skill_keywords.update(data.get("hard_skills", []))
 
         # Position patterns
         patterns = data.get("position_patterns", [])

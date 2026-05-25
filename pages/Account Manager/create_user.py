@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QColor, QIcon
 from Modul.modul_antarmuka_pengguna import show_message, show_question
+from Modul.modul_database import catat_aktivitas
 
 def create_account_manager_page(router_self):
     page = QWidget()
@@ -442,6 +443,11 @@ def simpan_user_baru(router_self):
         json.dump(users, file, indent=4)
         file.truncate()
 
+        if router_self.editing_username_target is not None:
+            catat_aktivitas(f"<b>User Diperbarui</b><br>{username} ({role})", role="admin")
+        else:
+            catat_aktivitas(f"<b>User Ditambahkan</b><br>{username} ({role})", role="admin")
+
     reset_form_state(router_self)
     load_data_user_ke_tabel(router_self)
 
@@ -465,6 +471,7 @@ def hapus_user(router_self, username):
         with open(json_path, 'w') as file:
             json.dump(users, file, indent=4)
 
+        catat_aktivitas(f"<b>User Dihapus</b><br>{username}", role="admin")
         show_message(router_self, "Sukses", "User berhasil dihapus!")
         
         if router_self.editing_username_target == username:
