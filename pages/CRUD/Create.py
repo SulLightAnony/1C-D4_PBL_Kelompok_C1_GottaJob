@@ -20,7 +20,7 @@ for _p in [_pages_dir, _job_posting_dir, _modul_dir]:
         sys.path.insert(0, _p)
 
 from constants import down_icon_path
-from modul_antarmuka_pengguna import KeyboardScrollArea
+from modul_antarmuka_pengguna import KeyboardScrollArea, buat_tombol_kembali
 from skill_tag_input import SkillTagInput
 
 class JobFormPage(QWidget):
@@ -40,14 +40,7 @@ class JobFormPage(QWidget):
 
         # Header
         header = QHBoxLayout()
-        btn_back = QPushButton("← Kembali")
-        btn_back.setCursor(Qt.PointingHandCursor)
-        btn_back.setFixedHeight(38)
-        btn_back.setStyleSheet("""
-            QPushButton { border: 1px solid #ccc; border-radius: 8px; padding: 0 20px;
-                          background-color: white; color: #444; font-size: 14px; }
-            QPushButton:hover { background-color: #f0f0f0; }
-        """)
+        btn_back = buat_tombol_kembali("← Kembali")
         btn_back.clicked.connect(lambda: self.back_clicked.emit())
 
         self.lbl_form_title = QLabel("Tambah Lowongan Baru")

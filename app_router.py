@@ -139,11 +139,11 @@ class AppRouter(QMainWindow):
         self.menu_buttons = []
         
         self.btn_dashboard = self.create_menu_btn("  Dashboard", 0, "Dashboard", "dashboard.png")
-        self.btn_admin     = self.create_menu_btn("  Dashboard", 5, "Dashboard Admin", "dahboard.png")
+        self.btn_admin     = self.create_menu_btn("  Dashboard", 5, "Dashboard", "dashboard.png")
         self.btn_discovery = self.create_menu_btn("  Live Discovery", 1, "Live Discovery", "search.png")
         self.btn_archive   = self.create_menu_btn("  Job Archive", 2, "Job Archive", "folder.png")
-        self.btn_skill_manager = self.create_menu_btn("  Skill Manager", 6, "Skill Manager", "settings.png")
-        self.btn_account_manager   = self.create_menu_btn("  Account Manager", 8, "Account Manager", "settings.png")
+        self.btn_skill_manager = self.create_menu_btn("  Skill Manager", 6, "Skill Manager", "problem-solving.png")
+        self.btn_account_manager   = self.create_menu_btn("  Account Manager", 8, "Account Manager", "skills.png")
         self.btn_directory = self.create_menu_btn("  Job Posting", 3, "Job Posting", "post.png")
         self.btn_toolkit   = self.create_menu_btn("  Career Toolkit", 4, "Career Toolkit", "toolbox.png")
         

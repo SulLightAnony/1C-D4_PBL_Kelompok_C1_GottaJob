@@ -17,7 +17,7 @@ if base_dir not in sys.path:
     sys.path.insert(0, base_dir)
 
 from Modul.modul_kategorisasi import categorizer, HasilKlasifikasi, _get_dictionary_dir
-from Modul.modul_database import get_database_permanen_dir
+from Modul.modul_database import get_database_permanen_dir, catat_aktivitas
 from Modul.modul_antarmuka_pengguna import ModernComboBox, show_message, show_question, MODERN_TABLE_STYLE, SkillTag
 
 class SkillScannerWorker(QThread):
@@ -430,6 +430,7 @@ class SkillManagerPage(QWidget):
                 # Sinkronisasikan perubahan kamus langsung ke seluruh file database
                 self.sync_changes_to_database()
                 
+                catat_aktivitas(f"<b>Kamus Skill Diperbarui</b><br>{count_changes} perubahan disimpan", role="admin")
                 show_message(self, "Berhasil", f"Kamus skill berhasil diperbarui! {count_changes} perubahan disimpan dan database permanen disinkronkan.")
                 self.start_scan() # Refresh tabel agar warna berubah
             except Exception as e:

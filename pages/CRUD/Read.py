@@ -26,7 +26,7 @@ from constants import (
     currency_icon_path, calendar_icon_path, suitcase_icon_path, 
     link_icon_path, green_check_icon_path
 )
-from modul_antarmuka_pengguna import ActionButton, SkillTag, MODERN_BUTTON_STYLE
+from modul_antarmuka_pengguna import ActionButton, SkillTag, MODERN_BUTTON_STYLE, buat_tombol_kembali
 from flow_layout import FlowLayout
 
 class JobDetailPage(QWidget):
@@ -55,14 +55,12 @@ class JobDetailPage(QWidget):
 
         # Tombol Kembali
         back_row = QHBoxLayout()
-        self.btn_back = QPushButton("← Kembali")
-        self.btn_back.setCursor(Qt.PointingHandCursor)
-        self.btn_back.setStyleSheet("color: #9FE1CB; border: none; font-size: 14px; font-weight: bold; background: transparent;")
-        self.btn_back.clicked.connect(lambda: self.back_clicked.emit())
-        back_row.addWidget(self.btn_back)
+        btn_back = buat_tombol_kembali("← Kembali", theme="dark")
+        btn_back.clicked.connect(lambda: self.back_clicked.emit())
+        back_row.addWidget(btn_back)
         back_row.addStretch()
         h_layout.addLayout(back_row)
-        h_layout.addStretch()
+
 
         # Judul & Meta
         self.lbl_title = QLabel("Job Title")

@@ -89,7 +89,8 @@
         "social media",
         "organizational skills",
         "public speaking",
-        "yapping"
+        "yapping",
+        "business negotiation"
     ],
     "position_patterns": [
         "\\b(senior|junior|lead|mid|principal)?\\s*(software|web|mobile|backend|frontend|fullstack|full.stack|android|ios|flutter|react|vue|angular)\\s*(developer|programmer|engineer)\\b",
@@ -325,5 +326,8 @@
             "soft_indicators": [],
             "default": "hard_skill"
         }
-    }
+    },
+    "hard_skills": [
+        "adobe photoshop"
+    ]
 }

@@ -80,6 +80,8 @@ class LinkValidatorWorker(QObject):
             dead_links = []
             if os.path.isfile(self.target_path):
                 file_paths = [self.target_path]
+            elif self.target_path.endswith("*.json"):
+                file_paths = glob.glob(self.target_path)
             else:
                 # Cari file JSON di root dan semua subfolder kategori
                 file_paths = glob.glob(os.path.join(self.target_path, "**", "*.json"), recursive=True)
@@ -153,7 +155,7 @@ if process_dir not in sys.path:
 from modul_visualisasi_data import PieChartWidget
 from modul_pengolahan_data import hitung_persentase_skill, cari_pekerjaan_cocok, ambil_jenis_pekerjaan_unik
 from modul_database import get_database_permanen_dir, set_favorit, get_favorit, catat_aktivitas
-from modul_antarmuka_pengguna import JobMatchResultContainer, JobDetailPanel, JobDashboardWidget, show_message, show_question, ActionButton, buat_tombol_kembali
+from modul_antarmuka_pengguna import JobMatchResultContainer, JobDetailPanel, JobDashboardWidget, show_message, show_question, ActionButton, buat_tombol_kembali, ModernProgressDialog
 
 # ─────────────────────────────────────────────────────────────
 # Style Sheet
@@ -360,6 +362,7 @@ class JobArchivePage(QWidget):
     def load_file_list(self, auto_check=False):
         """Memuat daftar kategori (folder) dari database."""
         prev_cat = self.combo_category.currentText()
+        prev_file = self.combo_file.currentData()
         
         self.combo_category.clear()
         self.combo_category.addItem("-- Pilih Kategori --", "")
@@ -385,6 +388,10 @@ class JobArchivePage(QWidget):
         idx = self.combo_category.findText(prev_cat)
         if idx >= 0:
             self.combo_category.setCurrentIndex(idx)
+            # Kembalikan pilihan file jika masih ada dalam daftar yang baru dimuat
+            file_idx = self.combo_file.findData(prev_file)
+            if file_idx >= 0:
+                self.combo_file.setCurrentIndex(file_idx)
         else:
             self.combo_file.clear()
             self.combo_file.addItem("-- Pilih File --", "")
@@ -393,24 +400,29 @@ class JobArchivePage(QWidget):
         if not auto_check:
             # Gunakan pilihan file saat ini untuk validasi
             selected_path = self.combo_file.currentData()
+            selected_category = self.combo_category.currentData()
+            
             msg = ""
             if selected_path:
                 file_name = os.path.splitext(os.path.basename(selected_path))[0].replace('_', ' ')
                 msg = f"Apakah Anda ingin mengecek lowongan kadaluarsa pada file '{file_name}'?"
                 target = selected_path
+            elif selected_category and selected_category != "(Tanpa Kategori)":
+                msg = f"Apakah Anda ingin mengecek seluruh lowongan kadaluarsa di kategori '{selected_category}'?"
+                target = os.path.join(self.db_dir, selected_category)
+            elif selected_category == "(Tanpa Kategori)":
+                msg = "Apakah Anda ingin mengecek lowongan kadaluarsa pada file tanpa kategori?"
+                target = os.path.join(self.db_dir, "*.json")
             else:
                 msg = "Apakah Anda ingin mengecek seluruh lowongan kadaluarsa di semua folder arsip?\n(Proses ini mungkin sangat lama)"
                 target = self.db_dir
 
-            res = QMessageBox.question(
-                self, "Validasi Link", msg,
-                QMessageBox.Yes | QMessageBox.No
-            )
+            res = show_question(self, "Validasi Link", msg)
             if res == QMessageBox.Yes:
                 self._start_link_validation(target)
 
     def _start_link_validation(self, target_path):
-        self.progress_dialog = QProgressDialog("Memulai validasi link...", "Batal", 0, 0, self)
+        self.progress_dialog = ModernProgressDialog("Memulai validasi link...", "Batal", 0, 0, self)
         self.progress_dialog.setWindowTitle("Membersihkan Data Kadaluarsa")
         self.progress_dialog.setWindowModality(Qt.WindowModal)
         self.progress_dialog.show()
@@ -430,7 +442,7 @@ class JobArchivePage(QWidget):
         self.progress_dialog.close()
         
         if not dead_links:
-            QMessageBox.information(self, "Selesai", "Semua lowongan dalam arsip masih aktif.")
+            show_message(self, "Selesai", "Semua lowongan dalam arsip masih aktif.")
             return
             
         # Tampilkan dialog review
@@ -462,7 +474,7 @@ class JobArchivePage(QWidget):
                     with open(fp, "w", encoding="utf-8") as f:
                         json.dump(new_data, f, ensure_ascii=False, indent=4)
             
-            QMessageBox.information(self, "Berhasil", f"Berhasil menghapus {total_deleted} lowongan kadaluarsa.")
+            show_message(self, "Berhasil", f"Berhasil menghapus {total_deleted} lowongan kadaluarsa.")
             self.favorite_changed.emit()
             self.load_file_list(auto_check=True)
 
@@ -545,7 +557,7 @@ class JobArchivePage(QWidget):
             else:
                 self.chart.set_data({})
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Gagal memuat data: {e}")
+            show_message(self, "Error", f"Gagal memuat data: {e}")
 
     def _show_matches(self):
         selected = []
@@ -555,7 +567,7 @@ class JobArchivePage(QWidget):
                 selected.append(item.text().split(" (")[0])
         
         if not selected:
-            QMessageBox.warning(self, "Peringatan", "Pilih minimal satu skill.")
+            show_message(self, "Peringatan", "Pilih minimal satu skill.")
             return
 
         selected_job_types = []
@@ -700,7 +712,7 @@ class JobArchivePage(QWidget):
                         fav_link=fav_link
                     )
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Gagal menghapus data: {e}")
+            show_message(self, "Error", f"Gagal menghapus data: {e}")
     def _update_panel_visibility(self):
         """Mengatur visibilitas panel pemilihan file berdasarkan halaman yang aktif."""
         # Panel hanya terlihat jika main_stack ada di dashboard_view 

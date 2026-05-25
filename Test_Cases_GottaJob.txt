@@ -1,0 +1,101 @@
+[
+    {
+        "No": "1",
+        "Menu": "Live Discovery",
+        "Kebutuhan / Fitur": "Pencarian Lowongan",
+        "Skenario": "Pengguna mencari lowongan dengan kata kunci tertentu",
+        "Data Masukkan": "Kata kunci = \"Programmer\"",
+        "Hasil yang diharapkan": "Sistem menampilkan daftar lowongan yang memiliki kata kunci \"Programmer\" pada judul atau deskripsinya",
+        "Hasil aktual": "Ketika pengguna memasukkan kata kunci \"Programmer\", sistem berhasil menampilkan lowongan yang relevan",
+        "Keterangan": "",
+        "Status": "Berhasil"
+    },
+    {
+        "No": "2",
+        "Menu": "Live Discovery",
+        "Kebutuhan / Fitur": "Filter Kategori Pekerjaan",
+        "Skenario": "Pengguna memilih filter kategori pekerjaan",
+        "Data Masukkan": "Kategori = \"Penuh Waktu\"",
+        "Hasil yang diharapkan": "Sistem menampilkan daftar lowongan dengan kategori \"Penuh Waktu\"",
+        "Hasil aktual": "Ketika pengguna memilih kategori \"Penuh Waktu\", sistem hanya menampilkan lowongan dengan kategori tersebut",
+        "Keterangan": "",
+        "Status": "Berhasil"
+    },
+    {
+        "No": "3",
+        "Menu": "Live Discovery",
+        "Kebutuhan / Fitur": "Lihat Detail Lowongan",
+        "Skenario": "Pengguna mengklik salah satu kartu lowongan pekerjaan",
+        "Data Masukkan": "Klik pada kartu \"Software Engineer\"",
+        "Hasil yang diharapkan": "Sistem mengarahkan pengguna ke halaman detail lowongan \"Software Engineer\"",
+        "Hasil aktual": "Ketika pengguna mengklik kartu \"Software Engineer\", sistem berhasil membuka halaman detail pekerjaan tersebut",
+        "Keterangan": "",
+        "Status": "Berhasil"
+    },
+    {
+        "No": "4",
+        "Menu": "Job Archive",
+        "Kebutuhan / Fitur": "Melihat Arsip Pekerjaan",
+        "Skenario": "Pengguna membuka halaman Job Archive",
+        "Data Masukkan": "Klik menu \"Job Archive\"",
+        "Hasil yang diharapkan": "Sistem menampilkan daftar lowongan yang telah disimpan/diarsipkan oleh pengguna sebelumnya",
+        "Hasil aktual": "Ketika pengguna membuka halaman Job Archive, daftar pekerjaan yang pernah diarsipkan berhasil ditampilkan",
+        "Keterangan": "",
+        "Status": "Berhasil"
+    },
+    {
+        "No": "5",
+        "Menu": "Job Archive",
+        "Kebutuhan / Fitur": "Menghapus Arsip",
+        "Skenario": "Pengguna menghapus salah satu lowongan dari daftar arsip",
+        "Data Masukkan": "Klik ikon \"Hapus\" pada salah satu kartu lowongan di arsip",
+        "Hasil yang diharapkan": "Lowongan tersebut terhapus dan hilang dari daftar Job Archive",
+        "Hasil aktual": "Ketika pengguna mengklik ikon \"Hapus\", lowongan berhasil dihapus dan tidak lagi tampil di daftar arsip",
+        "Keterangan": "",
+        "Status": "Berhasil"
+    },
+    {
+        "No": "6",
+        "Menu": "Job Archive",
+        "Kebutuhan / Fitur": "Mencari Arsip Pekerjaan",
+        "Skenario": "Pengguna mencari pekerjaan yang diarsipkan berdasarkan nama",
+        "Data Masukkan": "Kata kunci pencarian = \"Desainer\"",
+        "Hasil yang diharapkan": "Sistem memfilter dan menampilkan arsip pekerjaan dengan kata kunci \"Desainer\"",
+        "Hasil aktual": "Ketika pengguna mengetikkan kata kunci \"Desainer\", sistem berhasil menampilkan arsip yang sesuai",
+        "Keterangan": "",
+        "Status": "Berhasil"
+    },
+    {
+        "No": "7",
+        "Menu": "Skill Manager",
+        "Kebutuhan / Fitur": "Menambah Skill Baru",
+        "Skenario": "Pengguna menambahkan skill baru ke dalam daftar skill",
+        "Data Masukkan": "Nama Skill = \"Python\"",
+        "Hasil yang diharapkan": "Skill \"Python\" berhasil ditambahkan dan muncul di daftar skill pengguna",
+        "Hasil aktual": "Ketika pengguna memasukkan skill \"Python\" dan menyimpannya, skill tersebut berhasil muncul di daftar",
+        "Keterangan": "",
+        "Status": "Berhasil"
+    },
+    {
+        "No": "8",
+        "Menu": "Skill Manager",
+        "Kebutuhan / Fitur": "Menghapus Skill",
+        "Skenario": "Pengguna menghapus skill yang sudah ada di daftar",
+        "Data Masukkan": "Klik tombol \"Hapus\" pada skill \"Python\"",
+        "Hasil yang diharapkan": "Skill \"Python\" terhapus dari daftar skill",
+        "Hasil aktual": "Ketika pengguna mengklik tombol \"Hapus\" pada skill \"Python\", skill tersebut berhasil hilang dari daftar",
+        "Keterangan": "",
+        "Status": "Berhasil"
+    },
+    {
+        "No": "9",
+        "Menu": "Skill Manager",
+        "Kebutuhan / Fitur": "Mengedit Skill",
+        "Skenario": "Pengguna mengubah nama atau detail skill yang sudah ada",
+        "Data Masukkan": "Ubah \"Python\" menjadi \"Python (Advanced)\"",
+        "Hasil yang diharapkan": "Skill yang diubah berhasil diperbarui menjadi \"Python (Advanced)\" di daftar",
+        "Hasil aktual": "Ketika pengguna menyimpan perubahan, skill berhasil diperbarui di daftar menjadi \"Python (Advanced)\"",
+        "Keterangan": "",
+        "Status": "Berhasil"
+    }
+]
