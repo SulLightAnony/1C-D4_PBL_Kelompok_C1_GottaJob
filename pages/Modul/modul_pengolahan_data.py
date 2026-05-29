@@ -581,3 +581,73 @@ def hitung_total_user_terdaftar():
         print(f"Error hitung_total_user_terdaftar: {e}")
         return 0
 
+def normalisasi_jenis_pekerjaan_di_database():
+    """
+    Menyeragamkan format 'Jenis_Pekerjaan' (seperti Full-Time -> Penuh Waktu)
+    di seluruh file JSON yang ada di database (permanen & sementara) 
+    dan menimpanya (mengganti data asli).
+    """
+    import glob
+    from Modul.modul_database import get_root_dir
+    
+    root = get_root_dir()
+    db_dir = os.path.join(root, 'database')
+    
+    if not os.path.exists(db_dir):
+        return 0
+        
+    kamus_normalisasi = {
+        "full-time": "Penuh Waktu",
+        "full time": "Penuh Waktu",
+        "part-time": "Paruh Waktu",
+        "part time": "Paruh Waktu",
+        "internship": "Magang",
+        "contract": "Kontrak",
+        "tetap": "Penuh Waktu", # Opsional
+    }
+    
+    file_paths = glob.glob(os.path.join(db_dir, "**", "*.json"), recursive=True)
+    total_berubah = 0
+    
+    for fp in file_paths:
+        # Jangan proses user.json atau file non-lowongan lainnya
+        if os.path.basename(fp) in ["user.json", "alias.json", "universal.json", "skills.json"]:
+            continue
+            
+        try:
+            with open(fp, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                
+            if not isinstance(data, list):
+                continue
+                
+            diubah = False
+            for item in data:
+                jp = item.get("Jenis_Pekerjaan", "").strip()
+                if not jp or jp == "-":
+                    continue
+                    
+                jp_lower = jp.lower()
+                # Cek apakah ada di kamus
+                if jp_lower in kamus_normalisasi:
+                    baru = kamus_normalisasi[jp_lower]
+                    if jp != baru:
+                        item["Jenis_Pekerjaan"] = baru
+                        diubah = True
+                else:
+                    # Jika tidak ada di kamus, pastikan Title Case
+                    baru = jp.title()
+                    if jp != baru:
+                        item["Jenis_Pekerjaan"] = baru
+                        diubah = True
+                        
+            if diubah:
+                with open(fp, "w", encoding="utf-8") as f:
+                    json.dump(data, f, indent=4)
+                total_berubah += 1
+        except Exception as e:
+            print(f"Gagal memproses file {fp}: {e}")
+            
+    return total_berubah
+
+

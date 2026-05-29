@@ -476,6 +476,21 @@ class GlintsScraper:
                 except Exception as e:
                     print(f"      [Error] {e}")
 
+                # Normalisasi Jenis Pekerjaan
+                kamus_jp = {
+                    "full-time": "Penuh Waktu",
+                    "full time": "Penuh Waktu",
+                    "part-time": "Paruh Waktu",
+                    "part time": "Paruh Waktu",
+                    "internship": "Magang",
+                    "contract": "Kontrak"
+                }
+                jp_lower = jenis_pekerjaan.lower()
+                if jp_lower in kamus_jp:
+                    jenis_pekerjaan = kamus_jp[jp_lower]
+                elif jenis_pekerjaan and jenis_pekerjaan != "-":
+                    jenis_pekerjaan = jenis_pekerjaan.title()
+
                 data_ekstrak.append({
                     "Judul_Pekerjaan":         judul,
                     "Jenis_Pekerjaan":         jenis_pekerjaan,

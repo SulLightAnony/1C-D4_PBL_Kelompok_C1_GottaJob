@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
     QFrame, QTableWidget, QTableWidgetItem, QHeaderView, QScrollArea,
     QPushButton, QListWidget, QStackedWidget, QDialog, QMessageBox,
-    QComboBox, QGraphicsDropShadowEffect
+    QComboBox, QGraphicsDropShadowEffect, QProgressBar, QApplication
 )
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from PyQt5.QtGui import QColor, QPixmap, QIcon, QFont
@@ -19,21 +19,40 @@ def terapkan_soft_shadow(widget, blur_radius=24, offset_x=0, offset_y=6, alpha=1
     shadow.setOffset(offset_x, offset_y)
     widget.setGraphicsEffect(shadow)
 
-def buat_tombol_kembali(text="← Kembali", parent=None):
+def buat_tombol_kembali(text="← Kembali", parent=None, theme="light"):
     """
     Membuat tombol kembali dengan gaya visual terstandarisasi, modern, dan premium.
+    theme: "light" (default, untuk background terang) atau "dark" (untuk background gelap).
     """
     btn = QPushButton(text, parent)
     btn.setCursor(Qt.PointingHandCursor)
-    btn.setStyleSheet("""
-        QPushButton {
-            background-color: transparent; color: #2C687B;
-            font-size: 14px; font-weight: bold;
-            border: 1px solid #2C687B; border-radius: 6px; padding: 5px 15px;
-            min-height: 25px;
-        }
-        QPushButton:hover { background-color: #E2EFF1; }
-    """)
+    if theme == "dark":
+        btn.setStyleSheet("""
+            QPushButton {
+                background-color: rgba(255, 255, 255, 0.1);
+                color: white;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 6px;
+                padding: 5px 15px;
+                font-size: 14px;
+                font-weight: bold;
+                min-height: 25px;
+            }
+            QPushButton:hover {
+                background-color: rgba(255, 255, 255, 0.2);
+                border: 1px solid rgba(255, 255, 255, 0.5);
+            }
+        """)
+    else:
+        btn.setStyleSheet("""
+            QPushButton {
+                background-color: transparent; color: #2C687B;
+                font-size: 14px; font-weight: bold;
+                border: 1px solid #2C687B; border-radius: 6px; padding: 5px 15px;
+                min-height: 25px;
+            }
+            QPushButton:hover { background-color: #E2EFF1; }
+        """)
     return btn
 
 class SkillTag(QLabel):
@@ -363,6 +382,101 @@ def show_question(parent, title, text):
     dialog = ModernMessageBox(title, text, QMessageBox.Yes | QMessageBox.No, parent)
     dialog.exec_()
     return dialog.result
+
+class ModernProgressDialog(QDialog):
+    """
+    Dialog progress/loading kustom dengan desain modern premium.
+    """
+    def __init__(self, label_text="Memproses...", cancel_button_text="Batal", min_val=0, max_val=0, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Proses")
+        self.setMinimumWidth(400)
+        self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint | Qt.Dialog)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        
+        # Main Container
+        self.container = QFrame(self)
+        self.container.setObjectName("ProgBoxContainer")
+        self.container.setStyleSheet("""
+            QFrame#ProgBoxContainer {
+                background-color: white;
+                border: 2px solid #2C687B;
+                border-radius: 15px;
+            }
+        """)
+        
+        main_lay = QVBoxLayout(self)
+        main_lay.setContentsMargins(10, 10, 10, 10)
+        main_lay.addWidget(self.container)
+        
+        inner_lay = QVBoxLayout(self.container)
+        inner_lay.setContentsMargins(25, 25, 25, 20)
+        inner_lay.setSpacing(15)
+        
+        # Title / Label
+        self.title_lbl = QLabel("Proses")
+        self.title_lbl.setStyleSheet("font-size: 18px; font-weight: bold; color: #2C687B; border: none; background-color: transparent;")
+        inner_lay.addWidget(self.title_lbl)
+        
+        # Current progress label
+        self.msg_lbl = QLabel(label_text)
+        self.msg_lbl.setWordWrap(True)
+        self.msg_lbl.setStyleSheet("font-size: 15px; color: #1E3A4A; border: none; line-height: 1.4; background-color: transparent;")
+        inner_lay.addWidget(self.msg_lbl)
+        
+        # Progress Bar
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setRange(min_val, max_val)
+        self.progress_bar.setFixedHeight(8)
+        self.progress_bar.setTextVisible(False)
+        self.progress_bar.setStyleSheet("""
+            QProgressBar {
+                border: none;
+                background-color: #E2EFF1;
+                border-radius: 4px;
+            }
+            QProgressBar::chunk {
+                background-color: #2C687B;
+                border-radius: 4px;
+            }
+        """)
+        inner_lay.addWidget(self.progress_bar)
+        
+        # Cancel Button
+        btn_lay = QHBoxLayout()
+        btn_lay.addStretch()
+        
+        self.btn_cancel = QPushButton(cancel_button_text)
+        self.btn_cancel.setCursor(Qt.PointingHandCursor)
+        self.btn_cancel.setStyleSheet("""
+            QPushButton {
+                background-color: #F3F4F6; color: #4A5568;
+                border: 1px solid #D1D5DB; border-radius: 8px;
+                padding: 8px 18px; font-weight: bold; font-size: 14px; min-height: 32px;
+            }
+            QPushButton:hover { background-color: #E5E7EB; }
+        """)
+        self.btn_cancel.clicked.connect(self.reject)
+        btn_lay.addWidget(self.btn_cancel)
+        inner_lay.addLayout(btn_lay)
+        
+        # Apply drop shadow
+        terapkan_soft_shadow(self.container)
+
+    def setLabelText(self, text):
+        self.msg_lbl.setText(text)
+        QApplication.processEvents()
+
+    def setWindowTitle(self, title):
+        super().setWindowTitle(title)
+        if hasattr(self, 'title_lbl'):
+            self.title_lbl.setText(title)
+
+    def setRange(self, minimum, maximum):
+        self.progress_bar.setRange(minimum, maximum)
+
+    def setValue(self, value):
+        self.progress_bar.setValue(value)
 
 GLOBAL_DIALOG_STYLE = MODERN_SCROLLBAR_STYLE + """
 QDialog { background-color: white; }
