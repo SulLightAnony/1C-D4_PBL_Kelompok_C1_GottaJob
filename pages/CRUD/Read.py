@@ -20,13 +20,16 @@ for _p in [_pages_dir, _job_posting_dir, _modul_dir]:
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
+# pyrefly: ignore [missing-import]
 from constants import (
     company_icon_path, location_detail_icon_path, edit_icon_path, 
     trash_icon_path, send_icon_path, checked_icon_path, 
     currency_icon_path, calendar_icon_path, suitcase_icon_path, 
     link_icon_path, green_check_icon_path
 )
+# pyrefly: ignore [missing-import]
 from modul_antarmuka_pengguna import ActionButton, SkillTag, MODERN_BUTTON_STYLE, buat_tombol_kembali
+# pyrefly: ignore [missing-import]
 from flow_layout import FlowLayout
 
 class JobDetailPage(QWidget):
@@ -226,6 +229,9 @@ class JobDetailPage(QWidget):
         lbl.setStyleSheet("color: #718096; font-size: 11px; font-weight: 600; text-transform: uppercase; border: none;")
         return lbl
 
+    def open_link(self, url):
+        QDesktopServices.openUrl(QUrl(url))
+
     def _create_meta_item(self, label, value, icon_path=None, is_link=False):
         box = QFrame()
         box.setStyleSheet("background-color: #F8FAFC; border-radius: 10px; border: 1px solid #F1F5F9;")
@@ -255,7 +261,7 @@ class JobDetailPage(QWidget):
         if is_link and value != "-":
             v_lbl.setCursor(Qt.PointingHandCursor)
             v_lbl.setStyleSheet("color: #1D4E5F; font-size: 16px; font-weight: 700; text-decoration: underline; border: none; background: transparent;")
-            v_lbl.mousePressEvent = lambda e: QDesktopServices.openUrl(QUrl(value))
+            v_lbl.mousePressEvent = lambda e: self.open_link(value)
             
         v.addWidget(v_lbl)
         lay.addLayout(v)
