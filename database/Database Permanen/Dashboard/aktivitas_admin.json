@@ -1,127 +1,102 @@
 [
-        {
-                "pesan": "<b>Lowongan disimpan</b><br>PT GANDA PARADE ESMERALDA",
-                "waktu": "",
-                "role": "admin"
-        },
-        {
-                "pesan": "<b>Lowongan Dihapus</b><br>Hospitality & Hotel Operations",
-                "waktu": "",
-                "role": "admin"
-        },
-        {
-                "pesan": "<b>Pekerjaan Favorit Diganti</b><br>Hotel Receptionist",
-                "waktu": "",
-                "role": "admin"
-        },
-        {
-                "pesan": "<b>Kamus Skill Diperbarui</b><br>1 perubahan disimpan",
-                "waktu": "",
-                "role": "admin"
-        },
-        {
-                "pesan": "<b>30 Lowongan disimpan massal</b>",
-                "waktu": "",
-                "role": "admin"
-        },
-        {
-                "pesan": "<b>Live Discovery Selesai</b><br>temp_hotel_manager · 30 hasil",
-                "waktu": "",
-                "role": "admin"
-        },
-        {
-                "pesan": "<b>Lowongan Diperbarui</b><br>Senior Data Scientist",
-                "waktu": "",
-                "role": "admin"
-        },
-        {
-                "pesan": "<b>Lowongan Ditambah</b><br>Senior Data Scientist",
-                "waktu": "",
-                "role": "admin"
-        },
-        {
-                "pesan": "<b>Kamus Skill Diperbarui</b><br>1 perubahan disimpan",
-                "waktu": "",
-                "role": "admin"
-        },
-        {
-                "pesan": "<b>30 Lowongan disimpan massal</b>",
-                "waktu": "",
-                "role": "admin"
-        },
-        {
-                "pesan": "<b>Live Discovery Selesai</b><br>temp_konsultan_pendidikan · 30 hasil",
-                "waktu": "",
-                "role": "admin"
-        },
-        {
-                "pesan": "<b>Live Discovery Selesai</b><br>temp_konsultan_pendidikan · 30 hasil",
-                "waktu": "",
-                "role": "admin"
-        },
-        {
-                "pesan": "<b>Live Discovery Selesai</b><br>temp_konsultan_pendidikan · 30 hasil",
-                "waktu": "",
-                "role": "admin"
-        },
-        {
-                "pesan": "<b>Kamus Skill Diperbarui</b><br>2 perubahan disimpan",
-                "waktu": "",
-                "role": "admin"
-        },
-        {
-                "pesan": "<b>Kamus Skill Diperbarui</b><br>2 perubahan disimpan",
-                "waktu": "",
-                "role": "admin"
-        },
-        {
-                "pesan": "<b>Kamus Skill Diperbarui</b><br>2 perubahan disimpan",
-                "waktu": "",
-                "role": "admin"
-        },
-        {
-                "pesan": "<b>Kamus Skill Diperbarui</b><br>1 perubahan disimpan",
-                "waktu": "",
-                "role": "admin"
-        },
-        {
-                "pesan": "<b>Lowongan Ditambah</b><br>awd",
-                "waktu": "",
-                "role": "admin"
-        },
-        {
-                "pesan": "<b>Lowongan Dihapus</b><br>front end developer",
-                "waktu": "",
-                "role": "admin"
-        },
-        {
-                "pesan": "<b>Lowongan Diperbarui</b><br>front end developer",
-                "waktu": "",
-                "role": "admin"
-        },
-        {
-                "pesan": "<b>Lowongan Diperbarui</b><br>front end developer",
-                "waktu": "",
-                "role": "admin"
-        },
-        {
-                "pesan": "<b>Lowongan Dihapus</b><br>front end",
-                "waktu": "",
-                "role": "admin"
-        },
-        {
-                "pesan": "<b>Lowongan Ditambah</b><br>front end developer",
-                "waktu": "",
-                "role": "admin"
-        },
-        {
-                "pesan": "<b>Lowongan Diperbarui</b><br>front end",
-                "waktu": "",
-                "role": "admin"
-        },
-        {
-                "pesan": "<b>Lowongan Diperbarui</b><br>front end",
-                "waktu": "",
-                "role": "admin"
-        }
+    {
+        "pesan": "<b>Lowongan Diperbarui</b><br>Data Scientist",
+        "waktu": "",
+        "role": "admin"
+    },
+    {
+        "pesan": "<b>Lowongan Dihapus</b><br>awd",
+        "waktu": "",
+        "role": "admin"
+    },
+    {
+        "pesan": "<b>Lowongan disimpan</b><br>PT GANDA PARADE ESMERALDA",
+        "waktu": "",
+        "role": "admin"
+    },
+    {
+        "pesan": "<b>Lowongan Dihapus</b><br>Hospitality & Hotel Operations",
+        "waktu": "",
+        "role": "admin"
+    },
+    {
+        "pesan": "<b>Pekerjaan Favorit Diganti</b><br>Hotel Receptionist",
+        "waktu": "",
+        "role": "admin"
+    },
+    {
+        "pesan": "<b>Kamus Skill Diperbarui</b><br>1 perubahan disimpan",
+        "waktu": "",
+        "role": "admin"
+    },
+    {
+        "pesan": "<b>30 Lowongan disimpan massal</b>",
+        "waktu": "",
+        "role": "admin"
+    },
+    {
+        "pesan": "<b>Live Discovery Selesai</b><br>temp_hotel_manager · 30 hasil",
+        "waktu": "",
+        "role": "admin"
+    },
+    {
+        "pesan": "<b>Lowongan Diperbarui</b><br>Senior Data Scientist",
+        "waktu": "",
+        "role": "admin"
+    },
+    {
+        "pesan": "<b>Lowongan Ditambah</b><br>Senior Data Scientist",
+        "waktu": "",
+        "role": "admin"
+    },
+    {
+        "pesan": "<b>Kamus Skill Diperbarui</b><br>1 perubahan disimpan",
+        "waktu": "",
+        "role": "admin"
+    },
+    {
+        "pesan": "<b>30 Lowongan disimpan massal</b>",
+        "waktu": "",
+        "role": "admin"
+    },
+    {
+        "pesan": "<b>Live Discovery Selesai</b><br>temp_konsultan_pendidikan · 30 hasil",
+        "waktu": "",
+        "role": "admin"
+    },
+    {
+        "pesan": "<b>Live Discovery Selesai</b><br>temp_konsultan_pendidikan · 30 hasil",
+        "waktu": "",
+        "role": "admin"
+    },
+    {
+        "pesan": "<b>Live Discovery Selesai</b><br>temp_konsultan_pendidikan · 30 hasil",
+        "waktu": "",
+        "role": "admin"
+    },
+    {
+        "pesan": "<b>Kamus Skill Diperbarui</b><br>2 perubahan disimpan",
+        "waktu": "",
+        "role": "admin"
+    },
+    {
+        "pesan": "<b>Kamus Skill Diperbarui</b><br>2 perubahan disimpan",
+        "waktu": "",
+        "role": "admin"
+    },
+    {
+        "pesan": "<b>Kamus Skill Diperbarui</b><br>2 perubahan disimpan",
+        "waktu": "",
+        "role": "admin"
+    },
+    {
+        "pesan": "<b>Kamus Skill Diperbarui</b><br>1 perubahan disimpan",
+        "waktu": "",
+        "role": "admin"
+    },
+    {
+        "pesan": "<b>Lowongan Ditambah</b><br>awd",
+        "waktu": "",
+        "role": "admin"
+    }
 ]
