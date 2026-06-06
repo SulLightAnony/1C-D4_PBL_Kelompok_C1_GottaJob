@@ -570,7 +570,7 @@ def hitung_total_user_terdaftar():
     try:
         from Modul.modul_database import get_root_dir
         root = get_root_dir()
-        json_path = os.path.join(root, 'database', 'user.json')
+        json_path = os.path.join(root, 'database', 'Database Permanen', 'Account Manager', 'user.json')
         if os.path.exists(json_path):
             with open(json_path, 'r', encoding='utf-8') as file:
                 users = json.load(file)

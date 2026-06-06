@@ -268,7 +268,7 @@ def create_account_manager_page(router_self):
 
 def load_data_user_ke_tabel(router_self):
     base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    json_path = os.path.normpath(os.path.join(base_path, 'database', 'user.json'))
+    json_path = os.path.normpath(os.path.join(base_path, 'database', 'Database Permanen', 'Account Manager', 'user.json'))
     
     if not os.path.exists(json_path):
         return
@@ -409,7 +409,7 @@ def simpan_user_baru(router_self):
         return
 
     base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    json_path = os.path.normpath(os.path.join(base_path, 'database', 'user.json'))
+    json_path = os.path.normpath(os.path.join(base_path, 'database', 'Database Permanen', 'Account Manager', 'user.json'))
 
     with open(json_path, 'r+') as file:
         users = json.load(file)
@@ -461,7 +461,7 @@ def hapus_user(router_self, username):
     
     if reply == QMessageBox.Yes:
         base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        json_path = os.path.normpath(os.path.join(base_path, 'database', 'user.json'))
+        json_path = os.path.normpath(os.path.join(base_path, 'database', 'Database Permanen', 'Account Manager', 'user.json'))
 
         with open(json_path, 'r') as file:
             users = json.load(file)

@@ -1,5 +1,10 @@
 [
     {
+        "pesan": "<b>User Diperbarui</b><br>admin (admin)",
+        "waktu": "",
+        "role": "admin"
+    },
+    {
         "pesan": "<b>Lowongan disimpan</b><br>PT GANDA PARADE ESMERALDA",
         "waktu": "",
         "role": "admin"
@@ -91,11 +96,6 @@
     },
     {
         "pesan": "<b>Lowongan Dihapus</b><br>front end developer",
-        "waktu": "",
-        "role": "admin"
-    },
-    {
-        "pesan": "<b>User Dihapus</b><br>Sigma",
         "waktu": "",
         "role": "admin"
     }
