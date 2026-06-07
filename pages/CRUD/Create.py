@@ -19,12 +19,16 @@ for _p in [_pages_dir, _job_posting_dir, _modul_dir]:
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
+
+# pyrefly: ignore [missing-import]
 from constants import down_icon_path
+# pyrefly: ignore [missing-import]
 from modul_antarmuka_pengguna import (
     KeyboardScrollArea, buat_tombol_kembali,
     theme_primary, theme_hover, theme_border, theme_selection_bg,
     theme_field_bg
 )
+# pyrefly: ignore [missing-import]
 from skill_tag_input import SkillTagInput
 
 class JobFormPage(QWidget):
@@ -525,9 +529,9 @@ def proses_create_job(form_data, current_data):
         "Jenis_Pekerjaan": form_data.get('jenis', ''),
         "Lokasi": form_data.get('lokasi', '').strip(),
         "Rentang_Gaji": gaji,
-        "Hard_Skills": ", ".join(form_data.get('hard_skills', [])),
-        "Soft_Skills": ", ".join(form_data.get('soft_skills', [])),
-        "Skills": ", ".join(form_data.get('hard_skills', [])) + "||" + ", ".join(form_data.get('soft_skills', [])),
+        "Hard_Skills": "|".join(form_data.get('hard_skills', [])),
+        "Soft_Skills": "|".join(form_data.get('soft_skills', [])),
+        "Skills": "|".join(form_data.get('hard_skills', [])) + "||" + "|".join(form_data.get('soft_skills', [])),
         "Link_Lowongan": form_data.get('link', '').strip(),
         "Deskripsi_Pekerjaan": form_data.get('desc', ''),
         "Benefit_Pekerjaan": form_data.get('benefit', ''),
