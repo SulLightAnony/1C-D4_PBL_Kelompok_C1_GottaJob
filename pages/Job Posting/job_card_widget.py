@@ -16,6 +16,14 @@ from constants import (
     check_icon_path, location_icon_path, currency_icon_path,
     edit_icon_path, trash_icon_card_path, send_icon_path, checked_icon_path
 )
+import os, sys
+_modul_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "Modul")
+if _modul_dir not in sys.path:
+    sys.path.insert(0, _modul_dir)
+
+from modul_antarmuka_pengguna import (
+    theme_primary, theme_hover, theme_pressed, theme_border, theme_selection_bg
+)
 
 
 class JobCardWidget(QFrame):
@@ -41,20 +49,23 @@ class JobCardWidget(QFrame):
         super().mousePressEvent(event)
 
     def setup_ui(self):
+        primary_color = theme_primary()
+        selected_bg = theme_selection_bg()
+        
         self.setObjectName("JobCard")
-        self.setStyleSheet("""
-            QFrame#JobCard {
+        self.setStyleSheet(f"""
+            QFrame#JobCard {{
                 background-color: white;
                 border: 1px solid #e8e8e8;
                 border-radius: 10px;
-            }
-            QFrame#JobCard:hover {
-                border: 1px solid #2C687B;
-            }
-            QFrame#JobCard[selected="true"] {
-                background-color: #f0f9ff;
-                border: 2px solid #2C687B;
-            }
+            }}
+            QFrame#JobCard:hover {{
+                border: 1px solid {primary_color};
+            }}
+            QFrame#JobCard[selected="true"] {{
+                background-color: {selected_bg};
+                border: 2px solid {primary_color};
+            }}
         """)
 
         main_layout = QVBoxLayout(self)
@@ -105,10 +116,10 @@ class JobCardWidget(QFrame):
                 border-radius: 4px;
                 background-color: #f1f5f9;
             }}
-            QCheckBox::indicator:hover {{ border-color: #2C687B; }}
+            QCheckBox::indicator:hover {{ border-color: {primary_color}; }}
             QCheckBox::indicator:checked {{
-                background-color: #2C687B;
-                border-color: #2C687B;
+                background-color: {primary_color};
+                border-color: {primary_color};
                 image: url("{check_url}");
             }}
         """)
@@ -313,34 +324,34 @@ class JobCardWidget(QFrame):
         
         if is_applied:
             btn_lamar.setEnabled(False)
-            btn_lamar.setStyleSheet("""
-                QPushButton {
-                    background-color: #E2EFF1;
-                    color: #2C687B;
+            btn_lamar.setStyleSheet(f"""
+                QPushButton {{
+                    background-color: {theme_selection_bg()};
+                    color: {theme_primary()};
                     border-radius: 8px;
                     padding: 6px 12px;
                     font-weight: bold;
                     font-size: 13px;
-                    border: 1px solid #B2D2D9;
-                }
+                    border: 1px solid {theme_border()};
+                }}
             """)
         else:
-            btn_lamar.setStyleSheet("""
-                QPushButton {
-                    background-color: #408699;
+            btn_lamar.setStyleSheet(f"""
+                QPushButton {{
+                    background-color: {theme_hover()};
                     color: white;
                     border-radius: 8px;
                     padding: 6px 12px;
                     font-weight: bold;
                     font-size: 13px;
                     border: none;
-                }
-                QPushButton:hover {
-                    background-color: #2C687B;
-                }
-                QPushButton:pressed {
-                    background-color: #1E4A58;
-                }
+                }}
+                QPushButton:hover {{
+                    background-color: {theme_primary()};
+                }}
+                QPushButton:pressed {{
+                    background-color: {theme_pressed()};
+                }}
             """)
         
         btn_lamar.clicked.connect(lambda: self.lamar_clicked.emit(self.job_data))

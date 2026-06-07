@@ -76,7 +76,7 @@ def create_account_manager_page(router_self):
             font-family: 'Segoe UI';
         }
         QLineEdit:focus, QComboBox:focus { 
-            border: 2px solid #2C687B; 
+            border: 2px solid #1E3A5F; 
             background-color: white; 
         }
         
@@ -101,7 +101,7 @@ def create_account_manager_page(router_self):
             font-weight: bold;
         }
         QComboBox::down-arrow:on {
-            color: #2C687B; 
+            color: #1E3A5F; 
         }
         
         /* Styling Menu Pop-up Pilihan */
@@ -114,7 +114,7 @@ def create_account_manager_page(router_self):
             font-size: 14px;
             color: #1F2937;
             selection-background-color: #F3F4F6; 
-            selection-color: #2C687B;
+            selection-color: #1E3A5F;
             outline: 0px; 
         }
     """
@@ -165,7 +165,7 @@ def create_account_manager_page(router_self):
     router_self.btn_save_user.setCursor(Qt.PointingHandCursor)
     router_self.btn_save_user.setStyleSheet("""
         QPushButton {
-            background-color: #2C687B;
+            background-color: #1E3A5F;
             color: white;
             padding: 14px;
             border-radius: 12px;
@@ -268,7 +268,7 @@ def create_account_manager_page(router_self):
 
 def load_data_user_ke_tabel(router_self):
     base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    json_path = os.path.normpath(os.path.join(base_path, 'database', 'user.json'))
+    json_path = os.path.normpath(os.path.join(base_path, 'database', 'Database Permanen', 'Account Manager', 'user.json'))
     
     if not os.path.exists(json_path):
         return
@@ -292,7 +292,7 @@ def load_data_user_ke_tabel(router_self):
         if user_data['role'] == 'admin':
             item_role.setForeground(QColor("#E74C3C")) 
         else:
-            item_role.setForeground(QColor("#2C687B")) 
+            item_role.setForeground(QColor("#1E3A5F")) 
             
         item_user.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
         item_role.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
@@ -312,7 +312,7 @@ def load_data_user_ke_tabel(router_self):
         btn_edit.setCursor(Qt.PointingHandCursor)
         btn_edit.setStyleSheet("""
             QPushButton {
-                background-color: #2C687B; 
+                background-color: #1E3A5F; 
                 color: white;
                 border: none;
                 border-radius: 8px;
@@ -387,7 +387,7 @@ def reset_form_state(router_self):
     router_self.btn_save_user.setText("Tambah User")
     router_self.btn_save_user.setStyleSheet("""
         QPushButton {
-            background-color: #2C687B;
+            background-color: #1E3A5F;
             color: white;
             padding: 14px;
             border-radius: 12px;
@@ -409,7 +409,7 @@ def simpan_user_baru(router_self):
         return
 
     base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    json_path = os.path.normpath(os.path.join(base_path, 'database', 'user.json'))
+    json_path = os.path.normpath(os.path.join(base_path, 'database', 'Database Permanen', 'Account Manager', 'user.json'))
 
     with open(json_path, 'r+') as file:
         users = json.load(file)
@@ -461,7 +461,7 @@ def hapus_user(router_self, username):
     
     if reply == QMessageBox.Yes:
         base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        json_path = os.path.normpath(os.path.join(base_path, 'database', 'user.json'))
+        json_path = os.path.normpath(os.path.join(base_path, 'database', 'Database Permanen', 'Account Manager', 'user.json'))
 
         with open(json_path, 'r') as file:
             users = json.load(file)

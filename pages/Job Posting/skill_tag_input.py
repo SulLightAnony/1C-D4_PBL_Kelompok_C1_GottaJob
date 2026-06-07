@@ -13,6 +13,12 @@ from PyQt5.QtGui import QIcon, QFont
 from constants import plus_icon_path
 from flow_layout import FlowLayout
 
+import sys, os
+_modul_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "Modul")
+if _modul_dir not in sys.path:
+    sys.path.insert(0, _modul_dir)
+from modul_antarmuka_pengguna import theme_primary, theme_hover
+
 
 class SkillTagInput(QWidget):
     """Widget input skill dengan tags di atas dan input box di bawah."""
@@ -23,6 +29,25 @@ class SkillTagInput(QWidget):
         self._placeholder = placeholder
         self._btn_text = btn_text
         self._setup_ui()
+
+    def update_theme_mode(self, is_admin):
+        """Perbarui warna tema — warna diambil dari getter sentral."""
+        self._apply_edit_frame_style()
+        if self._btn_text:
+            self._apply_btn_add_style()
+        # Refresh warna semua tag pill yang sudah ada
+        for i in range(self.tags_layout.count()):
+            item = self.tags_layout.itemAt(i)
+            if item and item.widget():
+                tag = item.widget()
+                if tag.objectName() == "SkillTag":
+                    tag.setStyleSheet(f"""
+                        QFrame#SkillTag {{
+                            background-color: {theme_primary()};
+                            border-radius: 15px;
+                            padding: 0;
+                        }}
+                    """)
 
     def _setup_ui(self):
         self.main_layout = QVBoxLayout(self)
@@ -42,17 +67,7 @@ class SkillTagInput(QWidget):
         # Container untuk LineEdit agar ada border khusus
         self.edit_frame = QFrame()
         self.edit_frame.setObjectName("EditFrame")
-        self.edit_frame.setStyleSheet("""
-            QFrame#EditFrame {
-                border: 1px solid #dcdcdc;
-                border-radius: 8px;
-                background-color: white;
-            }
-            QFrame#EditFrame:focus-within {
-                border: 1px solid #2C687B;
-                background-color: #fff;
-            }
-        """)
+        self._apply_edit_frame_style()
         self.edit_frame.setFixedHeight(40)
         
         edit_layout = QHBoxLayout(self.edit_frame)
@@ -73,19 +88,7 @@ class SkillTagInput(QWidget):
         if self._btn_text:
             self._btn_add.setFixedHeight(40)
             self._btn_add.setMinimumWidth(100)
-            self._btn_add.setStyleSheet("""
-                QPushButton {
-                    background-color: #2C687B;
-                    color: white;
-                    border: none;
-                    border-radius: 8px;
-                    font-weight: bold;
-                    padding: 0 15px;
-                }
-                QPushButton:hover {
-                    background-color: #408699;
-                }
-            """)
+            self._apply_btn_add_style()
         else:
             self._btn_add.setFixedSize(40, 40)
             self._btn_add.setStyleSheet("""
@@ -107,6 +110,34 @@ class SkillTagInput(QWidget):
         input_row.addWidget(self._btn_add)
 
         self.main_layout.addLayout(input_row)
+
+    def _apply_edit_frame_style(self):
+        self.edit_frame.setStyleSheet(f"""
+            QFrame#EditFrame {{
+                border: 1px solid #dcdcdc;
+                border-radius: 8px;
+                background-color: white;
+            }}
+            QFrame#EditFrame:focus-within {{
+                border: 1px solid {theme_primary()};
+                background-color: #fff;
+            }}
+        """)
+
+    def _apply_btn_add_style(self):
+        self._btn_add.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {theme_primary()};
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-weight: bold;
+                padding: 0 15px;
+            }}
+            QPushButton:hover {{
+                background-color: {theme_hover()};
+            }}
+        """)
 
     def _add_from_input(self):
         text = self._edit.text().strip()
@@ -134,12 +165,12 @@ class SkillTagInput(QWidget):
         text = text.strip()
         tag = QFrame()
         tag.setObjectName("SkillTag")
-        tag.setStyleSheet("""
-            QFrame#SkillTag {
-                background-color: #2C687B;
+        tag.setStyleSheet(f"""
+            QFrame#SkillTag {{
+                background-color: {theme_primary()};
                 border-radius: 15px;
                 padding: 0;
-            }
+            }}
         """)
         tag.setFixedHeight(30)
         

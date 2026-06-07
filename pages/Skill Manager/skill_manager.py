@@ -145,8 +145,15 @@ class SkillManagerPage(QWidget):
 
         # Footer
         footer = QHBoxLayout()
-        self.btn_save = QPushButton("💾 Update Kamus Skill")
-        self.btn_save.setStyleSheet("background-color: #059669; color: white; padding: 12px 30px; font-weight: bold; border-radius: 8px;")
+        
+        # Path ke icon save.png
+        root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        save_icon_path = os.path.join(root_dir, "assets", "modul", "save.png")
+        
+        self.btn_save = QPushButton(" Update Kamus Skill")
+        self.btn_save.setIcon(QIcon(save_icon_path))
+        self.btn_save.setIconSize(QSize(18, 18))
+        self.btn_save.setStyleSheet("background-color: #1E3A5F; color: white; padding: 12px 30px; font-weight: bold; border-radius: 8px;")
         self.btn_save.clicked.connect(self.save_to_dictionary)
         footer.addStretch()
         footer.addWidget(self.btn_save)

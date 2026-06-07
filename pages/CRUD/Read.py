@@ -27,9 +27,10 @@ from constants import (
     currency_icon_path, calendar_icon_path, suitcase_icon_path, 
     link_icon_path, green_check_icon_path
 )
-# pyrefly: ignore [missing-import]
-from modul_antarmuka_pengguna import ActionButton, SkillTag, MODERN_BUTTON_STYLE, buat_tombol_kembali
-# pyrefly: ignore [missing-import]
+from modul_antarmuka_pengguna import (
+    ActionButton, SkillTag, MODERN_BUTTON_STYLE, buat_tombol_kembali,
+    theme_primary, theme_hover, theme_border, theme_selection_bg, theme_pressed
+)
 from flow_layout import FlowLayout
 
 class JobDetailPage(QWidget):
@@ -41,6 +42,7 @@ class JobDetailPage(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.job_data = {}
+        self.is_admin = False
         self.init_ui()
 
     def init_ui(self):
@@ -389,6 +391,23 @@ class JobDetailPage(QWidget):
         self.btn_lamar.setEnabled(not is_applied)
         self.btn_lamar.setIcon(QIcon(checked_icon_path if is_applied else send_icon_path))
 
+    def update_theme_mode(self, is_admin):
+        self.is_admin = is_admin
+        header_color = theme_primary()
+        self.header.setStyleSheet(f"background-color: {header_color}; border: none;")
+        
+        primary_color = theme_primary()
+        hover_color = theme_hover()
+        applied_bg = theme_selection_bg()
+        applied_text = theme_primary()
+        applied_border = theme_border()
+        
+        self.btn_lamar.setStyleSheet(f"""
+            QPushButton {{ background-color: {primary_color}; color: white; border-radius: 10px; font-weight: bold; font-size: 14px; border: none; }}
+            QPushButton:hover {{ background-color: {hover_color}; }}
+            QPushButton:disabled {{ background-color: {applied_bg}; color: {applied_text}; border: 1px solid {applied_border}; }}
+        """)
+
 
 class SelectCVDialog(QDialog):
     def __init__(self, parent=None):
@@ -401,17 +420,44 @@ class SelectCVDialog(QDialog):
         self.setup_ui()
 
     def setup_ui(self):
+        parent = self.parent()
+        is_admin = parent.is_admin if parent and hasattr(parent, 'is_admin') else False
+        primary_color = theme_primary()
+        hover_color = theme_hover()
+        pressed_color = theme_pressed()
+        applied_bg = theme_selection_bg()
+        applied_text = theme_primary()
+
+        confirm_btn_style = f"""
+            QPushButton {{
+                background-color: {primary_color};
+                color: white;
+                border: none;
+                border-radius: 8px;
+                padding: 8px 18px;
+                font-weight: bold;
+                font-size: 14px;
+                min-height: 32px;
+            }}
+            QPushButton:hover {{
+                background-color: {hover_color};
+            }}
+            QPushButton:pressed {{
+                background-color: {pressed_color};
+            }}
+        """
+
         main_lay = QVBoxLayout(self)
         main_lay.setContentsMargins(10, 10, 10, 10)
 
         self.container = QFrame()
-        self.container.setStyleSheet("""
-            QFrame {
+        self.container.setStyleSheet(f"""
+            QFrame {{
                 background-color: white;
-                border: 2px solid #2C687B;
+                border: 2px solid {primary_color};
                 border-radius: 15px;
-            }
-            QLabel { border: none; background: transparent; }
+            }}
+            QLabel {{ border: none; background: transparent; }}
         """)
         main_lay.addWidget(self.container)
 
@@ -421,7 +467,7 @@ class SelectCVDialog(QDialog):
 
         title = QLabel("Pilih CV untuk Dikirim")
         title.setFont(QFont("Segoe UI", 16, QFont.Bold))
-        title.setStyleSheet("color: #2C687B;")
+        title.setStyleSheet(f"color: {primary_color};")
         inner_lay.addWidget(title)
 
         cvs = []
@@ -443,7 +489,7 @@ class SelectCVDialog(QDialog):
             btn_close = QPushButton("Tutup")
             btn_close.setCursor(Qt.PointingHandCursor)
             btn_close.setFixedHeight(38)
-            btn_close.setStyleSheet(MODERN_BUTTON_STYLE)
+            btn_close.setStyleSheet(confirm_btn_style)
             btn_close.clicked.connect(self.reject)
             inner_lay.addWidget(btn_close)
             return
@@ -458,12 +504,12 @@ class SelectCVDialog(QDialog):
         
         self.combo_cv.setItemDelegate(QStyledItemDelegate())
         self.combo_cv.setFixedHeight(40)
-        self.combo_cv.setStyleSheet("""
-            QComboBox { 
+        self.combo_cv.setStyleSheet(f"""
+            QComboBox {{ 
                 border: 1px solid #D1D5DB; border-radius: 8px; padding: 8px 12px; font-size: 14px; background: #F9FAFB; color: #1E3A4A;
-            }
-            QComboBox:focus { border: 2px solid #2C687B; }
-            QComboBox QAbstractItemView { background: white; border: 1px solid #D1D5DB; selection-background-color: #E2EFF1; selection-color: #2C687B; outline: none; }
+            }}
+            QComboBox:focus {{ border: 2px solid {primary_color}; }}
+            QComboBox QAbstractItemView {{ background: white; border: 1px solid #D1D5DB; selection-background-color: {applied_bg}; selection-color: {applied_text}; outline: none; }}
         """)
         inner_lay.addWidget(self.combo_cv)
 
@@ -486,7 +532,7 @@ class SelectCVDialog(QDialog):
         btn_confirm = QPushButton("Kirim CV Ini")
         btn_confirm.setCursor(Qt.PointingHandCursor)
         btn_confirm.setFixedHeight(38)
-        btn_confirm.setStyleSheet(MODERN_BUTTON_STYLE)
+        btn_confirm.setStyleSheet(confirm_btn_style)
         btn_confirm.clicked.connect(self.on_confirm)
 
         btn_layout.addWidget(btn_cancel)

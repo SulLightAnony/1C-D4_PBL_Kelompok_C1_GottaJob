@@ -20,7 +20,11 @@ for _p in [_pages_dir, _job_posting_dir, _modul_dir]:
         sys.path.insert(0, _p)
 
 from constants import down_icon_path
-from modul_antarmuka_pengguna import KeyboardScrollArea, buat_tombol_kembali
+from modul_antarmuka_pengguna import (
+    KeyboardScrollArea, buat_tombol_kembali,
+    theme_primary, theme_hover, theme_border, theme_selection_bg,
+    theme_field_bg
+)
 from skill_tag_input import SkillTagInput
 
 class JobFormPage(QWidget):
@@ -54,9 +58,9 @@ class JobFormPage(QWidget):
         layout.addLayout(header)
 
         # Card putih pembungkus form
-        card = QFrame()
-        card.setStyleSheet("QFrame { background-color: white; border-radius: 12px; border: 1px solid #e8e8e8; }")
-        card_layout = QVBoxLayout(card)
+        self.card = QFrame()
+        self.card.setStyleSheet("QFrame { background-color: white; border-radius: 12px; border: 1px solid #e8e8e8; }")
+        card_layout = QVBoxLayout(self.card)
         card_layout.setContentsMargins(30, 25, 30, 25)
         card_layout.setSpacing(18)
 
@@ -128,7 +132,7 @@ class JobFormPage(QWidget):
             QCalendarWidget QToolButton {{ color: #1E3A4A; background-color: transparent; border: none; font-weight: bold; }}
             QCalendarWidget QMenu {{ background-color: white; color: #333; border: 1px solid #B2D2D9; }}
         """
-        card.setStyleSheet(card.styleSheet() + field_style)
+        self.card.setStyleSheet(self.card.styleSheet() + field_style)
 
         grid = QGridLayout()
         grid.setSpacing(16)
@@ -249,16 +253,16 @@ class JobFormPage(QWidget):
 
         card_layout.addLayout(grid)
 
-        btn_save = QPushButton("Simpan Lowongan")
-        btn_save.setCursor(Qt.PointingHandCursor)
-        btn_save.setFixedHeight(44)
-        btn_save.setStyleSheet("""
+        self.btn_save = QPushButton("Simpan Lowongan")
+        self.btn_save.setCursor(Qt.PointingHandCursor)
+        self.btn_save.setFixedHeight(44)
+        self.btn_save.setStyleSheet("""
             QPushButton { background-color: #2C687B; border-radius: 8px; color: white;
                           font-size: 15px; font-weight: bold; border: none; }
             QPushButton:hover { background-color: #408699; }
         """)
-        btn_save.clicked.connect(self._on_save_clicked)
-        card_layout.addWidget(btn_save)
+        self.btn_save.clicked.connect(self._on_save_clicked)
+        card_layout.addWidget(self.btn_save)
 
         for field in [self.f_judul, self.f_perusahaan, self.f_lokasi, self.f_gaji_min, self.f_gaji_max, self.f_link]:
             field.returnPressed.connect(self._on_save_clicked)
@@ -267,7 +271,7 @@ class JobFormPage(QWidget):
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.NoFrame)
         scroll.setStyleSheet("background-color: transparent;")
-        scroll.setWidget(card)
+        scroll.setWidget(self.card)
         
         layout.addWidget(scroll)
 
@@ -387,6 +391,110 @@ class JobFormPage(QWidget):
             "date": self.f_date.date()
         }
         self.save_requested.emit(form_data, self.editing_job_id)
+
+    def get_field_style(self, is_admin):
+        primary_color = theme_primary()
+        border_color = theme_border()
+        selection_bg = theme_selection_bg()
+        selection_color = theme_primary()
+        bg_hover = theme_field_bg()
+        
+        return f"""
+            QLineEdit, QTextEdit, QSpinBox {{
+                border: 1px solid #dcdcdc; border-radius: 8px;
+                padding: 10px 14px; font-size: 14px;
+                background-color: white; color: #333;
+            }}
+            QLineEdit:focus, QTextEdit:focus, QSpinBox:focus {{
+                border: 1px solid {primary_color};
+            }}
+
+            QComboBox, QDateEdit {{
+                border: 2px solid {border_color};
+                border-radius: 8px;
+                padding: 8px 12px;
+                font-size: 14px;
+                color: #1E3A4A;
+                background-color: {bg_hover};
+            }}
+            QComboBox:hover, QDateEdit:hover {{
+                border: 2px solid {primary_color};
+            }}
+            QComboBox::drop-down, QDateEdit::drop-down {{
+                subcontrol-origin: padding;
+                subcontrol-position: top right;
+                width: 35px;
+                border: none;
+            }}
+            QComboBox::down-arrow, QDateEdit::down-arrow {{
+                image: url({down_icon_path});
+                width: 20px;
+                height: 20px;
+            }}
+            QComboBox QAbstractItemView, QListView {{
+                background-color: white;
+                background: white;
+                color: black;
+                selection-background-color: {selection_bg};
+                selection-color: {selection_color};
+                border: 1px solid {border_color};
+                outline: none;
+            }}
+            QComboBox QAbstractItemView::item, QListView::item {{
+                background-color: white;
+                color: black;
+                padding: 4px 8px;
+            }}
+            QComboBox QAbstractItemView::item:hover, QListView::item:hover {{
+                background-color: {selection_bg};
+                color: {selection_color};
+            }}
+            QCalendarWidget QWidget {{ background-color: white; color: #333; }}
+            QCalendarWidget QAbstractItemView:enabled {{ color: #333; selection-background-color: {selection_bg}; selection-color: {selection_color}; }}
+            QCalendarWidget QToolButton {{ color: #1E3A4A; background-color: transparent; border: none; font-weight: bold; }}
+            QCalendarWidget QMenu {{ background-color: white; color: #333; border: 1px solid {border_color}; }}
+        """
+
+    def update_theme_mode(self, is_admin):
+        self.is_admin = is_admin
+        self.card.setStyleSheet("QFrame { background-color: white; border-radius: 12px; border: 1px solid #e8e8e8; }" + self.get_field_style(is_admin))
+        
+        # update btn_save
+        primary_color = theme_primary()
+        hover_color = theme_hover()
+        self.btn_save.setStyleSheet(f"""
+            QPushButton {{ background-color: {primary_color}; border-radius: 8px; color: white;
+                          font-size: 15px; font-weight: bold; border: none; }}
+            QPushButton:hover {{ background-color: {hover_color}; }}
+        """)
+
+        # update semua SkillTagInput widget
+        for skill_widget in [self.f_hard_skills, self.f_soft_skills, self.f_benefit, self.f_kualifikasi]:
+            skill_widget.update_theme_mode(is_admin)
+
+        # update calendar widget
+        cal = self.f_date.calendarWidget()
+        header_color = theme_primary()
+        hover_bg = "rgba(255,255,255,0.15)"
+        border_color = theme_border()
+        selection_bg = theme_selection_bg()
+        selection_color = theme_primary()
+        text_color = theme_primary()
+        
+        cal.setStyleSheet(f"""
+            QCalendarWidget {{ background-color: white; border: 1px solid {border_color}; border-radius: 8px; }}
+            QCalendarWidget QAbstractItemView {{ background-color: white; color: #1E3A4A; selection-background-color: {header_color}; selection-color: white; outline: none; font-size: 13px; }}
+            QCalendarWidget QAbstractItemView:disabled {{ color: {border_color}; }}
+            QCalendarWidget QWidget#qt_calendar_navigationbar {{ background-color: {header_color}; border-top-left-radius: 8px; border-top-right-radius: 8px; padding: 4px; }}
+            QCalendarWidget QToolButton {{ color: white; background-color: transparent; border: none; font-weight: bold; font-size: 14px; padding: 4px 8px; }}
+            QCalendarWidget QToolButton:hover {{ background-color: {hover_bg}; border-radius: 4px; }}
+            QCalendarWidget QToolButton::menu-indicator {{ image: none; }}
+            QCalendarWidget QSpinBox {{ color: white; background-color: transparent; border: none; font-weight: bold; font-size: 14px; }}
+            QCalendarWidget QMenu {{ background-color: white; color: #1E3A4A; border: 1px solid {border_color}; font-size: 13px; }}
+            QCalendarWidget QMenu::item:selected {{ background-color: {selection_bg}; color: {header_color}; }}
+            QCalendarWidget QHeaderView::section {{ background-color: #F0F7F9; color: {text_color}; font-weight: bold; font-size: 12px; border: none; padding: 4px; }}
+        """)
+
 
 
 def proses_create_job(form_data, current_data):

@@ -133,7 +133,7 @@ class LoginPage(QWidget):
 
         current_dir = os.path.dirname(os.path.abspath(__file__))
         base_path = os.path.dirname(current_dir) if os.path.basename(current_dir).lower() == 'login' else current_dir
-        json_path = os.path.normpath(os.path.join(base_path, 'database', 'user.json'))
+        json_path = os.path.normpath(os.path.join(base_path, 'database', 'Database Permanen', 'Account Manager', 'user.json'))
 
         user_find = False
         user_role = ""
