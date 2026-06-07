@@ -629,8 +629,8 @@ class AppRouter(QMainWindow):
                         self.halaman_archive.match_results.table.setFocus()
                         QApplication.sendEvent(self.halaman_archive.match_results.table, event)
                     else:
-                        self.halaman_archive.detail_view.scroll.setFocus()
-                        QApplication.sendEvent(self.halaman_archive.detail_view.scroll, event)
+                        self.halaman_archive.detail_view.scroll_area.setFocus()
+                        QApplication.sendEvent(self.halaman_archive.detail_view.scroll_area, event)
                     event.accept()
                     return
 
