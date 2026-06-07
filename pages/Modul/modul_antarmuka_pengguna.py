@@ -9,6 +9,47 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from PyQt5.QtGui import QColor, QPixmap, QIcon, QFont
 
+# ═══════════════════════════════════════════════════════════════════════════
+# STATE TEMA GLOBAL — Satu-satunya tempat warna tema didefinisikan.
+# Semua file lain import getter di bawah ini, TIDAK hardcode warna sendiri.
+# ═══════════════════════════════════════════════════════════════════════════
+_IS_ADMIN = False
+
+def set_app_theme(is_admin: bool):
+    """Dipanggil SEKALI oleh app_router saat login. Menyimpan state tema global."""
+    global _IS_ADMIN
+    _IS_ADMIN = is_admin
+
+def theme_primary() -> str:
+    """Warna utama: #1E3A5F (admin) atau #2C687B (user)."""
+    return "#1E3A5F" if _IS_ADMIN else "#2C687B"
+
+def theme_hover() -> str:
+    """Warna hover tombol."""
+    return "#295180" if _IS_ADMIN else "#408699"
+
+def theme_pressed() -> str:
+    """Warna saat tombol ditekan."""
+    return "#152842" if _IS_ADMIN else "#1E3A4A"
+
+def theme_border() -> str:
+    """Warna border elemen form."""
+    return "#B9CADF" if _IS_ADMIN else "#B2D2D9"
+
+def theme_selection_bg() -> str:
+    """Warna background item terpilih di dropdown/list."""
+    return "#E8EEF5" if _IS_ADMIN else "#E2EFF1"
+
+def theme_header_bg() -> str:
+    """Warna background header/navigasi."""
+    return "#1E3A5F" if _IS_ADMIN else "#1D4E5F"
+
+def theme_field_bg() -> str:
+    """Warna background field form."""
+    return "#F3F7FA" if _IS_ADMIN else "#F7FBFC"
+# ═══════════════════════════════════════════════════════════════════════════
+
+
 def terapkan_soft_shadow(widget, blur_radius=24, offset_x=0, offset_y=6, alpha=15):
     """
     Memberikan efek soft drop shadow premium pada sebuah widget PyQt5 secara dinamis.

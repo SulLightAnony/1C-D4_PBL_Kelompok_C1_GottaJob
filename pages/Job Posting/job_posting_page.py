@@ -16,7 +16,7 @@ if _pages_dir not in sys.path:
     sys.path.insert(0, _pages_dir)
 
 from CRUD.Shared import muat_data, simpan_data
-from modul_antarmuka_pengguna import KeyboardScrollArea, show_message, show_question, ActionButton
+from modul_antarmuka_pengguna import KeyboardScrollArea, show_message, show_question, ActionButton, theme_primary
 from Modul.modul_database import catat_aktivitas
 from constants import (
     refresh_icon_path, plus_icon_path, trash_icon_path, 
@@ -33,16 +33,69 @@ class JobPostingPage(QWidget):
         super().__init__()
         self.selected_ids = set()
         self.data = []
+        self.is_admin = False
         self._init_stack()
         self.load_data()
 
+    def _build_combo_style(self, primary_color):
+        """Bangun stylesheet untuk combo_filter berdasarkan warna tema."""
+        return f"""
+            QComboBox {{
+                border: 1px solid #ddd;
+                border-radius: 18px;
+                padding: 0 15px;
+                font-size: 13px;
+                background-color: white;
+                color: black;
+            }}
+            QComboBox::drop-down {{
+                subcontrol-origin: padding;
+                subcontrol-position: top right;
+                width: 30px;
+                border: none;
+            }}
+            QComboBox::down-arrow {{
+                image: url({down_icon_path});
+                width: 16px;
+                height: 16px;
+            }}
+            QComboBox QAbstractItemView, QListView {{
+                background-color: white;
+                background: white;
+                color: black;
+                selection-background-color: {primary_color};
+                selection-color: white;
+                border: 1px solid #ddd;
+                outline: none;
+            }}
+            QComboBox QAbstractItemView::item, QListView::item {{
+                background-color: white;
+                color: black;
+                padding: 4px 8px;
+            }}
+        """
+
     def update_theme_mode(self, is_admin):
         """Memperbarui gaya tombol mengikuti peran user yang sedang login."""
+        self.is_admin = is_admin
         theme = "admin" if is_admin else "user"
         if hasattr(self, 'btn_refresh'):
             self.btn_refresh.set_theme(theme)
         if hasattr(self, 'btn_add'):
             self.btn_add.set_theme(theme)
+        
+        # Update combo filter style
+        primary_color = theme_primary()
+        if hasattr(self, 'combo_filter'):
+            self.combo_filter.setStyleSheet(self._build_combo_style(primary_color))
+
+        # Propagate to sub-pages
+        if hasattr(self, 'form_page') and hasattr(self.form_page, 'update_theme_mode'):
+            self.form_page.update_theme_mode(is_admin)
+        if hasattr(self, 'detail_page') and hasattr(self.detail_page, 'update_theme_mode'):
+            self.detail_page.update_theme_mode(is_admin)
+
+        self.refresh_ui_only()
 
     def showEvent(self, event):
         if hasattr(self, 'page_stack'):
@@ -189,42 +242,7 @@ class JobPostingPage(QWidget):
         self.combo_filter.addItems(["Semua Jenis", "Penuh Waktu", "Paruh Waktu", "Freelance", "Magang", "Kontrak"])
         self.combo_filter.setFixedSize(150, 36)
         
-        combo_style = f"""
-            QComboBox {{
-                border: 1px solid #ddd;
-                border-radius: 18px;
-                padding: 0 15px;
-                font-size: 13px;
-                background-color: white;
-                color: black;
-            }}
-            QComboBox::drop-down {{
-                subcontrol-origin: padding;
-                subcontrol-position: top right;
-                width: 30px;
-                border: none;
-            }}
-            QComboBox::down-arrow {{
-                image: url({down_icon_path});
-                width: 16px;
-                height: 16px;
-            }}
-            QComboBox QAbstractItemView, QListView {{
-                background-color: white;
-                background: white;
-                color: black;
-                selection-background-color: #2C687B;
-                selection-color: white;
-                border: 1px solid #ddd;
-                outline: none;
-            }}
-            QComboBox QAbstractItemView::item, QListView::item {{
-                background-color: white;
-                color: black;
-                padding: 4px 8px;
-            }}
-        """
-        self.combo_filter.setStyleSheet(combo_style)
+        self.combo_filter.setStyleSheet(self._build_combo_style("#2C687B"))
         self.combo_filter.currentTextChanged.connect(self.filter_cards)
         
         filter_layout.addWidget(self.search_bar)
