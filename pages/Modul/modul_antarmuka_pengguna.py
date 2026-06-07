@@ -1266,9 +1266,9 @@ class JobDetailPanel(QFrame):
         layout.addSpacing(15)
 
         # Scroll Area (mendukung navigasi keyboard)
-        scroll = KeyboardScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setStyleSheet("""
+        self.scroll_area = KeyboardScrollArea()
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setStyleSheet("""
             QScrollArea { border: none; background-color: transparent; }
             QScrollBar:vertical {
                 border: none; background: #F3F4F6; width: 8px; border-radius: 4px;
@@ -1329,8 +1329,8 @@ class JobDetailPanel(QFrame):
         self.det_link = self._create_section("🔗 Link Lowongan")
         self.det_link.setOpenExternalLinks(True)
 
-        scroll.setWidget(scroll_content)
-        layout.addWidget(scroll)
+        self.scroll_area.setWidget(scroll_content)
+        layout.addWidget(self.scroll_area)
 
     def _create_back_button(self):
         return buat_tombol_kembali("← Kembali")

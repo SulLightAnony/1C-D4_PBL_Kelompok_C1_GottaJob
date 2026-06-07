@@ -606,7 +606,7 @@ class JobArchivePage(QWidget):
         self.detail_view.update_data(data, self.user_skills)
         self.main_stack.setCurrentWidget(self.detail_view)
         from PyQt5.QtCore import QTimer
-        QTimer.singleShot(50, lambda: self.detail_view.scroll.setFocus())
+        QTimer.singleShot(50, lambda: self.detail_view.scroll_area.setFocus())
 
     def _go_back_to_table(self):
         self.main_stack.setCurrentWidget(self.table_view)
