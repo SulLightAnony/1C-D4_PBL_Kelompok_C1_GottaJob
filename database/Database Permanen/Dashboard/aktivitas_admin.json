@@ -1,11 +1,11 @@
 [
     {
-        "pesan": "<b>Lowongan Diperbarui</b><br>awd",
+        "pesan": "<b>Lowongan Diperbarui</b><br>Data Scientist",
         "waktu": "",
         "role": "admin"
     },
     {
-        "pesan": "<b>User Diperbarui</b><br>admin (admin)",
+        "pesan": "<b>Lowongan Dihapus</b><br>awd",
         "waktu": "",
         "role": "admin"
     },
@@ -40,12 +40,12 @@
         "role": "admin"
     },
     {
-        "pesan": "<b>Kamus Skill Diperbarui</b><br>2 perubahan disimpan",
+        "pesan": "<b>Lowongan Diperbarui</b><br>Senior Data Scientist",
         "waktu": "",
         "role": "admin"
     },
     {
-        "pesan": "<b>Lowongan Diperbarui</b><br>awd",
+        "pesan": "<b>Lowongan Ditambah</b><br>Senior Data Scientist",
         "waktu": "",
         "role": "admin"
     },
