@@ -47,7 +47,7 @@ from toolkit_main import CareerToolkitPage
 # Modul
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pages", "Modul"))
 from modul_database import bersihkan_database_sementara, sinkronisasi_folder_kategori
-from modul_antarmuka_pengguna import set_app_theme
+from modul_antarmuka_pengguna import set_app_theme, show_question
 
 # Job Posting
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pages", "Job Posting"))
@@ -300,12 +300,10 @@ class AppRouter(QMainWindow):
 
     def proses_logout(self):
         """Kembali ke halaman login dan sembunyikan sidebar."""
-        confirm = QMessageBox.question(
+        confirm = show_question(
             self,
             "Konfirmasi Logout",
-            "Apakah anda yakin ingin keluar?",
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No
+            "Apakah anda yakin ingin keluar?"
         )
 
         if confirm == QMessageBox.Yes:

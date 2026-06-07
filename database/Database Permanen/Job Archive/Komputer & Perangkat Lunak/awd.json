@@ -6,9 +6,9 @@
         "Jenis_Pekerjaan": "Penuh Waktu",
         "Lokasi": "fhtnfgnf",
         "Rentang_Gaji": "-",
-        "Hard_Skills": "JavaScript, JS",
+        "Hard_Skills": "JavaScript, JS, Python, Py",
         "Soft_Skills": "",
-        "Skills": "Javascript",
+        "Skills": "JavaScript, JS, Python, Py||",
         "Link_Lowongan": "",
         "Deskripsi_Pekerjaan": "",
         "Benefit_Pekerjaan": "",
@@ -16,13 +16,6 @@
         "Kategori": "Komputer & Perangkat Lunak",
         "Tanggal_Kadaluarsa": "24/06/2026",
         "Is_lamar": false,
-        "source": "job_posting",
-        "all_categorized": {
-            "hard_skills": [
-                "Javascript"
-            ],
-            "soft_skills": [],
-            "positions": []
-        }
+        "source": "job_posting"
     }
 ]

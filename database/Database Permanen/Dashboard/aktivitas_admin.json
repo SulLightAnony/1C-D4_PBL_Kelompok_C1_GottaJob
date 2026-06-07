@@ -1,5 +1,10 @@
 [
     {
+        "pesan": "<b>Lowongan Diperbarui</b><br>awd",
+        "waktu": "",
+        "role": "admin"
+    },
+    {
         "pesan": "<b>User Diperbarui</b><br>admin (admin)",
         "waktu": "",
         "role": "admin"
@@ -91,11 +96,6 @@
     },
     {
         "pesan": "<b>Lowongan Ditambah</b><br>awd",
-        "waktu": "",
-        "role": "admin"
-    },
-    {
-        "pesan": "<b>Lowongan Dihapus</b><br>front end developer",
         "waktu": "",
         "role": "admin"
     }
