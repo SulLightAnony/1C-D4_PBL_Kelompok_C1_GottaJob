@@ -17,10 +17,10 @@ def proses_update_job(job_id, form_data, current_data):
 
     h_raw = form_data.get('hard_skills', '')
     s_raw = form_data.get('soft_skills', '')
-    if isinstance(h_raw, list): h_raw = ", ".join(h_raw)
-    if isinstance(s_raw, list): s_raw = ", ".join(s_raw)
+    if isinstance(h_raw, list): h_raw = "|".join(h_raw)
+    if isinstance(s_raw, list): s_raw = "|".join(s_raw)
     
-    skills_str = f"{h_raw}||{s_raw}"
+    skills_str = "|".join(s for s in [h_raw, s_raw] if s)
 
     # Cari data lama untuk mempertahankan field non-form (seperti Is_lamar)
     old_job = next((j for j in current_data if j.get("id") == job_id), {})
