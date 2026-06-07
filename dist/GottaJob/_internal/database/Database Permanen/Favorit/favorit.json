@@ -1,0 +1,44 @@
+{
+    "Judul_Pekerjaan": "General Hotel Manager",
+    "Jenis_Pekerjaan": "Penuh Waktu",
+    "Nama_Perusahaan": "Muncul Group",
+    "Lokasi": "-",
+    "Rentang_Gaji": "Rp10.000.000/Bulan",
+    "Bonus": "Rp0 - 5.000.000/Bulan",
+    "Kategori_Utama": "Hotel & Travel",
+    "Sub_Kategori": "Manager Hotel",
+    "Skills": "Hotel Management | Hotel Security | Leadership | Hotel Cleaning | Customer Service",
+    "Benefit_Pekerjaan": "Work Insurance | THR",
+    "Kualifikasi_Persyaratan": "Kerja di lokasi | 3 - 5 tahun pengalaman | Minimal Diploma (D1 - D4)",
+    "Deskripsi_Pekerjaan": "oversees all aspects of property operations—including front desk, housekeeping, F&B, and maintenance—to maximize revenue, control costs, and ensure high guest satisfaction.",
+    "Link_Lowongan": "https://glints.com/id/opportunities/jobs/general-hotel-manager/5023fce5-53b5-4bf6-9576-a70023b7e5f2",
+    "match_percentage": 60.0,
+    "matched_categorized": {
+        "hard_skills": [
+            "hotel management",
+            "hotel security",
+            "hotel cleaning"
+        ],
+        "soft_skills": [],
+        "positions": []
+    },
+    "all_categorized": {
+        "hard_skills": [
+            "Hotel Management",
+            "Hotel Security",
+            "Hotel Cleaning"
+        ],
+        "soft_skills": [
+            "Leadership",
+            "Customer Service"
+        ],
+        "positions": []
+    },
+    "matched_skills": [
+        "hotel management",
+        "hotel security",
+        "hotel cleaning"
+    ],
+    "is_type_match": true,
+    "source_file": "C:\\Users\\farre\\OneDrive\\Dokumen\\GitHub\\1C-D4_PBL_Kelompok_C1_GottaJob\\database\\Database Permanen\\Job Archive\\Hotel & Travel\\hotel_manager.json"
+}

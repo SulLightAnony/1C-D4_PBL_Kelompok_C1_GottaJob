@@ -1,0 +1,99 @@
+[
+    {
+        "Judul_Pekerjaan": "Python Developer",
+        "Jenis_Pekerjaan": "Penuh Waktu",
+        "Nama_Perusahaan": "Delta HQ",
+        "Lokasi": "Unit 2607 Level 26 VieLoft SOHO a Ciputra World Surabaya, Jalan Mayjen Sungkono No. 89, Surabaya, Jawa Timur, Indonesia 60224",
+        "Rentang_Gaji": "-",
+        "Bonus": "-",
+        "Kategori_Utama": "Komputer & Perangkat Lunak",
+        "Sub_Kategori": "Backend Developer",
+        "Skills": "Python | Data Analytics | Django",
+        "Benefit_Pekerjaan": "Team-building events | Wellness Facilities | Free Meals | Career Path | Employee Award",
+        "Kualifikasi_Persyaratan": "Willing to work onsite in Surabaya | Good in English (both speaking and writing) | Expertise in Back-End Web Development using Python and relevant frameworks such as Django and Flask | Proven experience in Software Development and utilizing Software Development Lifecycle methodologies | Strong Object-Oriented Programming (OOP) principles and hands-on experience in programming with Python | Excellent analytical and problem-solving skills with the ability to work independently and as part of a team | Strong communication skills and the ability to engage in cross-functional collaborations",
+        "Deskripsi_Pekerjaan": "We are PropTech company based in Singapore, and also provide a system development outsourcing service dedicated to innovation and quality, providing cutting-edge technology solutions for businesses in Japan. Our mission is to elevate our clients' businesses to the next level by staying at the forefront of technological trends and delivering efficient and effective software development services.\nDevelop, maintain, and optimize backend services using Python\nDesign and build scalable APIs and microservices\nWork with databases (SQL/NoSQL) to manage and process property data\nImplement data processing and automation workflows\nEnsure application performance, security, and scalability\nTroubleshoot, debug, and improve existing systems\nContribute to technical documentation and best practices",
+        "Link_Lowongan": "https://glints.com/id/opportunities/jobs/python-developer/a4966bab-a7ef-4735-bece-9539659ab6d9",
+        "match_percentage": 100.0,
+        "matched_categorized": {
+            "hard_skills": [
+                "python",
+                "data analytics",
+                "django"
+            ],
+            "soft_skills": [],
+            "positions": []
+        },
+        "all_categorized": {
+            "hard_skills": [
+                "Python",
+                "Data Analytics",
+                "Django"
+            ],
+            "soft_skills": [],
+            "positions": []
+        },
+        "matched_skills": [
+            "python",
+            "data analytics",
+            "django"
+        ],
+        "is_type_match": false
+    },
+    {
+        "id": "2026-06-07 13:12:23",
+        "Judul_Pekerjaan": "Python developer",
+        "Nama_Perusahaan": "PT indonesia maju",
+        "Jenis_Pekerjaan": "Penuh Waktu",
+        "Lokasi": "Jakarta",
+        "Rentang_Gaji": "50.000.000-100.000.000",
+        "Hard_Skills": "Python|MangoDB|Sql|ML",
+        "Soft_Skills": "Yapping|Public Speaking",
+        "Skills": "Python|MangoDB|Sql|ML|Yapping|Public Speaking",
+        "Link_Lowongan": "https://google.com",
+        "Deskripsi_Pekerjaan": "butuh orang yang bisa kerja",
+        "Benefit_Pekerjaan": "BPJS|MBG",
+        "Kualifikasi_Persyaratan": "S1 Teknik Informatika",
+        "Kategori": "Komputer & Perangkat Lunak",
+        "Tanggal_Kadaluarsa": "07/07/2026",
+        "Is_lamar": false,
+        "source": "job_posting"
+    },
+    {
+        "id": "2026-06-07 13:20:27",
+        "Judul_Pekerjaan": "web developer",
+        "Nama_Perusahaan": "PT Indonesia Merdeka",
+        "Jenis_Pekerjaan": "Penuh Waktu",
+        "Lokasi": "Jakarta",
+        "Rentang_Gaji": "5.000.000 - 67.000.000",
+        "Hard_Skills": "HTML|CSS|Javascript",
+        "Soft_Skills": "Yapping|Public Speaking",
+        "Skills": "HTML|CSS|Javascript||Yapping|Public Speaking",
+        "Link_Lowongan": "https://google.com",
+        "Deskripsi_Pekerjaan": "butuh orang yang bisa kerja dibawah tekanan",
+        "Benefit_Pekerjaan": "BPJS|MBG",
+        "Kualifikasi_Persyaratan": "D4 teknik informatika",
+        "Kategori": "Komputer & Perangkat Lunak",
+        "Tanggal_Kadaluarsa": "07/07/2026",
+        "Is_lamar": false,
+        "source": "job_posting"
+    },
+    {
+        "id": "2026-06-07 13:21:45",
+        "Judul_Pekerjaan": "Mobile developer",
+        "Nama_Perusahaan": "PT Makan Bergizi Gratis",
+        "Jenis_Pekerjaan": "Penuh Waktu",
+        "Lokasi": "Jakarta",
+        "Rentang_Gaji": "5.000.000 - 8.000.000",
+        "Hard_Skills": "Flutter",
+        "Soft_Skills": "Yapping",
+        "Skills": "Flutter||Yapping",
+        "Link_Lowongan": "https://google.com",
+        "Deskripsi_Pekerjaan": "",
+        "Benefit_Pekerjaan": "",
+        "Kualifikasi_Persyaratan": "",
+        "Kategori": "Komputer & Perangkat Lunak",
+        "Tanggal_Kadaluarsa": "07/07/2026",
+        "Is_lamar": false,
+        "source": "job_posting"
+    }
+]
