@@ -461,7 +461,11 @@ class JobFormPage(QWidget):
 
     def update_theme_mode(self, is_admin):
         self.is_admin = is_admin
-        self.card.setStyleSheet("QFrame { background-color: white; border-radius: 12px; border: 1px solid #e8e8e8; }" + self.get_field_style(is_admin))
+        style = self.get_field_style(is_admin)
+        self.card.setStyleSheet("QFrame { background-color: white; border-radius: 12px; border: 1px solid #e8e8e8; }" + style)
+        self.f_jenis.setStyleSheet(style)
+        self.f_kategori.setStyleSheet(style)
+        self.f_date.setStyleSheet(style)
         
         # update btn_save
         primary_color = theme_primary()

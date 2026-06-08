@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import glob
 import threading
@@ -34,9 +35,23 @@ KATEGORI_GLINTS = [
 ]
 
 def get_root_dir():
-    """Mendapatkan path root proyek."""
-    # Karena file ini ada di /pages/Modul/modul_database.py
+    """
+    Mendapatkan path root proyek secara benar baik dalam mode development
+    maupun setelah di-freeze oleh PyInstaller.
+    - Frozen (dist/GottaJob/GottaJob.exe) -> dist/GottaJob/
+    - Development (pages/Modul/modul_database.py) -> project root
+    """
+    if getattr(sys, 'frozen', False):
+        # Dalam mode frozen, gunakan direktori tempat GottaJob.exe berada
+        return os.path.dirname(sys.executable)
+    # Naik 3 level: modul_database.py -> Modul -> pages -> root
     return os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+def get_assets_dir():
+    """Mendapatkan path folder assets secara benar (frozen-aware menggunakan sys._MEIPASS jika ada)."""
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, "assets")
+    return os.path.join(get_root_dir(), "assets")
 
 def get_database_permanen_dir():
     """Mendapatkan path folder database permanen/Job Archive."""

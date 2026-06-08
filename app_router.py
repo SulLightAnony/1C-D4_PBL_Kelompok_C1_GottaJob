@@ -76,7 +76,12 @@ class AppRouter(QMainWindow):
         self.setStyleSheet("QMainWindow { background-color: #F3F4F6; }") # Background dasar QMainWindow
 
         # Set window icon
-        logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "logo.png")
+        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+            self.assets_dir = os.path.join(sys._MEIPASS, "assets")
+        else:
+            self.assets_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets")
+            
+        logo_path = os.path.join(self.assets_dir, "logo.png")
         if os.path.exists(logo_path):
             self.setWindowIcon(QIcon(logo_path))
 
@@ -310,14 +315,15 @@ class AppRouter(QMainWindow):
             self.sidebar.hide()
             self.halaman_login.input_user.clear()
             self.halaman_login.input_pass.clear()
-            self.update_theme(is_admin=False) # Reset background to clean gray (#F3F4F6)
+            self.halaman_discovery.reset_state()
+            self.halaman_archive.reset_state()
+            self.update_theme(is_admin=False)
             self.content_stack.setCurrentWidget(self.halaman_login)
         else:
-            pass    
+            pass
 
     def update_theme(self, is_admin):
         """Mengatur tema umum aplikasi (background window, sidebar, dan halaman) tergantung sisi user/admin."""
-        # 1. Tentukan warna background dasar aplikasi
         bg_app = "#F0FFFF" if is_admin else "#F3F4F6"
         
         # Terapkan background ke QMainWindow, main_widget, dan content_stack
@@ -406,10 +412,7 @@ class AppRouter(QMainWindow):
         # =========================
         self.label_img = QLabel()
         self.label_img.setStyleSheet("background: transparent; border: none;")
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        # Pastikan path ke assets selalu dihitung dari root proyek (naik satu tingkat)
-        base_path = os.path.dirname(current_dir)
-        logo_path = os.path.join(base_path, 'assets', 'logo.png')
+        logo_path = os.path.join(self.assets_dir, 'logo.png')
         pix = QPixmap(logo_path)
 
         if not pix.isNull():
@@ -457,7 +460,7 @@ class AppRouter(QMainWindow):
         self.btn_toggle.setFixedSize(55, 55)
         self.btn_toggle.setCursor(Qt.PointingHandCursor)
 
-        icon_path = os.path.join(base_path, 'assets', 'burger-bar.png')
+        icon_path = os.path.join(self.assets_dir, 'burger-bar.png')
 
         if os.path.exists(icon_path):
             icon = QIcon(icon_path)
@@ -565,8 +568,7 @@ class AppRouter(QMainWindow):
         btn = QPushButton(text)
         btn.setFont(QFont("Segoe UI", 18))
         if icon_name:
-            base_path = os.path.dirname(os.path.abspath(__file__))
-            icon_path = os.path.join(base_path, 'assets', folder_name, icon_name)
+            icon_path = os.path.join(self.assets_dir, folder_name, icon_name)
             icon = QIcon(icon_path)
             if not icon.isNull():
                 btn.setIcon(icon)

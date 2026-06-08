@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
                              QLineEdit, QComboBox, QPushButton, QTableWidget, 
@@ -7,6 +8,36 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QColor, QIcon
 from Modul.modul_antarmuka_pengguna import show_message, show_question
 from Modul.modul_database import catat_aktivitas
+
+
+def _get_base_path():
+    """
+    Mengembalikan path root proyek secara benar baik dalam
+    mode development maupun setelah di-freeze oleh PyInstaller.
+    - Frozen (dist/GottaJob/GottaJob.exe) -> dist/GottaJob/
+    - Development (pages/Account Manager/create_user.py) -> project root
+    """
+    if getattr(sys, 'frozen', False):
+        # Gunakan direktori tempat GottaJob.exe berada
+        return os.path.dirname(sys.executable)
+    # Naik 3 level: create_user.py -> Account Manager -> pages -> root
+    return os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+
+def _get_asset_path(*parts):
+    """Mengembalikan path absolut ke file di dalam folder assets/."""
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        base = sys._MEIPASS
+    else:
+        base = _get_base_path()
+    return os.path.normpath(os.path.join(base, 'assets', *parts))
+
+
+def _get_user_json_path():
+    """Mengembalikan path absolut ke user.json di database."""
+    return os.path.normpath(os.path.join(
+        _get_base_path(), 'database', 'Database Permanen', 'Account Manager', 'user.json'
+    ))
 
 def create_account_manager_page(router_self):
     page = QWidget()
@@ -136,8 +167,8 @@ def create_account_manager_page(router_self):
     router_self.txt_password.setPlaceholderText("Masukkan password...")
     router_self.txt_password.setStyleSheet(input_style)
     router_self.password_visible = False
-    router_self.icon_hidden = QIcon('assets/hidden.png')
-    router_self.icon_shown = QIcon('assets/eye.png')
+    router_self.icon_hidden = QIcon(_get_asset_path('hidden.png'))
+    router_self.icon_shown = QIcon(_get_asset_path('eye.png'))
     router_self.toggle_password_action = router_self.txt_password.addAction(
         router_self.icon_hidden, 
         QLineEdit.TrailingPosition
@@ -267,14 +298,17 @@ def create_account_manager_page(router_self):
 
 
 def load_data_user_ke_tabel(router_self):
-    base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    json_path = os.path.normpath(os.path.join(base_path, 'database', 'Database Permanen', 'Account Manager', 'user.json'))
+    json_path = _get_user_json_path()
     
     if not os.path.exists(json_path):
         return
 
-    with open(json_path, 'r') as file:
-        users = json.load(file)
+    try:
+        with open(json_path, 'r', encoding='utf-8') as file:
+            users = json.load(file)
+    except (json.JSONDecodeError, OSError) as e:
+        show_message(router_self, "Error", f"Gagal membaca data pengguna:\n{e}")
+        return
 
     router_self.table_user.setRowCount(0)
     for row_idx, user_data in enumerate(users):
@@ -408,45 +442,66 @@ def simpan_user_baru(router_self):
         show_message(router_self, "Peringatan", "Username dan Password tidak boleh kosong!")
         return
 
-    base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    json_path = os.path.normpath(os.path.join(base_path, 'database', 'Database Permanen', 'Account Manager', 'user.json'))
+    json_path = _get_user_json_path()
 
-    with open(json_path, 'r+') as file:
-        users = json.load(file)
-        
+    if not os.path.exists(json_path):
         if router_self.editing_username_target is not None:
-            if username.lower() != router_self.editing_username_target.lower():
-                if any(u['username'].lower() == username.lower() for u in users):
-                    show_message(router_self, "Gagal", f"Username '{username}' sudah dipakai user lain!")
-                    return
-            
-            for u in users:
-                if u['username'].lower() == router_self.editing_username_target.lower():
-                    u['username'] = username
-                    u['password'] = password
-                    u['role'] = role
-                    break
-                    
-            if hasattr(router_self, 'current_logged_in_user') and router_self.current_logged_in_user == router_self.editing_username_target:
-                router_self.current_logged_in_user = username
-            show_message(router_self, "Sukses", "Data pengguna berhasil diperbarui!")
-
+            # Saat mode edit, file harus sudah ada — ini error sesungguhnya
+            show_message(router_self, "Error", f"File database pengguna tidak ditemukan:\n{json_path}")
+            return
         else:
-            if any(u['username'].lower() == username.lower() for u in users):
-                show_message(router_self, "Gagal", f"Username '{username}' sudah terdaftar!")
+            # Saat tambah user baru, buat file dan foldernya otomatis
+            try:
+                os.makedirs(os.path.dirname(json_path), exist_ok=True)
+                with open(json_path, 'w', encoding='utf-8') as f:
+                    json.dump([], f, indent=4)
+            except OSError as e:
+                show_message(router_self, "Error", f"Gagal membuat file database pengguna:\n{e}")
                 return
 
-            users.append({"username": username, "password": password, "role": role})
-            show_message(router_self, "Sukses", f"User '{username}' berhasil ditambahkan!")
+    try:
+        with open(json_path, 'r', encoding='utf-8') as file:
+            users = json.load(file)
+    except (json.JSONDecodeError, OSError) as e:
+        show_message(router_self, "Error", f"Gagal membaca data pengguna:\n{e}")
+        return
 
-        file.seek(0)
-        json.dump(users, file, indent=4)
-        file.truncate()
+    if router_self.editing_username_target is not None:
+        if username.lower() != router_self.editing_username_target.lower():
+            if any(u['username'].lower() == username.lower() for u in users):
+                show_message(router_self, "Gagal", f"Username '{username}' sudah dipakai user lain!")
+                return
+        
+        for u in users:
+            if u['username'].lower() == router_self.editing_username_target.lower():
+                u['username'] = username
+                u['password'] = password
+                u['role'] = role
+                break
+                
+        if hasattr(router_self, 'current_logged_in_user') and router_self.current_logged_in_user == router_self.editing_username_target:
+            router_self.current_logged_in_user = username
+        pesan_sukses = "Data pengguna berhasil diperbarui!"
+        aksi_log = f"<b>User Diperbarui</b><br>{username} ({role})"
 
-        if router_self.editing_username_target is not None:
-            catat_aktivitas(f"<b>User Diperbarui</b><br>{username} ({role})", role="admin")
-        else:
-            catat_aktivitas(f"<b>User Ditambahkan</b><br>{username} ({role})", role="admin")
+    else:
+        if any(u['username'].lower() == username.lower() for u in users):
+            show_message(router_self, "Gagal", f"Username '{username}' sudah terdaftar!")
+            return
+
+        users.append({"username": username, "password": password, "role": role})
+        pesan_sukses = f"User '{username}' berhasil ditambahkan!"
+        aksi_log = f"<b>User Ditambahkan</b><br>{username} ({role})"
+
+    try:
+        with open(json_path, 'w', encoding='utf-8') as file:
+            json.dump(users, file, indent=4)
+    except OSError as e:
+        show_message(router_self, "Error", f"Gagal menyimpan data pengguna:\n{e}")
+        return
+
+    catat_aktivitas(aksi_log, role="admin")
+    show_message(router_self, "Sukses", pesan_sukses)
 
     reset_form_state(router_self)
     load_data_user_ke_tabel(router_self)
@@ -460,16 +515,23 @@ def hapus_user(router_self, username):
     reply = show_question(router_self, "Konfirmasi", f"Apakah Anda yakin ingin menghapus user '{username}'?")
     
     if reply == QMessageBox.Yes:
-        base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        json_path = os.path.normpath(os.path.join(base_path, 'database', 'Database Permanen', 'Account Manager', 'user.json'))
+        json_path = _get_user_json_path()
 
-        with open(json_path, 'r') as file:
-            users = json.load(file)
+        try:
+            with open(json_path, 'r', encoding='utf-8') as file:
+                users = json.load(file)
+        except (json.JSONDecodeError, OSError) as e:
+            show_message(router_self, "Error", f"Gagal membaca data pengguna:\n{e}")
+            return
 
         users = [u for u in users if u['username'] != username]
 
-        with open(json_path, 'w') as file:
-            json.dump(users, file, indent=4)
+        try:
+            with open(json_path, 'w', encoding='utf-8') as file:
+                json.dump(users, file, indent=4)
+        except OSError as e:
+            show_message(router_self, "Error", f"Gagal menyimpan data pengguna:\n{e}")
+            return
 
         catat_aktivitas(f"<b>User Dihapus</b><br>{username}", role="admin")
         show_message(router_self, "Sukses", "User berhasil dihapus!")

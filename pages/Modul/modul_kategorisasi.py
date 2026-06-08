@@ -28,11 +28,19 @@ class HasilKlasifikasi:
 
 def _get_dictionary_dir() -> str:
     """Mengembalikan path absolut ke folder Skill Dictionary."""
-    # modul_kategorisasi.py ada di pages/Modul/
-    # root proyek = 2 level ke atas
-    modul_dir = os.path.dirname(os.path.abspath(__file__))
-    root_dir = os.path.dirname(os.path.dirname(modul_dir))
-    return os.path.join(root_dir, "database", "Database Permanen", "Skill Dictionary")
+    import sys
+    if getattr(sys, 'frozen', False):
+        # Frozen: root = direktori tempat GottaJob.exe berada
+        root_dir = os.path.dirname(sys.executable)
+    else:
+        # Development: naik 2 level dari pages/Modul/modul_kategorisasi.py
+        modul_dir = os.path.dirname(os.path.abspath(__file__))
+        root_dir = os.path.dirname(os.path.dirname(modul_dir))
+    result = os.path.join(root_dir, "database", "Database Permanen", "Skill Dictionary")
+    # DEBUG: Tampilkan path yang digunakan (bantu diagnosa jika kategorisasi tidak bekerja)
+    print(f"[DEBUG kategorisasi] dict_dir = {result!r}")
+    print(f"[DEBUG kategorisasi] universal.json ada: {os.path.exists(os.path.join(result, 'universal.json'))}")
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -63,6 +71,27 @@ class KategorisasiSkill:
         self._load_universal()
         self._load_category_skills()
 
+    def reload_dictionary(self):
+        """Muat ulang seluruh data kamus dari disk (tanpa membuat instance baru)."""
+        self.dict_dir = _get_dictionary_dir()
+        self.alias_map = {}
+        self.soft_skill_keywords = set()
+        self.hard_skill_keywords = set()
+        self.position_keywords = set()
+        self.ambiguous_keywords = {}
+        self.position_patterns = []
+        self._compiled_positions = []
+
+        self._load_alias()
+        self._load_universal()
+        self._load_category_skills()
+        print(f"[INFO kategorisasi] reload_dictionary selesai: "
+              f"{len(self.soft_skill_keywords)} soft, "
+              f"{len(self.hard_skill_keywords)} hard, "
+              f"{len(self.alias_map)} alias")
+
+
+
     # ------------------------------------------------------------------
     # Loader: Alias
     # ------------------------------------------------------------------
@@ -82,13 +111,21 @@ class KategorisasiSkill:
     def _load_universal(self):
         path = os.path.join(self.dict_dir, "universal.json")
         if not os.path.exists(path):
+            print(f"[WARN kategorisasi] universal.json TIDAK DITEMUKAN di: {path!r}")
             return
-        with open(path, "r", encoding="utf-8") as f:
-            data = json.load(f)
+        try:
+            with open(path, "r", encoding="utf-8-sig") as f:  # utf-8-sig handles BOM
+                data = json.load(f)
+        except Exception as e:
+            print(f"[ERROR kategorisasi] Gagal baca universal.json: {e}")
+            return
 
         # Soft skills & Hard skills universal
         self.soft_skill_keywords.update(data.get("soft_skills", []))
         self.hard_skill_keywords.update(data.get("hard_skills", []))
+        print(f"[DEBUG kategorisasi] Loaded {len(self.soft_skill_keywords)} soft skills, "
+              f"{len(self.hard_skill_keywords)} hard skills dari universal.json")
+        print(f"[DEBUG kategorisasi] 'teamwork' in soft: {'teamwork' in self.soft_skill_keywords}")
 
         # Position patterns
         patterns = data.get("position_patterns", [])

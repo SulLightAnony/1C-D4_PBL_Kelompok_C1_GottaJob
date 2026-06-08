@@ -1,10 +1,19 @@
 import os
+import sys
 import json
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, QStyle,
                              QLineEdit, QPushButton, QFrame, QMessageBox, QSizePolicy)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QPixmap, QIcon
 
+
+def _get_asset_path(*parts):
+    """Mengembalikan path absolut ke file aset (frozen-aware)."""
+    if getattr(sys, 'frozen', False):
+        base = getattr(sys, '_MEIPASS', os.path.dirname(sys.executable))
+    else:
+        base = os.path.dirname(os.path.abspath(__file__))
+    return os.path.normpath(os.path.join(base, 'assets', *parts))
 class LoginPage(QWidget):
     def __init__(self, parent_window):
         super().__init__()
@@ -36,14 +45,14 @@ class LoginPage(QWidget):
 
         # Logo GottaJob
         lbl_logo_img = QLabel()
-        pix = QPixmap('assets/logo.png')
+        pix = QPixmap(_get_asset_path('logo.png'))
         if not pix.isNull():
             lbl_logo_img.setPixmap(pix.scaled(65, 65, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         lbl_logo_img.setAlignment(Qt.AlignCenter)
         lbl_logo_img.setStyleSheet("border: none; margin-bottom: 5px;")
 
         # Title 
-        lbl_title = QLabel("Welcome Back")
+        lbl_title = QLabel("Welcome to GottaJob")
         lbl_title.setStyleSheet("font-size: 24px; font-weight: bold; color: #2C687B; border: none;")
         lbl_title.setAlignment(Qt.AlignCenter)
         
@@ -70,8 +79,8 @@ class LoginPage(QWidget):
         self.input_user.returnPressed.connect(self.input_pass.setFocus)
 
         self.password_visible = False
-        self.icon_hidden = QIcon('assets/hidden.png') 
-        self.icon_shown = QIcon('assets/eye.png')
+        self.icon_hidden = QIcon(_get_asset_path('hidden.png'))
+        self.icon_shown = QIcon(_get_asset_path('eye.png'))
         
         self.toggle_login_password_action = self.input_pass.addAction(
             self.icon_hidden, 
@@ -131,8 +140,11 @@ class LoginPage(QWidget):
         user = self.input_user.text().strip()
         pw = self.input_pass.text().strip()
 
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        base_path = os.path.dirname(current_dir) if os.path.basename(current_dir).lower() == 'login' else current_dir
+        # Frozen-aware path ke user.json
+        if getattr(sys, 'frozen', False):
+            base_path = os.path.dirname(sys.executable)
+        else:
+            base_path = os.path.dirname(os.path.abspath(__file__))  # login.py ada di root project
         json_path = os.path.normpath(os.path.join(base_path, 'database', 'Database Permanen', 'Account Manager', 'user.json'))
 
         user_find = False
@@ -140,7 +152,7 @@ class LoginPage(QWidget):
 
         if os.path.exists(json_path):
             try:
-                with open(json_path, 'r') as file:
+                with open(json_path, 'r', encoding='utf-8') as file:
                     users = json.load(file)
 
                     # cari username dan password yang cocok

@@ -11,10 +11,11 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, QSize
 from PyQt5.QtGui import QIcon
 
-# Tambahkan path modul
-base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if base_dir not in sys.path:
-    sys.path.insert(0, base_dir)
+# Tambahkan path modul (hanya mode development; frozen mode tidak perlu)
+if not getattr(sys, 'frozen', False):
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if base_dir not in sys.path:
+        sys.path.insert(0, base_dir)
 
 from Modul.modul_kategorisasi import categorizer, HasilKlasifikasi, _get_dictionary_dir
 from Modul.modul_database import get_database_permanen_dir, catat_aktivitas
@@ -146,9 +147,13 @@ class SkillManagerPage(QWidget):
         # Footer
         footer = QHBoxLayout()
         
-        # Path ke icon save.png
-        root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        save_icon_path = os.path.join(root_dir, "assets", "modul", "save.png")
+        # Path ke icon save.png (frozen-aware via get_assets_dir)
+        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+            assets_dir = os.path.join(sys._MEIPASS, "assets")
+        else:
+            from Modul.modul_database import get_root_dir
+            assets_dir = os.path.join(get_root_dir(), "assets")
+        save_icon_path = os.path.join(assets_dir, "modul", "save.png")
         
         self.btn_save = QPushButton(" Update Kamus Skill")
         self.btn_save.setIcon(QIcon(save_icon_path))
@@ -158,6 +163,10 @@ class SkillManagerPage(QWidget):
         footer.addStretch()
         footer.addWidget(self.btn_save)
         layout.addLayout(footer)
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        self.load_scan_categories()
 
     def load_scan_categories(self):
         self.combo_scan_cat.clear()

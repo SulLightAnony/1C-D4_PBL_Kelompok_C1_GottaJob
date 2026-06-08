@@ -4,9 +4,14 @@ oleh modul-modul di folder Job Posting.
 """
 import os
 
+import sys
+
 _here = os.path.dirname(os.path.abspath(__file__))
-_pages_dir = os.path.dirname(_here)
-_root_dir = os.path.dirname(_pages_dir)
+if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+    _root_dir = sys._MEIPASS
+else:
+    _pages_dir = os.path.dirname(_here)
+    _root_dir = os.path.dirname(_pages_dir)
 
 # Job Archive assets
 down_icon_path = os.path.join(_root_dir, "assets", "Job Archive", "down.png").replace("\\", "/")

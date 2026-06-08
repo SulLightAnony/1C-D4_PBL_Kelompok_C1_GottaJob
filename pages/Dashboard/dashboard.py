@@ -267,11 +267,8 @@ class DashboardPage(QWidget):
         self.clear_layout(self.ins_card_layout)
 
         # 2. Penentuan Path Dasar
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        path_json_favorit = os.path.normpath(os.path.join(current_dir, "..", "..", "database", "Database Permanen", "Favorit", "favorit.json"))
-        folder_archive = os.path.normpath(os.path.join(current_dir, "..", "..", "database", "Database Permanen", "Job Archive"))
-        
-        job_data = load_favorite_job(path_json_favorit)
+        folder_archive = get_database_permanen_dir()
+        job_data = get_favorit()
         archive_json = None 
 
         if job_data:
@@ -457,6 +454,15 @@ class DashboardPage(QWidget):
                 layout_expand.addWidget(QLabel("Semua skill sudah terpenuhi!"))
 
             self.dev_layout.addWidget(self.container_gap_skill)
+        else:
+            header_fav = QLabel("Lowongan Favorit")
+            header_fav.setStyleSheet("font-weight: bold; color: #888; font-size: 24px;")
+            self.dev_layout.addWidget(header_fav)
+            
+            lbl_empty = QLabel("Belum ada lowongan pekerjaan favorit.\nTandai favorit pada Live Discovery atau Job Archive terlebih dahulu.")
+            lbl_empty.setStyleSheet("color: #7F8C8D; font-size: 16px; font-weight: 500; padding: 20px;")
+            lbl_empty.setAlignment(Qt.AlignCenter)
+            self.dev_layout.addWidget(lbl_empty)
 
         # 3. RENDER TREN SKILL MINGGU INI 
         trend_title = QLabel("TREN SKILL MINGGU INI")

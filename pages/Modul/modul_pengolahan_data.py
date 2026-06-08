@@ -470,11 +470,10 @@ def ambil_skill_tidak_terklasifikasi(limit=5):
     """
     import glob
     from Modul.modul_kategorisasi import categorizer
+    from Modul.modul_database import get_database_permanen_dir
     
-    # Dapatkan path root folder Job Archive
-    modul_dir = os.path.dirname(os.path.abspath(__file__))
-    root_dir = os.path.dirname(os.path.dirname(modul_dir))
-    db_dir = os.path.join(root_dir, "database", "Database Permanen", "Job Archive")
+    # Dapatkan path root folder Job Archive (frozen-aware)
+    db_dir = get_database_permanen_dir()
     
     if not os.path.exists(db_dir):
         return 0, []
@@ -527,10 +526,10 @@ def cari_kategori_untuk_skill(skill_name):
     """
     import glob
     import json
+    from Modul.modul_database import get_database_permanen_dir
     
-    modul_dir = os.path.dirname(os.path.abspath(__file__))
-    root_dir = os.path.dirname(os.path.dirname(modul_dir))
-    db_dir = os.path.join(root_dir, "database", "Database Permanen", "Job Archive")
+    # Dapatkan path folder Job Archive (frozen-aware)
+    db_dir = get_database_permanen_dir()
     
     if not os.path.exists(db_dir):
         return None

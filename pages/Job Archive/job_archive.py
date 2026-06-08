@@ -11,12 +11,58 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, QObject, QSize
 from PyQt5.QtGui import QPixmap, QIcon
 
+
+def _get_base_path():
+    """
+    Mengembalikan path root proyek secara benar baik dalam
+    mode development maupun setelah di-freeze oleh PyInstaller.
+    - Frozen (dist/GottaJob/GottaJob.exe) -> dist/GottaJob/
+    - Development (pages/Job Archive/job_archive.py) -> project root
+    """
+    if getattr(sys, 'frozen', False):
+        return os.path.dirname(sys.executable)
+    # Naik 3 level: job_archive.py -> Job Archive -> pages -> root
+    return os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+
+def _get_asset_path(*parts):
+    """Mengembalikan path absolut ke file di dalam folder assets/."""
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        base = sys._MEIPASS
+    else:
+        base = _get_base_path()
+    return os.path.normpath(os.path.join(base, 'assets', *parts))
+
+
+def _ensure_modul_in_path():
+    """
+    Pastikan folder pages/Modul ada di sys.path agar import modul berjalan.
+    Dipanggil satu kali saat modul pertama kali dibutuhkan.
+    """
+    if getattr(sys, 'frozen', False):
+        # Dalam mode frozen, semua modul sudah di-bundle — tidak perlu tambah path
+        return
+    base = _get_base_path()
+    process_dir = os.path.join(base, 'pages', 'Modul')
+    if process_dir not in sys.path:
+        sys.path.insert(0, process_dir)
+
+
+_ensure_modul_in_path()
+
+from modul_visualisasi_data import PieChartWidget
+from modul_pengolahan_data import hitung_persentase_skill, cari_pekerjaan_cocok, ambil_jenis_pekerjaan_unik
+from modul_database import get_database_permanen_dir, set_favorit, get_favorit, catat_aktivitas
+from modul_antarmuka_pengguna import JobMatchResultContainer, JobDetailPanel, JobDashboardWidget, show_message, show_question, ActionButton, buat_tombol_kembali, ModernProgressDialog
+
+
 class DeadLinkReviewDialog(QDialog):
     """Dialog untuk menampilkan daftar link mati dan meminta konfirmasi hapus."""
     def __init__(self, dead_jobs, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Review Lowongan Kadaluarsa")
         self.setMinimumSize(700, 450)
+
         
         lay = QVBoxLayout(self)
         
@@ -139,27 +185,8 @@ class LinkValidatorWorker(QObject):
             print(f"Error in LinkValidatorWorker: {e}")
             self.finished_signal.emit([])
 
-# Path dasar proyek
-current_dir = os.path.dirname(os.path.abspath(__file__)) # pages/Job Archive
-pages_dir = os.path.dirname(current_dir)                # pages
-root_dir = os.path.dirname(pages_dir)                  # root
-
-# Path asset spesifik
-icon_path = os.path.join(root_dir, "assets", "Job Archive", "down.png").replace("\\", "/")
-
-# Path untuk modul pengolahan dan visualisasi data
-process_dir = os.path.join(pages_dir, "Modul")
-if process_dir not in sys.path:
-    sys.path.insert(0, process_dir)
-
-from modul_visualisasi_data import PieChartWidget
-from modul_pengolahan_data import hitung_persentase_skill, cari_pekerjaan_cocok, ambil_jenis_pekerjaan_unik
-from modul_database import get_database_permanen_dir, set_favorit, get_favorit, catat_aktivitas
-from modul_antarmuka_pengguna import JobMatchResultContainer, JobDetailPanel, JobDashboardWidget, show_message, show_question, ActionButton, buat_tombol_kembali, ModernProgressDialog
-
-# ─────────────────────────────────────────────────────────────
-# Style Sheet
-# ─────────────────────────────────────────────────────────────
+# ─── Style Sheet (icon path dihitung saat module load) ───────────────────────
+_down_icon = _get_asset_path('Job Archive', 'down.png').replace('\\', '/')
 STYLE = """
 QWidget#JobArchivePage {
     background-color: transparent;
@@ -224,7 +251,7 @@ QPushButton {
 QPushButton:hover {
     background-color: #408699;
 }
-""".replace("__ICON_PATH__", icon_path)
+""".replace("__ICON_PATH__", _down_icon)
 
 class JobArchivePage(QWidget):
     favorite_changed = pyqtSignal()
@@ -238,6 +265,60 @@ class JobArchivePage(QWidget):
             self.btn_refresh.set_theme(theme)
         if hasattr(self, 'dashboard_view'):
             self.dashboard_view.update_theme_mode(theme)
+
+    def reset_state(self):
+        """Reset all inputs, dropdowns, variables, stats, lists, and stacked widget views to initial state."""
+        # 1. Block signals temporarily to prevent event triggering during reset
+        self.combo_category.blockSignals(True)
+        self.combo_file.blockSignals(True)
+
+        try:
+            # 2. Reset dropdowns & reload file list (fresh load from disk)
+            self.combo_category.setCurrentIndex(-1)
+            self.combo_file.clear()
+            self.combo_file.addItem("-- Pilih File --", "")
+            self.combo_file.setCurrentIndex(-1)
+            
+            # Reload file list so it's fresh for the next user/role
+            self.load_file_list(auto_check=True)
+        finally:
+            self.combo_category.blockSignals(False)
+            self.combo_file.blockSignals(False)
+
+        # 3. Reset state variables
+        self.current_file = None
+        self.user_skills = []
+        if hasattr(self, 'current_matches'):
+            self.current_matches = []
+
+        # 4. Clear dashboard lists and stats
+        self.skill_list.clear()
+        self.dashboard_view.job_type_list.clear()
+        self.dashboard_view.update_stats(0, 0, "-")
+        self.chart.set_data({})
+
+        # 5. Clear table results
+        self.match_results.table.setRowCount(0)
+        
+        # Clear best match card sections
+        for lay in [self.match_results.best_match_card.hard_skill_container, 
+                    self.match_results.best_match_card.soft_skill_container, 
+                    self.match_results.best_match_card.pos_skill_container]:
+            self.match_results.best_match_card._clear_layout(lay)
+        self.match_results.best_match_card.lbl_perc.setText("0%")
+        self.match_results.best_match_card.lbl_title.setText("Nama Pekerjaan")
+        self.match_results.best_match_card.lbl_company.setText("Nama Perusahaan")
+        self.match_results.best_match_card.lbl_location.setText("📍 Lokasi")
+        self.match_results.best_match_card.lbl_perc.setStyleSheet(
+            "font-size: 36px; font-weight: bold; color: white; background-color: #27AE60; border-radius: 12px; padding: 10px;"
+        )
+        self.match_results.best_match_card.setStyleSheet(
+            "QFrame#PanelCard { background-color: white; border: 2px solid #27AE60; border-radius: 16px; }"
+        )
+
+        # 6. Reset views to default
+        self.main_stack.setCurrentWidget(self.dashboard_view)
+        self.dashboard_view.right_stack.setCurrentIndex(0)
 
     def __init__(self):
         super().__init__()
@@ -266,7 +347,7 @@ class JobArchivePage(QWidget):
         judul_layout.setSpacing(10)
 
         icon_label = QLabel()
-        archive_icon_path = os.path.join(root_dir, "assets", "Job Archive", "archives.png")
+        archive_icon_path = _get_asset_path('Job Archive', 'archives.png')
         pixmap = QPixmap(archive_icon_path)
         if not pixmap.isNull():
             icon_label.setPixmap(pixmap.scaled(28, 28, Qt.KeepAspectRatio, Qt.SmoothTransformation))
@@ -293,7 +374,7 @@ class JobArchivePage(QWidget):
         self.combo_file.setPlaceholderText("Pilih File")
         self.combo_file.currentIndexChanged.connect(self._on_file_selected)
         
-        refresh_icon_path = os.path.join(root_dir, "assets", "Job Archive", "refresh.png")
+        refresh_icon_path = _get_asset_path('Job Archive', 'refresh.png')
         self.btn_refresh = ActionButton(" Perbarui", icon_path=refresh_icon_path, color_theme="user")
         self.btn_refresh.setToolTip("Muat ulang daftar kategori dan file")
         self.btn_refresh.clicked.connect(self.load_file_list)
@@ -592,9 +673,9 @@ class JobArchivePage(QWidget):
         self.match_results.set_data(
             hasil, selected, 
             show_save=False, 
-            show_favorite=True, 
+            show_favorite=not self.is_admin, 
             show_delete=True, 
-            show_ai_cv=True,
+            show_ai_cv=not self.is_admin,
             fav_link=fav_link
         )
         self.main_stack.setCurrentWidget(self.table_view)
@@ -642,9 +723,9 @@ class JobArchivePage(QWidget):
                 self.current_matches, 
                 self.user_skills, 
                 show_save=False, 
-                show_favorite=True, 
+                show_favorite=not self.is_admin, 
                 show_delete=True,
-                show_ai_cv=True,
+                show_ai_cv=not self.is_admin,
                 fav_link=job_data.get("Link_Lowongan")
             )
         else:
@@ -706,9 +787,9 @@ class JobArchivePage(QWidget):
                         self.current_matches, 
                         self.user_skills, 
                         show_save=False, 
-                        show_favorite=True, 
+                        show_favorite=not self.is_admin, 
                         show_delete=True,
-                        show_ai_cv=True,
+                        show_ai_cv=not self.is_admin,
                         fav_link=fav_link
                     )
         except Exception as e:
@@ -724,3 +805,7 @@ class JobArchivePage(QWidget):
                 self.file_selection_panel.setVisible(False)
         else:
             self.file_selection_panel.setVisible(False)
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        self.load_file_list(auto_check=True)

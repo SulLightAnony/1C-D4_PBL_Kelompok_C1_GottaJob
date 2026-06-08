@@ -1,4 +1,5 @@
 import os
+import sys
 import re
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
@@ -271,9 +272,13 @@ class ModernComboBox(QComboBox):
         super().__init__(parent)
         
         # Lokasi icon panah (menggunakan path relatif ke root)
-        curr_dir = os.path.dirname(os.path.abspath(__file__))
-        root_dir = os.path.dirname(os.path.dirname(curr_dir))
-        icon_path = os.path.join(root_dir, "assets", "Job Archive", "down.png").replace("\\", "/")
+        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+            assets_dir = os.path.join(sys._MEIPASS, "assets")
+        else:
+            curr_dir = os.path.dirname(os.path.abspath(__file__))
+            root_dir = os.path.dirname(os.path.dirname(curr_dir))
+            assets_dir = os.path.join(root_dir, "assets")
+        icon_path = os.path.join(assets_dir, "Job Archive", "down.png").replace("\\", "/")
         
         self.setStyleSheet(MODERN_COMBO_STYLE.replace("__ICON_PATH__", icon_path))
         self.setCursor(Qt.PointingHandCursor)
@@ -727,8 +732,12 @@ class JobDashboardWidget(QWidget):
         page_type_lay.addWidget(self.job_type_list, stretch=1)
         page_type_lay.addSpacing(15)
         
-        base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        search_icon_path = os.path.join(base_path, 'assets', 'Job Archive', 'search.png')
+        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+            assets_dir = os.path.join(sys._MEIPASS, "assets")
+        else:
+            base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            assets_dir = os.path.join(base_path, "assets")
+        search_icon_path = os.path.join(assets_dir, 'Job Archive', 'search.png')
         self.btn_find_match = ActionButton(" Cari pekerjaan yang cocok", icon_path=search_icon_path, color_theme=self.current_theme)
         self.btn_find_match.clicked.connect(self.find_match_clicked.emit)
         page_type_lay.addWidget(self.btn_find_match)
@@ -1093,11 +1102,15 @@ class JobMatchTable(QTableWidget):
             self.setColumnHidden(3, False)
 
         # Setup icon paths once
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        root_dir = os.path.dirname(os.path.dirname(current_dir))
-        save_icon_path = os.path.join(root_dir, "assets", "modul", "save.png")
-        star_icon_path = os.path.join(root_dir, "assets", "modul", "star.png")
-        delete_icon_path = os.path.join(root_dir, "assets", "modul", "delete.png")
+        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+            assets_dir = os.path.join(sys._MEIPASS, "assets")
+        else:
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            root_dir = os.path.dirname(os.path.dirname(current_dir))
+            assets_dir = os.path.join(root_dir, "assets")
+        save_icon_path = os.path.join(assets_dir, "modul", "save.png")
+        star_icon_path = os.path.join(assets_dir, "modul", "star.png")
+        delete_icon_path = os.path.join(assets_dir, "modul", "delete.png")
 
         for row, data in enumerate(hasil):
             # 1. Judul Pekerjaan

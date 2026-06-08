@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 import glob
 import datetime
 import threading
@@ -9,8 +10,14 @@ _SIMPAN_LOCK = threading.Lock()
 # ─────────────────────────────────────────────
 # KONFIGURASI
 # ─────────────────────────────────────────────
-# Root project = 2 level di atas file ini (pages/CRUD/Shared.py → root)
-_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Root project ditentukan secara frozen-aware:
+# - Frozen (dist/GottaJob/GottaJob.exe) -> dist/GottaJob/
+# - Development (pages/CRUD/Shared.py -> root)
+if getattr(sys, 'frozen', False):
+    _ROOT = os.path.dirname(sys.executable)
+else:
+    _ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 JOB_ARCHIVE_DIR = os.path.join(_ROOT, "database", "Database Permanen", "Job Archive")
 JOB_POSTING_FILE = os.path.join(_ROOT, "database", "Database Permanen", "Job Posting", "Data_Upload_Job.JSON")
 
@@ -147,15 +154,25 @@ def simpan_data(data: list) -> None:
             
         files_to_update[target_path].append(job)
 
-    # 3. Tulis ulang semua file yang terpengaruh
+    # 3. Tulis ulang semua file yang terpengaruh atau hapus jika kosong
     with _SIMPAN_LOCK:
         for path, isi in files_to_update.items():
             try:
-                os.makedirs(os.path.dirname(path), exist_ok=True)
-                with open(path, "w", encoding="utf-8") as f:
-                    json.dump(isi, f, ensure_ascii=False, indent=4)
+                if not isi:
+                    if os.path.exists(path):
+                        os.remove(path)
+                    # Hapus folder kategori jika sekarang kosong
+                    parent_dir = os.path.dirname(path)
+                    if os.path.exists(parent_dir) and not os.listdir(parent_dir):
+                        try:
+                            os.rmdir(parent_dir)
+                        except: pass
+                else:
+                    os.makedirs(os.path.dirname(path), exist_ok=True)
+                    with open(path, "w", encoding="utf-8") as f:
+                        json.dump(isi, f, ensure_ascii=False, indent=4)
             except Exception as e:
-                print(f"Gagal menyimpan ke {path}: {e}")
+                print(f"Gagal memproses {path}: {e}")
 
     # 4. Bersihkan Data_Upload_Job.JSON (karena data sudah pindah ke Archive)
     try:
