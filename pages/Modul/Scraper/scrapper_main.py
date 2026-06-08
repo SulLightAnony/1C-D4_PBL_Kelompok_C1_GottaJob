@@ -6,8 +6,13 @@ import re
 from collections import Counter
 from scraper_glints import GlintsScraper
 
-# Path absolut ke folder database/ di root project (2 level di atas pages/Scraper/)
-ROOT_DIR  = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
+import sys
+
+# Path absolut ke folder database/ di root project
+if getattr(sys, 'frozen', False):
+    ROOT_DIR = os.path.dirname(sys.executable)
+else:
+    ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 DB_DIR    = os.path.join(ROOT_DIR, "database")
 
 

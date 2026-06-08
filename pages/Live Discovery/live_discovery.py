@@ -11,19 +11,43 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, QObject
 from PyQt5.QtGui import QIcon
 
-# Tambahkan path untuk modul pengolahan, visualisasi data, dan database
-base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-root_dir = os.path.dirname(base_dir)
 
-# Path untuk folder pages/Modul
-process_dir = os.path.join(base_dir, "Modul")
-if process_dir not in sys.path:
-    sys.path.insert(0, process_dir)
+def _get_base_path():
+    """
+    Mengembalikan path root proyek secara benar baik dalam
+    mode development maupun setelah di-freeze oleh PyInstaller.
+    - Frozen (dist/GottaJob/GottaJob.exe) -> dist/GottaJob/
+    - Development (pages/Live Discovery/live_discovery.py) -> project root
+    """
+    if getattr(sys, 'frozen', False):
+        return os.path.dirname(sys.executable)
+    # Naik 3 level: live_discovery.py -> Live Discovery -> pages -> root
+    return os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Path untuk folder database (di root)
-db_mod_dir = os.path.join(root_dir, "database")
-if db_mod_dir not in sys.path:
-    sys.path.insert(0, db_mod_dir)
+
+def _get_asset_path(*parts):
+    """Mengembalikan path absolut ke file di dalam folder assets/."""
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        base = sys._MEIPASS
+    else:
+        base = _get_base_path()
+    return os.path.normpath(os.path.join(base, 'assets', *parts))
+
+
+def _ensure_modul_in_path():
+    """Pastikan folder pages/Modul ada di sys.path (hanya mode dev)."""
+    if getattr(sys, 'frozen', False):
+        return  # Dalam mode frozen, semua modul sudah di-bundle
+    base = _get_base_path()
+    for d in [
+        os.path.join(base, 'pages', 'Modul'),
+        os.path.join(base, 'database'),
+    ]:
+        if d not in sys.path:
+            sys.path.insert(0, d)
+
+
+_ensure_modul_in_path()
 
 from modul_visualisasi_data import PieChartWidget
 from modul_antarmuka_pengguna import (
@@ -49,12 +73,14 @@ class ScraperWorker(QObject):
 
     def run(self):
         # Import scraper dari subfolder pages/Modul/Scraper/
-        # base_dir di sini adalah folder 'pages'
-        base_pages_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        scraper_dir = os.path.join(base_pages_dir, "Modul", "Scraper")
-        
-        if scraper_dir not in sys.path:
-            sys.path.insert(0, scraper_dir)
+        if getattr(sys, 'frozen', False):
+            # Dalam mode frozen, semua modul sudah di-bundle oleh PyInstaller
+            scraper_dir = None
+        else:
+            base_pages_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            scraper_dir = os.path.join(base_pages_dir, "Modul", "Scraper")
+            if scraper_dir not in sys.path:
+                sys.path.insert(0, scraper_dir)
 
         try:
             import random
@@ -65,12 +91,10 @@ class ScraperWorker(QObject):
             self.done_signal.emit()
             return
 
-        ROOT_DIR = os.path.abspath(
-            os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
-        )
+        ROOT_DIR = _get_base_path()
         DB_DIR = os.path.join(ROOT_DIR, "database")
         os.makedirs(DB_DIR, exist_ok=True)
-        search_icon_path = os.path.join(ROOT_DIR, "assets", "live discovery", "search.png").replace("\\", "/")
+        search_icon_path = _get_asset_path('live discovery', 'search.png').replace('\\', '/')
 
         global_seen_links  = set()
         data_bersih_unik   = []
@@ -220,6 +244,70 @@ class LiveDiscoveryPage(QWidget):
             self.btn_scrape.set_theme(theme)
         if hasattr(self, 'dashboard_view'):
             self.dashboard_view.update_theme_mode(theme)
+
+    def reset_state(self):
+        """Reset all inputs, variables, stats, lists, and stacked widget views to initial state."""
+        # 1. Stop scraping thread if running
+        if self._running:
+            try:
+                if self._worker:
+                    self._worker.log_signal.disconnect()
+                    self._worker.result_signal.disconnect()
+                    self._worker.done_signal.disconnect()
+                if self._thread:
+                    self._thread.quit()
+                    self._thread.wait()
+            except Exception:
+                pass
+            self._running = False
+            self.btn_scrape.setEnabled(True)
+            self.progress.setVisible(False)
+            icon_path = _get_asset_path('live discovery', 'refresh.png')
+            self.btn_scrape.setIcon(QIcon(icon_path))
+            self.btn_scrape.setText("▶  Cari Pekerjaan")
+
+        # 2. Reset state variables
+        self.last_scraped_file = None
+        self.user_selected_skills = []
+        self.keyword_pages = {}
+        self.last_search_raw = ""
+        if hasattr(self, 'current_matches'):
+            self.current_matches = []
+
+        # 3. Clear inputs & labels
+        self.keyword_input.clear()
+        self.status_lbl.setText("")
+        self.progress.setVisible(False)
+        self.progress.setRange(0, 0)
+
+        # 4. Clear dashboard lists and stats
+        self.skill_list.clear()
+        self.dashboard_view.job_type_list.clear()
+        self.dashboard_view.update_stats(0, 0, "-")
+        self.chart.set_data({})
+
+        # 5. Clear table results
+        self.match_results.table.setRowCount(0)
+        
+        # Clear best match card sections
+        for lay in [self.match_results.best_match_card.hard_skill_container, 
+                    self.match_results.best_match_card.soft_skill_container, 
+                    self.match_results.best_match_card.pos_skill_container]:
+            self.match_results.best_match_card._clear_layout(lay)
+        self.match_results.best_match_card.lbl_perc.setText("0%")
+        self.match_results.best_match_card.lbl_title.setText("Nama Pekerjaan")
+        self.match_results.best_match_card.lbl_company.setText("Nama Perusahaan")
+        self.match_results.best_match_card.lbl_location.setText("📍 Lokasi")
+        self.match_results.best_match_card.lbl_perc.setStyleSheet(
+            "font-size: 36px; font-weight: bold; color: white; background-color: #27AE60; border-radius: 12px; padding: 10px;"
+        )
+        self.match_results.best_match_card.setStyleSheet(
+            "QFrame#PanelCard { background-color: white; border: 2px solid #27AE60; border-radius: 16px; }"
+        )
+
+        # 6. Reset views to default
+        self.main_stack.setCurrentWidget(self.dashboard_view)
+        self.dashboard_view.right_stack.setCurrentIndex(0)
 
     def __init__(self):
         super().__init__()
@@ -392,7 +480,7 @@ class LiveDiscoveryPage(QWidget):
         self._worker.done_signal.connect(self._on_done)
         self._worker.done_signal.connect(self._thread.quit)
 
-        icon_path = os.path.join(root_dir, "assets", "live discovery", "refresh.png")
+        icon_path = _get_asset_path('live discovery', 'refresh.png')
         self.btn_scrape.setIcon(QIcon(icon_path))
         self.btn_scrape.setText(" Sedang mencari pekerjaan...")
         self._thread.start()
@@ -596,11 +684,13 @@ class LiveDiscoveryPage(QWidget):
 
             # 4. Refresh tabel untuk mengubah warna tombol
             show_fav = not getattr(self, 'is_admin', False)
+            saved_links = get_all_saved_links()
             self.match_results.set_data(
                 self.current_matches, 
                 self.user_selected_skills, 
                 show_favorite=show_fav,
-                fav_link=job_data.get("Link_Lowongan")
+                fav_link=job_data.get("Link_Lowongan"),
+                saved_links=saved_links
             )
         else:
             show_message(self, "Gagal", "Gagal menetapkan favorit.")

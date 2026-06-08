@@ -7,6 +7,13 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
 from PyQt5.QtCore import Qt, pyqtSignal, QDate, QTimer
 from PyQt5.QtGui import QIcon, QFont, QPixmap, QCursor
 
+import sys
+
+def _get_base_path():
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        return sys._MEIPASS
+    return os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 # ==========================================
 # KOMPONEN KECIL & HELPER
 # ==========================================
@@ -16,7 +23,7 @@ class DateRangeWidget(QWidget):
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         
-        base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        base_path = _get_base_path()
         down_icon_path = os.path.join(base_path, "assets", "Job Archive", "down.png").replace("\\", "/")
         qdate_style = f"""
             QDateEdit {{
@@ -111,7 +118,7 @@ class CompactInputWidget(QFrame):
         self.btn_delete.setCursor(QCursor(Qt.PointingHandCursor))
         self.btn_delete.setStyleSheet("border: none; background: transparent;")
         
-        base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        base_path = _get_base_path()
         icon_path = os.path.join(base_path, "assets", "Career Toolkit", "icon-delete.png")
         if os.path.exists(icon_path): self.btn_delete.setIcon(QIcon(icon_path))
         else: self.btn_delete.setText("✖"); self.btn_delete.setStyleSheet("color: red; border: none;")
@@ -177,7 +184,7 @@ class CVCard(QFrame):
         if template_id == "ats_modern": img_name = "CV-02.png"
         elif template_id == "ats_minimalist": img_name = "CV-03.png"
         
-        base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        base_path = _get_base_path()
         img_path = os.path.join(base_path, "assets", "Career Toolkit", img_name)
         if os.path.exists(img_path):
             pixmap = QPixmap(img_path)
@@ -281,13 +288,10 @@ class PhotoUploaderWidget(QFrame):
         """Membuka foto menggunakan OS bawaan dengan popup loading anti-spam"""
         if self.photo_path and os.path.exists(self.photo_path):
             import platform, subprocess
+            from Modul.modul_antarmuka_pengguna import ModernMessageBox
             
             # 1. Siapkan Popup (MessageBox)
-            msg_box = QMessageBox(self)
-            msg_box.setWindowTitle("Memuat Foto")
-            msg_box.setText("Gambar sedang dibuka, harap tunggu...")
-            msg_box.setIcon(QMessageBox.Information)
-            msg_box.addButton("Oke", QMessageBox.AcceptRole)
+            msg_box = ModernMessageBox("Memuat Foto", "Gambar sedang dibuka, harap tunggu...", QMessageBox.Ok, self)
             
             # 2. Pasang Timer 3 Detik (3000 ms) untuk menutup otomatis
             QTimer.singleShot(3000, msg_box.accept)
@@ -334,7 +338,7 @@ class BaseInputWidget(QFrame):
         self.btn_delete.setCursor(QCursor(Qt.PointingHandCursor))
         self.btn_delete.setStyleSheet("border: none; background: transparent;")
         
-        base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        base_path = _get_base_path()
         icon_path = os.path.join(base_path, "assets", "Career Toolkit", "icon-delete.png")
         if os.path.exists(icon_path):
             self.btn_delete.setIcon(QIcon(icon_path))
@@ -439,7 +443,7 @@ class TemplateCard(QFrame):
         self.lbl_preview.setAlignment(Qt.AlignCenter)
         self.lbl_preview.setStyleSheet("background-color: #e2e8f0; border-radius: 8px; color: #94a3b8;")
         
-        base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        base_path = _get_base_path()
         img_path = os.path.join(base_path, "assets", "Career Toolkit", self.image_file)
         if os.path.exists(img_path):
             pixmap = QPixmap(img_path)
